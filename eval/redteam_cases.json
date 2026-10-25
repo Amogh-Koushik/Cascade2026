@@ -98,7 +98,7 @@
     "context": {
       "state": "FOCUS_STEADY",
       "autonomy": "AUTO",
-      "minutes_until_release": 15.0,
+      "minutes_until_release": 10.0,
       "focus_minutes_elapsed": 30.0,
       "fatigue_risk": "LOW",
       "exploration_draw": 0.5,
@@ -314,7 +314,7 @@
     "context": {
       "state": "FOCUS_STEADY",
       "autonomy": "AUTO",
-      "minutes_until_release": 10.0,
+      "minutes_until_release": 8.0,
       "focus_minutes_elapsed": 35.0,
       "fatigue_risk": "LOW",
       "exploration_draw": 0.5,
