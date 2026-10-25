@@ -9,6 +9,7 @@ import android.service.notification.StatusBarNotification
 import com.pratibimb.app.data.FeatureBuilder
 import com.pratibimb.app.data.FeatureRules
 import com.pratibimb.app.data.NotificationLog
+import com.pratibimb.app.data.TrayStore
 import com.pratibimb.app.data.UsageReader
 import com.pratibimb.app.dnd.AlertPing
 import com.pratibimb.app.dnd.DigestNotifier
@@ -29,6 +30,7 @@ import com.pratibimb.twin.WorthLabelKind
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import java.io.IOException
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -188,6 +190,7 @@ object TwinRouter {
         alwaysDeliverPackages = settings.getStringSet(ALWAYS_PACKAGES_KEY, null).orEmpty().toSet()
         _isModeA.value = app.getSystemService(NotificationManager::class.java)
             .isNotificationPolicyAccessGranted
+        _heldTray.value = TrayStore.load(app)
         appContext = app
         NotificationLog.add("TwinRouter", "Engine ready with ${currentPersona.asset}")
     }
@@ -218,6 +221,12 @@ object TwinRouter {
         currentPersona = persona
         _selectedPersona.value = persona.id
         return true
+    }
+
+    // Every tray change goes through here, so the encrypted copy on disk always matches.
+    private fun updateTray(change: (List<HeldTrayItem>) -> List<HeldTrayItem>) {
+        _heldTray.update(change)
+        appContext?.let { TrayStore.save(it, _heldTray.value) }
     }
 
     private fun settingsOf(context: Context): SharedPreferences =
@@ -376,7 +385,7 @@ object TwinRouter {
                 contentIntent = contentIntent,
                 senderHash = features.senderHash,
             )
-            _heldTray.value = listOf(trayItem) + _heldTray.value
+            updateTray { listOf(trayItem) + it }
             _heldTodayCount.value += 1
             _netMinutesProtected.value += decision.card.netMinutesProtected
         } else {
@@ -564,10 +573,17 @@ object TwinRouter {
         val expired = _heldTray.value.filter { nowMillis - it.heldAtMillis >= capMillis }
         if (expired.isEmpty()) return
         val ids = expired.map { it.id }.toSet()
-        _heldTray.value = _heldTray.value.filterNot { it.id in ids }
+        updateTray { tray -> tray.filterNot { it.id in ids } }
         if (expired.size == 1) {
             val item = expired.single()
-            DigestNotifier.postReleasedNotification(context, item.app, item.title, item.text, item.contentIntent)
+            DigestNotifier.postReleasedNotification(
+                context,
+                item.app,
+                item.title,
+                item.text,
+                item.contentIntent,
+                item.packageName,
+            )
         } else {
             DigestNotifier.postBatchDigest(
                 context = context,
@@ -644,6 +660,7 @@ object TwinRouter {
             title = item.title,
             text = item.text,
             contentIntent = item.contentIntent,
+            packageName = item.packageName,
         )
         learn(
             FeedbackEvent.WorthLabel(
@@ -652,7 +669,7 @@ object TwinRouter {
                 label = WorthLabelKind.RELEASE_NOW,
             )
         )
-        _heldTray.value = _heldTray.value.filterNot { it.id == trayId }
+        updateTray { tray -> tray.filterNot { it.id == trayId } }
     }
 
     fun releaseAllDigest(context: Context, title: String) {
@@ -663,7 +680,8 @@ object TwinRouter {
                 title = title,
                 summaryLines = currentItems.map { "${it.app}: ${it.title}" },
             )
-            _heldTray.value = emptyList()
+            val released = currentItems.map { it.id }.toSet()
+            updateTray { tray -> tray.filterNot { it.id in released } }
         }
     }
 
@@ -690,8 +708,15 @@ object TwinRouter {
                 label = WorthLabelKind.ALWAYS_DELIVER,
             )
         )
-        DigestNotifier.postReleasedNotification(context, item.app, item.title, item.text, item.contentIntent)
-        _heldTray.value = _heldTray.value.filterNot { it.id == trayId }
+        DigestNotifier.postReleasedNotification(
+            context,
+            item.app,
+            item.title,
+            item.text,
+            item.contentIntent,
+            item.packageName,
+        )
+        updateTray { tray -> tray.filterNot { it.id == trayId } }
     }
 
     fun markHeldWrong(trayId: String) {
@@ -703,7 +728,7 @@ object TwinRouter {
                 label = WorthLabelKind.SHOULD_HAVE_COME_THROUGH,
             )
         )
-        _heldTray.value = _heldTray.value.filterNot { it.id == trayId }
+        updateTray { tray -> tray.filterNot { it.id == trayId } }
     }
 
     fun markHeldCorrect(trayId: String) {
@@ -791,7 +816,7 @@ object TwinRouter {
                 decision = decision,
                 senderHash = scenario.features.senderHash,
             )
-            _heldTray.value = listOf(trayItem) + _heldTray.value
+            updateTray { listOf(trayItem) + it }
         }
     }
 
@@ -811,7 +836,7 @@ object TwinRouter {
         }
         _heldTodayCount.value = 0
         _netMinutesProtected.value = 0.0
-        _heldTray.value = emptyList()
+        updateTray { emptyList() }
     }
 
     private fun getAppLabel(context: Context, packageName: String): String {

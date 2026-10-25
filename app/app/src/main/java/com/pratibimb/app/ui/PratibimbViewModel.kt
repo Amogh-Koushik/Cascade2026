@@ -195,6 +195,11 @@ class PratibimbViewModel(application: Application) : AndroidViewModel(applicatio
         if (focusDnd.restore()) {
             NotificationLog.add("focus", "Restored DND settings left over from an earlier session")
         }
+        // Items saved in the tray belong to a session that ended with the app, so they are
+        // released now rather than held with no session to release them.
+        if (TwinRouter.heldTray.value.isNotEmpty()) {
+            TwinRouter.releaseAllDigest(application, "Held before the app closed")
+        }
         refreshFocusStatus()
     }
 
@@ -309,9 +314,11 @@ class PratibimbViewModel(application: Application) : AndroidViewModel(applicatio
     // the phone must not be left in Priority mode afterwards.
     override fun onCleared() {
         if (_isFocusActive.value) {
+            TwinRouter.tick(getApplication(), sessionOver = true)
             TwinRouter.endSession()
             TwinRouter.setPhoneState(PhoneState.FREE)
             focusDnd.restore()
+            TwinRouter.releaseAllDigest(getApplication(), "Focus ended when the app closed")
         }
         super.onCleared()
     }

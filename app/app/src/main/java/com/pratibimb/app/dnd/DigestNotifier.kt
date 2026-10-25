@@ -38,15 +38,19 @@ object DigestNotifier {
         title: String,
         text: String,
         contentIntent: PendingIntent? = null,
+        // Without the original tap action (for example after a restart), open this app.
+        packageName: String? = null,
     ) {
         val permission = context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)
         if (permission != PackageManager.PERMISSION_GRANTED) return
         ensureChannel(context)
 
+        val launch = packageName?.let { context.packageManager.getLaunchIntentForPackage(it) }
+            ?: Intent(context, MainActivity::class.java)
         val appIntent = contentIntent ?: PendingIntent.getActivity(
             context,
-            0,
-            Intent(context, MainActivity::class.java),
+            packageName.hashCode(),
+            launch,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
