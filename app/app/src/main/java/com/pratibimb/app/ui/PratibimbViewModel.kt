@@ -59,6 +59,8 @@ data class LiveNotificationItem(
     val contentIntent: PendingIntent? = null,
     // Suggest mode: what the user chose, once they chose.
     val suggestionChoice: Action? = null,
+    // For a group message: the group's salted key, so a worth tap marks the group.
+    val groupKey: String? = null,
 )
 
 data class InstalledApp(val packageName: String, val label: String, val category: String)
@@ -84,6 +86,9 @@ data class HeldTrayItem(
     val capMinutes: Double? = null,
     // A deadline named in the text; the item is released once it is two hours away.
     val deadlineAtMillis: Long? = null,
+    // A group's held messages share one row: its key, and how many it holds.
+    val groupKey: String? = null,
+    val count: Int = 1,
 )
 
 class PratibimbViewModel(application: Application) : AndroidViewModel(application) {

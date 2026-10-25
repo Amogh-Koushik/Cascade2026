@@ -11,8 +11,8 @@ import com.pratibimb.twin.PhoneState
 import com.pratibimb.twin.RealTwinEngine
 import com.pratibimb.twin.TwinContext
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.File
 
@@ -32,162 +32,139 @@ class ContentPolicyTest {
         alwaysDeliverSenders = emptySet(), alwaysDeliverPackages = emptySet(), demoLearning = false,
     )
 
-    private fun message(group: Boolean = false, sender: String? = "s_new", otp: Boolean = false) = NotificationFeatures(
-        key = "k", postedAtMillis = 0L, packageName = if (otp) "com.google.android.apps.messaging" else "com.whatsapp",
-        category = Category.MESSAGING, androidCategory = null, channelImportance = 4, isOngoing = false,
-        isConversation = true, priorityConversation = false, groupChat = group,
-        senderHash = if (group) null else sender, senderDisplayName = null, sameSenderRecentPings = 0,
-        baitHit = false, urgencyHit = false, otpPattern = otp,
+    private fun features(
+        pkg: String,
+        category: Category,
+        conversation: Boolean = false,
+        group: Boolean = false,
+        sender: String? = null,
+        recentPings: Int = 0,
+        urgent: Boolean = false,
+        otp: Boolean = false,
+    ) = NotificationFeatures(
+        key = "k", postedAtMillis = 0L, packageName = pkg, category = category, androidCategory = null,
+        channelImportance = 4, isOngoing = false, isConversation = conversation, priorityConversation = false,
+        groupChat = group, senderHash = if (group) null else sender, senderDisplayName = if (group) null else sender,
+        sameSenderRecentPings = recentPings, baitHit = false, urgencyHit = urgent, otpPattern = otp,
     )
 
-    private val link = ContentFeatures.PLAIN.copy(hasUrl = true)
-    private val allOn = ContentRuleFlags(textOnlyRepeatPings = true, holdUnmentionedGroups = true, newSenderLinks = true)
+    private val instaDm = features("com.instagram.android", Category.SOCIAL, conversation = true, sender = "Rohan")
+    private val whatsappDm = features("com.whatsapp", Category.MESSAGING, conversation = true, sender = "Mom")
+    private val group = features("com.whatsapp", Category.MESSAGING, conversation = true, group = true)
+    private val gmail = features("com.google.android.gm", Category.WORK_EMAIL)
+    private val swiggy = features("in.swiggy.android", Category.SHOPPING_PROMO)
+    private val text = ContentFeatures.PLAIN
+    private val on = ContentRuleFlags()
 
-    private fun ruled(features: NotificationFeatures, content: ContentFeatures, flags: ContentRuleFlags, mentions: Boolean = false, newSender: Boolean = true): RuledDecision {
-        val decision = engine.decide(features, context)
-        return ContentPolicy.apply(decision, features, content, flags, mentions, newSender)
-    }
+    private fun decide(
+        f: NotificationFeatures,
+        signals: FocusSignals = FocusSignals(),
+        content: ContentFeatures = text,
+        flags: ContentRuleFlags = on,
+    ) = ContentPolicy.apply(engine.decide(f, context), f, content, flags, signals)
 
-    private val off = ContentRuleFlags(focusGate = false)
-
-    @Test
-    fun withEveryFlagOffNothingChanges() {
-        val features = message()
-        val decision = engine.decide(features, context)
-
-        assertSame(decision, ContentPolicy.apply(decision, features, link, off, false, true).decision)
-    }
-
-    private fun delivered(features: NotificationFeatures) =
-        engine.decide(features, context).copy(action = Action.DELIVER, rule = DecisionRule.MIGHT_MATTER)
+    private fun insta(burst: Int) = FocusSignals(family = AppFamily.INSTAGRAM, textBurst = burst)
 
     @Test
-    fun theFocusGateHoldsEverythingButTypedMessagesFromPeople() {
-        val gate = ContentRuleFlags()
-        val typed = ContentPolicy.apply(delivered(message()), message(), ContentFeatures.PLAIN, gate, false, false)
-        val reel = ContentPolicy.apply(delivered(message()), message(), ContentFeatures.PLAIN.copy(kind = ContentKind.FORWARD), gate, false, false)
-        val email = ContentPolicy.apply(delivered(like.copy(baitHit = false)), like.copy(baitHit = false), ContentFeatures.PLAIN, gate, false, false)
+    fun instagramDmIsHeldUntilFiveTextsInTwoMinutes() {
+        assertEquals(Action.HOLD, decide(instaDm, insta(4)).decision.action)
 
-        assertEquals(Action.DELIVER, typed.decision.action)
-        assertEquals(Action.HOLD, reel.decision.action)
-        assertEquals(Action.HOLD, email.decision.action)
-        assertEquals("Held: not a typed message from a person", email.decision.reason)
+        val fifth = decide(instaDm, insta(5))
+        assertEquals(Action.DELIVER, fifth.decision.action)
+        assertEquals("Delivered: Rohan ×5 in 2 minutes", fifth.decision.reason)
+        assertTrue(fifth.releaseSenderBurst)
     }
 
     @Test
-    fun urgentEmailPassesTheGateButAnUrgentPromoDoesNot() {
-        val gate = ContentRuleFlags()
-        val urgentEmail = like.copy(urgencyHit = true)
-        val urgentPromo = like.copy(urgencyHit = true, category = Category.SHOPPING_PROMO, packageName = "com.flipkart.android")
-
-        assertEquals(Action.DELIVER, ContentPolicy.apply(delivered(urgentEmail), urgentEmail, ContentFeatures.PLAIN, gate, false, false).decision.action)
-        assertEquals(Action.HOLD, ContentPolicy.apply(delivered(urgentPromo), urgentPromo, ContentFeatures.PLAIN, gate, false, false).decision.action)
+    fun reelsAndSnapsNeverCountTowardsTheFive() {
+        assertEquals(Action.HOLD, decide(instaDm, insta(9), text.copy(kind = ContentKind.FORWARD)).decision.action)
     }
 
     @Test
-    fun contextsAndDeadlinesStillGetThroughTheGate() {
-        val gate = ContentRuleFlags()
-        val soon = ContentFeatures.PLAIN.copy(deadlinePhrase = "in 30 min", deadlineAtMillis = 30 * 60_000L)
+    fun instagramFollowsItsOwnRuleEvenAfterThreeRepeatPings() {
+        val pinged = instaDm.copy(sameSenderRecentPings = 2)
 
-        assertEquals(Action.DELIVER, ContentPolicy.apply(delivered(like), like, ContentFeatures.PLAIN, gate, false, false, "Placements").decision.action)
-        assertEquals(Action.DELIVER, ContentPolicy.apply(delivered(like), like, soon, gate, false, false, nowMillis = 0L).decision.action)
+        assertEquals(DecisionRule.OVERRIDE, engine.decide(pinged, context).rule)
+        assertEquals(Action.HOLD, decide(pinged, insta(3)).decision.action)
     }
 
     @Test
-    fun aNewSendersLinkIsHeldAndFlagged() {
-        val result = ruled(message(), link, allOn)
-
-        assertEquals(Action.HOLD, result.decision.action)
-        assertEquals("New sender with a link", result.flag)
+    fun whatsAppAndOtherOneToOneMessagesAreDelivered() {
+        assertEquals(Action.DELIVER, decide(whatsappDm, FocusSignals(family = AppFamily.WHATSAPP)).decision.action)
+        val telegram = features("org.telegram.messenger", Category.MESSAGING, conversation = true, sender = "Rahul")
+        assertEquals(Action.DELIVER, decide(telegram, FocusSignals(family = AppFamily.TELEGRAM)).decision.action)
     }
 
     @Test
-    fun aNewSendersPlainTextIsDeliveredOnce() {
-        val first = ruled(message(), ContentFeatures.PLAIN, allOn)
-        val later = ruled(message(), ContentFeatures.PLAIN, allOn, newSender = false)
-
-        assertEquals(Action.DELIVER, first.decision.action)
-        assertEquals("Delivered: first message from a new sender", first.decision.reason)
-        assertNull(later.rule)
+    fun groupsAreHeldUnlessMarkedWorthItOrTheyMentionYou() {
+        assertEquals(Action.HOLD, decide(group).decision.action)
+        assertEquals(Action.DELIVER, decide(group, FocusSignals(groupWorth = true)).decision.action)
+        assertEquals(Action.DELIVER, decide(group, FocusSignals(mentionsYou = true)).decision.action)
     }
 
     @Test
-    fun aGroupMessageWithoutAMentionIsHeldUnlessItMentionsYou() {
-        val group = message(group = true)
-        val flags = ContentRuleFlags(holdUnmentionedGroups = true, focusGate = false)
-        val unmentioned = ruled(group, ContentFeatures.PLAIN, flags)
-        val mentioned = ruled(group, ContentFeatures.PLAIN, flags, mentions = true)
-
-        assertEquals(Action.HOLD, unmentioned.decision.action)
-        assertEquals(engine.decide(group, context).action, mentioned.decision.action)
-    }
-
-    private val like = NotificationFeatures(
-        key = "like", postedAtMillis = 0L, packageName = "com.google.android.gm", category = Category.WORK_EMAIL,
-        androidCategory = null, channelImportance = 3, isOngoing = false, isConversation = false,
-        priorityConversation = false, groupChat = false, senderHash = null, senderDisplayName = null,
-        sameSenderRecentPings = 0, baitHit = true, urgencyHit = false, otpPattern = false,
-    )
-
-    private fun heldByEngine(): Decision = engine.decide(like, context).copy(action = Action.HOLD, rule = DecisionRule.HOLD_BETTER)
-
-    @Test
-    fun aDeadlineWithinTwoHoursIsDelivered() {
-        val hour = 3_600_000L
-        val soon = ContentFeatures.PLAIN.copy(deadlinePhrase = "by 6 pm", deadlineAtMillis = 90 * 60_000L)
-        val later = ContentFeatures.PLAIN.copy(deadlinePhrase = "by 9 pm", deadlineAtMillis = 3 * hour)
-
-        val delivered = ContentPolicy.apply(heldByEngine(), like, soon, ContentRuleFlags(), false, false, nowMillis = 0L)
-        val stillHeld = ContentPolicy.apply(heldByEngine(), like, later, off, false, false, nowMillis = 0L)
-
-        assertEquals(Action.DELIVER, delivered.decision.action)
-        assertEquals("Delivered: deadline within 2 hours (by 6 pm)", delivered.decision.reason)
-        assertEquals(Action.HOLD, stillHeld.decision.action)
+    fun snapsStreaksPromosAndBotsAreHeld() {
+        val snapDm = features("com.snapchat.android", Category.SOCIAL, conversation = true, sender = "Rohan")
+        val snapchat = FocusSignals(family = AppFamily.SNAPCHAT)
+        assertEquals(Action.HOLD, decide(snapDm, snapchat, text.copy(kind = ContentKind.FORWARD)).decision.action)
+        assertEquals(Action.HOLD, decide(snapDm, snapchat.copy(streak = true)).decision.action)
+        assertEquals(Action.HOLD, decide(swiggy).decision.action)
+        val bot = features("org.telegram.messenger", Category.MESSAGING, conversation = true, sender = "QuizBot")
+        assertEquals(Action.HOLD, decide(bot, FocusSignals(family = AppFamily.TELEGRAM, bot = true)).decision.action)
     }
 
     @Test
-    fun aContextMatchIsDelivered() {
-        val result = ContentPolicy.apply(heldByEngine(), like, ContentFeatures.PLAIN, ContentRuleFlags(), false, false, contextLabel = "Placements")
-
-        assertEquals(Action.DELIVER, result.decision.action)
-        assertEquals("Delivered: matches your Placements context", result.decision.reason)
+    fun orderStatusAndBankAlertsAreDelivered() {
+        assertEquals(Action.DELIVER, decide(swiggy, FocusSignals(orderStatus = true)).decision.action)
+        val sms = features("com.google.android.apps.messaging", Category.MESSAGING)
+        val bankAlert = FocusSignals(family = AppFamily.SMS, bankAlert = true, bot = true)
+        assertEquals(Action.DELIVER, decide(sms, bankAlert).decision.action)
     }
 
     @Test
-    fun aNewSendersLinkIsHeldEvenWithADeadlineAndAContext() {
-        val bait = ContentFeatures.PLAIN.copy(hasUrl = true, deadlinePhrase = "in 30 min", deadlineAtMillis = 30 * 60_000L)
-
-        val result = ContentPolicy.apply(engine.decide(message(), context), message(), bait, allOn, false, true, "Placements", 0L)
-
-        assertEquals(Action.HOLD, result.decision.action)
-        assertEquals("New sender with a link", result.flag)
-    }
-
-    @Test
-    fun aContextMatchKeepsAGroupMessageFromTheMentionRule() {
-        val group = message(group = true)
-        val decision = engine.decide(group, context)
-        val result = ContentPolicy.apply(decision, group, ContentFeatures.PLAIN, ContentRuleFlags(holdUnmentionedGroups = true, focusGate = false), false, false, "Placements")
-
-        assertEquals(decision.action, result.decision.action)
-    }
-
-    @Test
-    fun safetyOverridesAreNeverChanged() {
-        val otp = message(otp = true, sender = null)
+    fun safetyOverridesAlwaysStand() {
+        val otp = features("com.google.android.apps.messaging", Category.MESSAGING, otp = true)
         val decision = engine.decide(otp, context)
 
         assertEquals(DecisionRule.OVERRIDE, decision.rule)
-        assertSame(decision, ContentPolicy.apply(decision, otp, link, allOn, false, true).decision)
+        assertSame(decision, ContentPolicy.apply(decision, otp, text, on, FocusSignals(bot = true)).decision)
+    }
+
+    @Test
+    fun everythingElseIsHeldUnlessUrgentAContextOrADeadline() {
+        assertEquals(Action.HOLD, decide(gmail).decision.action)
+        assertEquals(Action.DELIVER, decide(gmail.copy(urgencyHit = true)).decision.action)
+        assertEquals(Action.DELIVER, decide(gmail, FocusSignals(contextLabel = "Placements")).decision.action)
+        val soon = text.copy(deadlinePhrase = "in 30 min", deadlineAtMillis = 30 * 60_000L)
+        assertEquals(Action.DELIVER, decide(gmail, FocusSignals(nowMillis = 0L), soon).decision.action)
+    }
+
+    @Test
+    fun aNewSendersLinkIsHeldAndFlaggedEvenWithAContext() {
+        val result = decide(
+            whatsappDm,
+            FocusSignals(newSender = true, contextLabel = "Placements"),
+            text.copy(hasUrl = true),
+            on.copy(newSenderLinks = true),
+        )
+
+        assertEquals(Action.HOLD, result.decision.action)
+        assertEquals("New sender with a link", result.flag)
     }
 
     @Test
     fun freeStateAndSuggestModeAreLeftAlone() {
-        val features = message()
-        val free = engine.decide(features, context.copy(state = PhoneState.FREE))
-        val suggest: Decision = engine.decide(features, context.copy(autonomy = Autonomy.SUGGEST))
+        val free: Decision = engine.decide(gmail, context.copy(state = PhoneState.FREE))
+        val suggest: Decision = engine.decide(gmail, context.copy(autonomy = Autonomy.SUGGEST))
 
-        assertSame(free, ContentPolicy.apply(free, features, link, allOn, false, true).decision)
-        assertSame(suggest, ContentPolicy.apply(suggest, features, link, allOn, false, true).decision)
+        assertSame(free, ContentPolicy.apply(free, gmail, text, on, FocusSignals()).decision)
+        assertSame(suggest, ContentPolicy.apply(suggest, gmail, text, on, FocusSignals()).decision)
+    }
+
+    @Test
+    fun withFocusRulesOffTheEngineDecides() {
+        val decision = engine.decide(gmail, context)
+
+        assertSame(decision, ContentPolicy.apply(decision, gmail, text, ContentRuleFlags(focusGate = false), FocusSignals()).decision)
     }
 }

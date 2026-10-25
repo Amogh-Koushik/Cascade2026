@@ -102,8 +102,8 @@ private fun RulesCard(
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(text = "Content rules", style = titleMd(color = WarmObsidian.OnSurface))
             RuleSwitch(
-                "Focus gate (on by default)",
-                "In focus, only typed messages from people get through on the model; the rest waits.",
+                "Focus rules (on by default)",
+                "WhatsApp and other 1:1 chats come through; Instagram/Snapchat at 5 texts in 2 min; groups, snaps, promos, bots and the rest wait.",
                 flags.focusGate,
             ) { onSetRuleFlags(flags.copy(focusGate = it)) }
             RuleSwitch(
@@ -112,11 +112,6 @@ private fun RulesCard(
                 flags.textOnlyRepeatPings,
             ) { onSetRuleFlags(flags.copy(textOnlyRepeatPings = it)) }
             RuleSwitch(
-                "Hold group messages without a mention",
-                "Delivered only when they tag you or @everyone.",
-                flags.holdUnmentionedGroups,
-            ) { onSetRuleFlags(flags.copy(holdUnmentionedGroups = it)) }
-            RuleSwitch(
                 "New senders: hold links, deliver plain text once",
                 "A first message with a link is held and flagged in the tray.",
                 flags.newSenderLinks,
@@ -124,7 +119,7 @@ private fun RulesCard(
             OutlinedTextField(
                 value = names,
                 onValueChange = { names = it },
-                label = { Text("Names you're tagged by (comma-separated)") },
+                label = { Text("Names you're mentioned by (comma-separated)") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 colors = OutlinedTextFieldDefaults.colors(

@@ -26,6 +26,7 @@ import com.pratibimb.twin.Action
 import com.pratibimb.twin.Autonomy
 import com.pratibimb.twin.Category
 import com.pratibimb.twin.Decision
+import com.pratibimb.twin.DecisionRule
 import com.pratibimb.twin.FatigueRisk
 import com.pratibimb.twin.FeedbackEvent
 import com.pratibimb.twin.PhoneState
@@ -107,6 +108,13 @@ object TwinRouter {
     @Volatile
     private var contexts: List<TopicContext> = emptyList()
 
+    // never_hold.otp_source_packages without the chat apps: where bank and UPI alerts come from.
+    @Volatile
+    private var paymentPackages: Set<String> = emptySet()
+
+    // Instagram and Snapchat texts per sender in the last 2 minutes (5 get through).
+    private val textBursts = TextBurstCounter()
+
     @Volatile
     var activeListener: PratibimbListener? = null
 
@@ -153,10 +161,10 @@ object TwinRouter {
     private val _selectedPersona = MutableStateFlow(Personas.default.id)
     val selectedPersona: StateFlow<String> = _selectedPersona.asStateFlow()
 
-    // The demo-learning profile makes every worth estimate so uncertain that nearly every
-    // message counts as "might matter", so a few taps visibly move the ranges. It is for the
-    // scripted demo, never on by default, and not saved across restarts.
-    private val _demoLearning = MutableStateFlow(false)
+    // The demo-learning profile uses small prior weights, so a few Worth it / Not worth it taps
+    // visibly move the ranges and the decisions. On by default for the demo; not saved, so it
+    // is on again after a restart.
+    private val _demoLearning = MutableStateFlow(true)
     val demoLearning: StateFlow<Boolean> = _demoLearning.asStateFlow()
 
     // Mode A is only claimed once DND access is confirmed in init().
@@ -267,12 +275,17 @@ object TwinRouter {
             val lostCapMin = (policy["minutes_lost_cap_min"] as Number).toDouble()
             val caps = HoldCaps.fromParams(params)
             val topics = Contexts.fromParams(params)
+            val payments = ((params["never_hold"] as Map<String, Any?>)["otp_source_packages"] as List<Any?>)
+                .map { it as String }
+                .filter { MessageSignals.familyOf(it) == AppFamily.OTHER }
+                .toSet()
             engine.loadParams(paramsJson)
             featureRules = rules
             holdCapMin = capMin
             minutesLostCapMin = lostCapMin
             holdCaps = caps
             contexts = topics
+            paymentPackages = payments
             outcomes.openWindowMillis = (openWindowMin * 60_000).toLong()
         } catch (e: IOException) {
             NotificationLog.add("TwinRouter", "Could not load ${persona.asset}: ${e.message}")
@@ -425,20 +438,33 @@ object TwinRouter {
         } ?: false
         val capMin = holdCaps.capFor(features)
         val topic = Contexts.match(rawTitle, text, features.category, contexts)
-
-        // 2. Engine evaluates features against the current focus session, then the content
-        // rules the user switched on get their say.
-        val context = currentContext(capMin)
-        val ruled = ContentPolicy.apply(
-            decision = engine.decide(features, context),
-            features = features,
-            content = content,
-            flags = flags,
+        val family = MessageSignals.familyOf(features.packageName)
+        val oneToOne = features.isConversation && !features.groupChat
+        // A group is known by its app and its name, salted like a sender.
+        val groupName = extras.getCharSequence(Notification.EXTRA_CONVERSATION_TITLE)?.toString() ?: rawTitle
+        val groupKey = if (features.groupChat) FeatureBuilder.keyFor("${features.packageName}:$groupName", senderSalt, "g_") else null
+        val instaOrSnapText = oneToOne && content.kind == ContentKind.TEXT &&
+            (family == AppFamily.INSTAGRAM || family == AppFamily.SNAPCHAT)
+        val hasProgress = extras.getInt(Notification.EXTRA_PROGRESS_MAX, 0) > 0 ||
+            extras.getBoolean(Notification.EXTRA_PROGRESS_INDETERMINATE, false)
+        val signals = FocusSignals(
+            family = family,
+            orderStatus = MessageSignals.isOrderStatus(sbn.notification.category, hasProgress, sbn.isOngoing, rawTitle, text),
+            bankAlert = !features.groupChat && MessageSignals.isBankAlert(features.packageName, paymentPackages, rawTitle, text),
+            bot = MessageSignals.isBot(family, rawTitle),
+            streak = MessageSignals.isStreak(text),
             mentionsYou = ContentRules.mentionsYou(text, TwinSettings.mentionNames.value),
+            groupWorth = groupKey?.let { TwinSettings.isGroupWorth(it) } ?: false,
+            textBurst = if (instaOrSnapText) textBursts.record(features.senderHash ?: rawTitle, sbn.postTime) else 0,
             newSender = newSender,
             contextLabel = topic?.label,
             nowMillis = System.currentTimeMillis(),
         )
+
+        // 2. Engine evaluates features against the current focus session, then the focus
+        // rules get their say.
+        val context = currentContext(capMin)
+        val ruled = ContentPolicy.apply(engine.decide(features, context), features, content, flags, signals)
         val decision = ruled.decision
         // In Suggest mode the decision is only a recommendation: the notification is delivered
         // and the user can still hold it from its detail screen.
@@ -472,6 +498,7 @@ object TwinRouter {
             features = features,
             context = context,
             contentIntent = contentIntent,
+            groupKey = groupKey,
         )
         _liveNotifications.value = (listOf(liveItem) + _liveNotifications.value).take(60)
 
@@ -497,11 +524,29 @@ object TwinRouter {
                 flag = ruled.flag,
                 capMinutes = capMin,
                 deadlineAtMillis = content.deadlineAtMillis,
+                groupKey = groupKey,
             )
-            updateTray { listOf(trayItem) + it }
+            // A group keeps one tray row, "CSE-B ×3", holding its latest message; the row keeps
+            // the first one's hold time, so the cap counts from the first.
+            updateTray { tray ->
+                val existing = groupKey?.let { key -> tray.firstOrNull { it.groupKey == key } }
+                if (existing == null) {
+                    listOf(trayItem) + tray
+                } else {
+                    val count = existing.count + 1
+                    val merged = trayItem.copy(
+                        id = existing.id,
+                        title = "$groupName ×$count",
+                        heldAtMillis = existing.heldAtMillis,
+                        count = count,
+                    )
+                    listOf(merged) + tray.filterNot { it.id == existing.id }
+                }
+            }
             _heldTodayCount.value += 1
             _netMinutesProtected.value += decision.card.netMinutesProtected
         } else {
+            if (ruled.releaseSenderBurst) releaseSenderMessages(listener, features.packageName, features.senderHash)
             // A demo post has no real app behind it to open, so it teaches nothing about pull.
             if (demo == null) {
                 outcomes.delivered(
@@ -512,20 +557,41 @@ object TwinRouter {
                     System.currentTimeMillis(),
                 )
             }
-            if (_phoneState.value != PhoneState.FREE) deliverInFocus(listener, sbn.key, liveItem, contentIntent)
+            if (_phoneState.value != PhoneState.FREE) {
+                val pingTitle = if (ruled.releaseSenderBurst) "${features.senderDisplayName ?: title} ×${signals.textBurst}" else title
+                deliverInFocus(listener, sbn.key, liveItem.copy(title = pingTitle), contentIntent)
+            }
         }
     }
 
+    // The 5th text in 2 minutes: the same person's held messages from this app go out with it.
+    private fun releaseSenderMessages(context: Context, packageName: String, senderHash: String?) {
+        if (senderHash == null) return
+        val earlier = _heldTray.value.filter { it.packageName == packageName && it.senderHash == senderHash }
+        if (earlier.isEmpty()) return
+        val ids = earlier.map { it.id }.toSet()
+        updateTray { tray -> tray.filterNot { it.id in ids } }
+        DigestNotifier.postBatchDigest(
+            context = context,
+            title = "${earlier.first().app}: ${earlier.first().sender ?: earlier.first().title}",
+            summaryLines = earlier.reversed().map { it.text },
+        )
+        NotificationLog.add("TwinRouter", "Released ${earlier.size} earlier messages from the same sender")
+    }
+
     // In Mode A a delivered notification is silenced by Priority mode, so the twin pings for
-    // it. One in three delivered alerts also asks "Worth it?" (on the ping in Mode A, on a
-    // silent notification in Mode B, where the real app made its own sound).
+    // it. Unsure deliveries and one in three of the rest also ask "Worth it?" (on the ping in
+    // Mode A, on a silent notification in Mode B, where the real app made its own sound).
     private fun deliverInFocus(
         listener: PratibimbListener,
         key: String,
         item: LiveNotificationItem,
         contentIntent: PendingIntent?,
     ) {
-        val prompt = if (deliveredInFocus.incrementAndGet() % WORTH_PROMPT_EVERY == 0) {
+        // An unsure delivery ("might matter", or ranges too wide to trust) always asks, so the
+        // twin learns where it is least sure; the rest ask one time in three.
+        val unsure = item.decision.rule == DecisionRule.MIGHT_MATTER || item.decision.card.lowConfidence
+        val prompt = if (deliveredInFocus.incrementAndGet() % WORTH_PROMPT_EVERY == 0 || unsure) {
             WorthPrompt(item.id, item.packageName, item.senderHash)
         } else {
             null
@@ -556,6 +622,7 @@ object TwinRouter {
     fun recordAlertFeedback(liveItemId: String?, packageName: String, senderHash: String?, worth: Boolean) {
         val label = if (worth) WorthLabelKind.WORTH_IT else WorthLabelKind.NOT_WORTH_IT
         learn(FeedbackEvent.WorthLabel(packageName = packageName, senderHash = senderHash, label = label))
+        _liveNotifications.value.firstOrNull { it.id == liveItemId }?.groupKey?.let { TwinSettings.markGroup(it, worth) }
         _liveNotifications.update { items ->
             items.map { if (it.id == liveItemId) it.copy(feedbackLabel = label) else it }
         }
@@ -1035,6 +1102,7 @@ object TwinRouter {
                 label = WorthLabelKind.SHOULD_HAVE_COME_THROUGH,
             )
         )
+        item.groupKey?.let { TwinSettings.markGroup(it, worth = true) }
         updateTray { tray -> tray.filterNot { it.id == trayId } }
         NotificationLog.add("TwinRouter", "Marked important: \"${item.title}\" released, twin taught it matters")
     }
@@ -1048,12 +1116,14 @@ object TwinRouter {
                 label = WorthLabelKind.CORRECT_HOLD,
             )
         )
+        item.groupKey?.let { TwinSettings.markGroup(it, worth = false) }
     }
 
     fun submitWorthFeedback(itemId: String, isWorth: Boolean) {
         val label = if (isWorth) WorthLabelKind.WORTH_IT else WorthLabelKind.NOT_WORTH_IT
         _liveNotifications.value = _liveNotifications.value.map { item ->
             if (item.id == itemId) {
+                item.groupKey?.let { TwinSettings.markGroup(it, isWorth) }
                 learn(
                     FeedbackEvent.WorthLabel(
                         packageName = item.packageName,
@@ -1140,6 +1210,7 @@ object TwinRouter {
         seenByKey.clear()
         outcomes.clear()
         openTimers.clear()
+        textBursts.clear()
         alwaysDeliverSenders = emptySet()
         alwaysDeliverPackages = emptySet()
         editSettings {

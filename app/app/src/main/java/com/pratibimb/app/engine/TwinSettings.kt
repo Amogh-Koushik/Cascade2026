@@ -14,7 +14,7 @@ object TwinSettings {
     private const val OPTED_OUT_KEY = "opted_out_packages"
     private const val RESEARCH_KEY = "research_mode"
     private const val RULE_TEXT_ONLY_KEY = "rule_text_only_repeat"
-    private const val RULE_GROUPS_KEY = "rule_hold_unmentioned_groups"
+    private const val GROUP_MARKS_KEY = "group_marks"
     private const val RULE_NEW_SENDER_KEY = "rule_new_sender_links"
     private const val RULE_FOCUS_GATE_KEY = "rule_focus_gate"
     private const val MENTION_NAMES_KEY = "mention_names"
@@ -50,6 +50,10 @@ object TwinSettings {
     @Volatile
     private var knownSenders: Set<String> = emptySet()
 
+    // Per group (salted key): worth-it taps minus not-worth-it taps. Above zero, it gets through.
+    @Volatile
+    private var groupMarks: Map<String, Int> = emptyMap()
+
     @Synchronized
     fun init(context: Context) {
         if (prefs != null) return
@@ -59,12 +63,15 @@ object TwinSettings {
         _researchMode.value = loaded.getBoolean(RESEARCH_KEY, true)
         _ruleFlags.value = ContentRuleFlags(
             textOnlyRepeatPings = loaded.getBoolean(RULE_TEXT_ONLY_KEY, false),
-            holdUnmentionedGroups = loaded.getBoolean(RULE_GROUPS_KEY, false),
             newSenderLinks = loaded.getBoolean(RULE_NEW_SENDER_KEY, false),
             focusGate = loaded.getBoolean(RULE_FOCUS_GATE_KEY, true),
         )
         _mentionNames.value = loaded.getStringSet(MENTION_NAMES_KEY, null).orEmpty().toSet()
         knownSenders = loaded.getStringSet(KNOWN_SENDERS_KEY, null).orEmpty().toSet()
+        groupMarks = loaded.getStringSet(GROUP_MARKS_KEY, null).orEmpty().mapNotNull { entry ->
+            val (key, net) = entry.split('=').takeIf { it.size == 2 } ?: return@mapNotNull null
+            net.toIntOrNull()?.let { key to it }
+        }.toMap()
         prefs = loaded
     }
 
@@ -72,7 +79,6 @@ object TwinSettings {
         _ruleFlags.value = flags
         prefs?.edit()
             ?.putBoolean(RULE_TEXT_ONLY_KEY, flags.textOnlyRepeatPings)
-            ?.putBoolean(RULE_GROUPS_KEY, flags.holdUnmentionedGroups)
             ?.putBoolean(RULE_NEW_SENDER_KEY, flags.newSenderLinks)
             ?.putBoolean(RULE_FOCUS_GATE_KEY, flags.focusGate)
             ?.apply()
@@ -86,6 +92,14 @@ object TwinSettings {
     }
 
     fun isKnownSender(senderHash: String): Boolean = senderHash in knownSenders
+
+    fun isGroupWorth(groupKey: String): Boolean = (groupMarks[groupKey] ?: 0) > 0
+
+    @Synchronized
+    fun markGroup(groupKey: String, worth: Boolean) {
+        groupMarks = groupMarks + (groupKey to (groupMarks[groupKey] ?: 0) + if (worth) 1 else -1)
+        prefs?.edit()?.putStringSet(GROUP_MARKS_KEY, groupMarks.map { (key, net) -> "$key=$net" }.toSet())?.apply()
+    }
 
     // True the first time a sender is seen; the sender is known from then on.
     @Synchronized
@@ -123,6 +137,7 @@ object TwinSettings {
         _ruleFlags.value = ContentRuleFlags()
         _mentionNames.value = emptySet()
         knownSenders = emptySet()
+        groupMarks = emptyMap()
         prefs?.edit()?.clear()?.apply()
     }
 }

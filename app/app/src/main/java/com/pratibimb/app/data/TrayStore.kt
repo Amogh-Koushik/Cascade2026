@@ -108,6 +108,8 @@ object TrayStore {
             .put("flag", item.flag ?: JSONObject.NULL)
             .put("capMinutes", item.capMinutes ?: JSONObject.NULL)
             .put("deadlineAtMillis", item.deadlineAtMillis ?: JSONObject.NULL)
+            .put("groupKey", item.groupKey ?: JSONObject.NULL)
+            .put("count", item.count)
 
     private fun fromJson(json: JSONObject): HeldTrayItem =
         HeldTrayItem(
@@ -132,6 +134,8 @@ object TrayStore {
             } else {
                 null
             },
+            groupKey = if (json.has("groupKey")) json.optStringOrNull("groupKey") else null,
+            count = json.optInt("count", 1),
         )
 
     private fun JSONObject.optStringOrNull(key: String): String? = if (isNull(key)) null else getString(key)

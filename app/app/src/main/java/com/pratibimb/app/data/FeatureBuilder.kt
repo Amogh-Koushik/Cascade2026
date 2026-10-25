@@ -87,8 +87,11 @@ object FeatureBuilder {
         }
 
     // Salted, so the stored hash cannot be matched against a list of names.
-    private fun hashSender(name: String, salt: String): String {
+    private fun hashSender(name: String, salt: String): String = keyFor(name, salt, "s_")
+
+    // The same salted hash for any name worth remembering without storing it (a group).
+    fun keyFor(name: String, salt: String, prefix: String): String {
         val digest = MessageDigest.getInstance("SHA-256").digest("$salt:$name".toByteArray())
-        return "s_" + digest.take(6).joinToString("") { "%02x".format(it) }
+        return prefix + digest.take(6).joinToString("") { "%02x".format(it) }
     }
 }
