@@ -10,6 +10,7 @@ import android.service.notification.StatusBarNotification
 import com.pratibimb.app.data.FeatureBuilder
 import com.pratibimb.app.data.FeatureRules
 import com.pratibimb.app.data.NotificationInspector
+import com.pratibimb.app.data.ReportStore
 import com.pratibimb.app.data.NotificationLog
 import com.pratibimb.app.data.TrayStore
 import com.pratibimb.app.data.UsageReader
@@ -139,6 +140,10 @@ object TwinRouter {
     private val _fatigueReasons = MutableStateFlow<List<String>>(emptyList())
     val fatigueReasons: StateFlow<List<String>> = _fatigueReasons.asStateFlow()
 
+    // What the Report tab is built from: aggregates over every focus session on this phone.
+    private val _report = MutableStateFlow(ReportHistory())
+    val report: StateFlow<ReportHistory> = _report.asStateFlow()
+
     // The last batch released as one digest; Home and the Tray show it, and the Tray can undo it
     // for a short while.
     private val _lastDigest = MutableStateFlow<ReleasedDigest?>(null)
@@ -199,6 +204,20 @@ object TwinRouter {
 
     private val deliveredInFocus = AtomicInteger(0)
 
+    // When focus time was last added to the report, and the last app seen in front, so each
+    // reading adds only what happened since the one before.
+    @Volatile
+    private var lastBehaviourAtMillis = 0L
+
+    @Volatile
+    private var lastSwitchEventAtMillis = 0L
+
+    @Volatile
+    private var lastForegroundPackage: String? = null
+
+    // A gap longer than this between readings (the app was asleep) is not counted as focus.
+    private const val MAX_READING_GAP_MILLIS = 60_000L
+
     // How long a released digest can be put back into the tray.
     private const val UNDO_WINDOW_MILLIS = 60_000L
 
@@ -230,6 +249,7 @@ object TwinRouter {
         _isModeA.value = app.getSystemService(NotificationManager::class.java)
             .isNotificationPolicyAccessGranted
         _heldTray.value = TrayStore.load(app)
+        _report.value = ReportStore.load(app) ?: ReportHistory(sinceMillis = System.currentTimeMillis())
         appContext = app
         NotificationLog.add("TwinRouter", "Engine ready with ${currentPersona.asset}")
     }
@@ -323,6 +343,15 @@ object TwinRouter {
         if (events.isEmpty()) return
         events.forEach { engine.applyFeedback(it) }
         saveCounts()
+        events.filterIsInstance<FeedbackEvent.WorthLabel>().forEach { label ->
+            record { it.withWorth(label.packageName, label.label.positive) }
+        }
+    }
+
+    // Every report change goes through here, so the copy on disk always matches.
+    private fun record(change: (ReportHistory) -> ReportHistory) {
+        _report.update(change)
+        appContext?.let { ReportStore.save(it, _report.value) }
     }
 
     private fun saveCounts() {
@@ -416,6 +445,8 @@ object TwinRouter {
         val holds = decision.action == Action.HOLD && !decision.suggestOnly
         if (seenByKey.size > MAX_TRACKED_KEYS) seenByKey.clear()
         seenByKey[sbn.key] = SeenPost(contentHash, holds)
+        // The report covers focus only; demo posts stand in for an app and are left out too.
+        if (demo == null && _phoneState.value != PhoneState.FREE) record { it.withDecision(features.packageName, holds) }
 
         val line = describeDecision(title, features.category, features.isConversation, decision, features.groupChat) +
             (ruled.rule?.let { " · content rule: $it" } ?: "")
@@ -617,6 +648,10 @@ object TwinRouter {
         }
         val outcome = open.outcome(OPENED_MINUTES_ESTIMATE)
         learn(outcome)
+        // The estimate is not a measurement, so the report counts the open but adds no minutes.
+        if (outcome.opened && open.state != PhoneState.FREE) {
+            record { it.withOpen(open.packageName, open.category.key, null) }
+        }
         val what = if (outcome.opened) "opened (estimated ${OPENED_MINUTES_ESTIMATE.toInt()} min)" else "opened too late, counted as not opened"
         NotificationLog.add("TwinRouter", "Feedback: ${open.category.key} $what in ${open.state}")
     }
@@ -639,6 +674,9 @@ object TwinRouter {
             ) ?: continue
             openTimers.remove(open)
             settled += open.outcome(minutes)
+            // Only minutes actually seen in the usage events go into the report.
+            val measured = minutes.takeIf { visit.enteredAtMillis != null }
+            if (open.inWindow) record { it.withOpen(open.packageName, open.category.key, measured) }
             NotificationLog.add(
                 "TwinRouter",
                 "Feedback: ${open.category.key} opened, %.1f min lost in ${open.state}".format(minutes),
@@ -654,6 +692,8 @@ object TwinRouter {
         if (_phoneState.value == PhoneState.FREE || sessionStartMillis == 0L) {
             lastDetectedState = null
             lastDetectedFatigue = null
+            lastBehaviourAtMillis = 0L
+            lastForegroundPackage = null
             return
         }
         val hasAccess = UsageReader.hasAccess(context)
@@ -678,6 +718,8 @@ object TwinRouter {
             }
         }
 
+        if (hasAccess) recordSwitches(context, sessionEvents, passThrough)
+
         val sessionMinutes = (nowMillis - sessionStartMillis) / 60_000.0
         val assessment = FatigueRules.assess(
             minutesSinceBreak = sessionMinutes,
@@ -687,6 +729,7 @@ object TwinRouter {
             hourOfDay = Calendar.getInstance().get(Calendar.HOUR_OF_DAY),
         )
         _fatigueReasons.value = assessment.reasons
+        recordFocusTime(nowMillis, assessment.risk)
         // Like the phone state, a level picked on the Debug screen stays until the proxy changes.
         if (assessment.risk != lastDetectedFatigue) {
             lastDetectedFatigue = assessment.risk
@@ -695,6 +738,33 @@ object TwinRouter {
                 val why = assessment.reasons.joinToString().ifEmpty { "no signals" }
                 NotificationLog.add("TwinRouter", "Fatigue risk (proxy) ${assessment.risk}: $why")
             }
+        }
+    }
+
+    // Adds the focus time since the last reading to its hour, as steady or restless, and one
+    // fatigue reading.
+    private fun recordFocusTime(nowMillis: Long, risk: FatigueRisk) {
+        val previous = lastBehaviourAtMillis
+        lastBehaviourAtMillis = nowMillis
+        if (previous == 0L || nowMillis - previous > MAX_READING_GAP_MILLIS) return
+        val hour = Calendar.getInstance().apply { timeInMillis = nowMillis }.get(Calendar.HOUR_OF_DAY)
+        val restless = _phoneState.value == PhoneState.FOCUS_RESTLESS
+        record { it.withFocusTime(hour, restless, (nowMillis - previous) / 1000).withFatigue(hour, risk) }
+    }
+
+    // Counts each move to another app since the last reading (the launcher and the shade are
+    // passed through, and moving to Pratibimb itself is not counted).
+    private fun recordSwitches(context: Context, events: List<ForegroundEvent>, passThrough: Set<String>) {
+        val fresh = events
+            .filter { it.kind == ForegroundKind.APP_RESUMED && it.atMillis > lastSwitchEventAtMillis && it.packageName !in passThrough }
+            .sortedBy { it.atMillis }
+        for (event in fresh) {
+            val previous = lastForegroundPackage
+            if (previous != null && event.packageName != previous && event.packageName != context.packageName) {
+                record { it.withSwitch(event.packageName) }
+            }
+            lastForegroundPackage = event.packageName
+            lastSwitchEventAtMillis = event.atMillis
         }
     }
 
@@ -1081,6 +1151,8 @@ object TwinRouter {
         _lastDigest.value = null
         _liveNotifications.value = emptyList()
         TwinSettings.clear()
+        _report.value = ReportHistory(sinceMillis = System.currentTimeMillis())
+        appContext?.let { ReportStore.save(it, _report.value) }
         updateTray { emptyList() }
     }
 

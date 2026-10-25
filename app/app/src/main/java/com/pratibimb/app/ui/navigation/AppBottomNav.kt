@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Archive
-import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.Tune
@@ -30,7 +30,7 @@ enum class AppTab(val title: String, val icon: ImageVector) {
     HOME("Home", Icons.Default.Home),
     LIVE_TWIN("Live Twin", Icons.Default.Psychology),
     TRAY("Tray", Icons.Default.Archive),
-    DEBUG("Debug", Icons.Default.BugReport),
+    REPORT("Report", Icons.Default.Assessment),
     SETTINGS("Settings", Icons.Default.Tune),
 }
 

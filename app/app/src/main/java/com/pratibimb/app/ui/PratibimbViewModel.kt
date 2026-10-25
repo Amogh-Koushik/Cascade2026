@@ -18,6 +18,7 @@ import com.pratibimb.app.engine.MockScenario
 import com.pratibimb.app.engine.PersonaOption
 import com.pratibimb.app.engine.Personas
 import com.pratibimb.app.engine.ReleasedDigest
+import com.pratibimb.app.engine.ReportHistory
 import com.pratibimb.app.engine.TwinRouter
 import com.pratibimb.app.engine.TwinSettings
 import com.pratibimb.app.service.FocusTileService
@@ -193,6 +194,21 @@ class PratibimbViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
     val demoLearning: StateFlow<Boolean> = TwinRouter.demoLearning
+
+    // ── Report ─────────────────────────────────────────────────────────────
+    val report: StateFlow<ReportHistory> = TwinRouter.report
+
+    private val appLabels = HashMap<String, String>()
+
+    // An installed app's name for the report, or the last part of its package name.
+    fun appLabel(packageName: String): String = appLabels.getOrPut(packageName) {
+        val pm = getApplication<Application>().packageManager
+        try {
+            pm.getApplicationLabel(pm.getApplicationInfo(packageName, 0)).toString()
+        } catch (_: PackageManager.NameNotFoundException) {
+            packageName.substringAfterLast('.').replaceFirstChar { it.uppercase() }
+        }
+    }
 
     // ── Notification inspector and content rules ───────────────────────────
     val inspectedPosts: StateFlow<List<InspectedPost>> = NotificationInspector.posts

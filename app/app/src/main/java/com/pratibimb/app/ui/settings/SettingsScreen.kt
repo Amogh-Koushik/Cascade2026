@@ -58,6 +58,7 @@ fun SettingsScreen(
     // Returns how many simulated outcomes were applied.
     onRunLearningReplay: () -> Int,
     onDeleteAllData: () -> Unit,
+    onOpenDebug: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val scrollState = rememberScrollState()
@@ -106,6 +107,23 @@ fun SettingsScreen(
                     modifier = Modifier.size(22.dp),
                 )
             }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Debug, scenarios and the notification inspector live here, off the bottom bar.
+        Button(
+            onClick = onOpenDebug,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(44.dp),
+            shape = ShapePill,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = WarmObsidian.SurfaceContainerHigh,
+                contentColor = WarmObsidian.OnSurface,
+            ),
+        ) {
+            Text(text = "Debug, scenarios & notification inspector", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
         }
 
         Spacer(modifier = Modifier.height(24.dp))

@@ -27,6 +27,7 @@ import com.pratibimb.app.ui.onboarding.ConsentScreen
 import com.pratibimb.app.ui.onboarding.PermissionChecklistScreen
 import com.pratibimb.app.ui.onboarding.SetupResultModeAScreen
 import com.pratibimb.app.ui.onboarding.SetupResultModeBScreen
+import com.pratibimb.app.ui.report.ReportScreen
 import com.pratibimb.app.ui.settings.SettingsScreen
 import com.pratibimb.app.ui.theme.WarmObsidian
 import com.pratibimb.app.ui.tray.HeldTrayScreen
@@ -72,6 +73,8 @@ fun PratibimbApp(
 
     var selectedTab by remember { mutableStateOf(AppTab.HOME) }
     var inspectorOpen by remember { mutableStateOf(false) }
+    var debugOpen by remember { mutableStateOf(false) }
+    val report by viewModel.report.collectAsStateWithLifecycle()
 
     NavHost(
         navController = navController,
@@ -180,7 +183,10 @@ fun PratibimbApp(
                                 onReleaseAll = viewModel::releaseAllDigest,
                             )
                         }
-                        AppTab.DEBUG -> if (inspectorOpen) {
+                        AppTab.REPORT -> {
+                            ReportScreen(history = report, appLabel = viewModel::appLabel)
+                        }
+                        AppTab.SETTINGS -> if (inspectorOpen) {
                             BackHandler { inspectorOpen = false }
                             InspectorScreen(
                                 posts = inspectedPosts,
@@ -191,7 +197,8 @@ fun PratibimbApp(
                                 onClear = viewModel::clearInspector,
                                 onBack = { inspectorOpen = false },
                             )
-                        } else {
+                        } else if (debugOpen) {
+                            BackHandler { debugOpen = false }
                             DebugScreen(
                                 isModeA = isModeA,
                                 phoneState = phoneState,
@@ -210,8 +217,7 @@ fun PratibimbApp(
                                 onResetTwin = viewModel::resetAllCounts,
                                 onOpenInspector = { inspectorOpen = true },
                             )
-                        }
-                        AppTab.SETTINGS -> {
+                        } else {
                             SettingsScreen(
                                 selectedPersona = selectedPersona,
                                 onSelectPersona = viewModel::setPersona,
@@ -219,6 +225,7 @@ fun PratibimbApp(
                                 onToggleDemoLearning = viewModel::setDemoLearning,
                                 onRunLearningReplay = viewModel::runLearningReplay,
                                 onDeleteAllData = viewModel::resetAllCounts,
+                                onOpenDebug = { debugOpen = true },
                             )
                         }
                     }
