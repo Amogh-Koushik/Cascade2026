@@ -9,6 +9,9 @@ __pycache__/
 # Secrets
 .env
 
+# docx
+docs/
+
 # Raw public datasets are downloaded locally, never committed
 data/raw/
 
