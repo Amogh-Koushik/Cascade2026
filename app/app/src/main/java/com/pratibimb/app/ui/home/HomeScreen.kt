@@ -62,9 +62,11 @@ fun HomeScreen(
     autonomy: Autonomy,
     heldTodayCount: Int,
     netMinutesProtected: Double,
+    breakSecondsLeft: Int,
     onSelectDuration: (Int) -> Unit,
     onStartFocus: () -> Unit,
     onStopFocus: () -> Unit,
+    onTakeBreak: () -> Unit,
     onOpenPersona: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -197,6 +199,7 @@ fun HomeScreen(
             val mins = remainingSeconds / 60
             val secs = remainingSeconds % 60
             val timeFormatted = "%02d:%02d".format(mins, secs)
+            val onBreak = breakSecondsLeft > 0
 
             Box(
                 modifier = Modifier
@@ -209,7 +212,7 @@ fun HomeScreen(
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Text(
-                        text = "Focus session active",
+                        text = if (onBreak) "On a break · focus paused" else "Focus session active",
                         style = labelLg(color = WarmObsidian.Secondary),
                         fontWeight = FontWeight.Medium,
                     )
@@ -225,11 +228,39 @@ fun HomeScreen(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text = if (isModeA) "Silent mode active · Alarms only" else "Hold mode active",
+                        text = when {
+                            onBreak -> "Break ends in %d:%02d · notifications ring normally"
+                                .format(breakSecondsLeft / 60, breakSecondsLeft % 60)
+                            isModeA -> "Silent mode active · Alarms only"
+                            else -> "Hold mode active"
+                        },
                         style = bodyMd(color = WarmObsidian.OnSurfaceVariant),
                     )
 
                     Spacer(modifier = Modifier.height(20.dp))
+
+                    // A break releases everything held so far and pauses the focus clock.
+                    if (!onBreak) {
+                        Button(
+                            onClick = onTakeBreak,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(50.dp),
+                            shape = ShapePill,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = WarmObsidian.PrimaryContainer,
+                                contentColor = WarmObsidian.OnPrimary,
+                            ),
+                        ) {
+                            Text(
+                                text = "Take a 5-min break",
+                                style = bodyMd(color = WarmObsidian.OnPrimary),
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(10.dp))
+                    }
 
                     Button(
                         onClick = onStopFocus,

@@ -25,8 +25,14 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,6 +53,10 @@ import com.pratibimb.app.ui.theme.labelMd
 fun SettingsScreen(
     selectedPersona: String,
     onSelectPersona: (String) -> Unit,
+    demoLearning: Boolean,
+    onToggleDemoLearning: (Boolean) -> Unit,
+    // Returns how many simulated outcomes were applied.
+    onRunLearningReplay: () -> Int,
     onDeleteAllData: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -163,6 +173,14 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        DemoLearningSection(
+            demoLearning = demoLearning,
+            onToggleDemoLearning = onToggleDemoLearning,
+            onRunLearningReplay = onRunLearningReplay,
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
         // Section 2: Non-Negotiable Safety Overrides (PRD §5.5)
         Text(
             text = "HARD SAFETY OVERRIDES (NEVER HOLD)",
@@ -261,6 +279,101 @@ fun SettingsScreen(
                         fontWeight = FontWeight.SemiBold,
                     )
                 }
+            }
+        }
+    }
+}
+
+// For the stage demo: wider worth ranges so a few taps visibly move them, and a replay of 30
+// simulated outcomes through the normal learning path. Both are labelled as demo-only.
+@Composable
+private fun DemoLearningSection(
+    demoLearning: Boolean,
+    onToggleDemoLearning: (Boolean) -> Unit,
+    onRunLearningReplay: () -> Int,
+) {
+    var replayResult by remember { mutableStateOf<String?>(null) }
+
+    Text(
+        text = "DEMO LEARNING",
+        style = labelMd(color = WarmObsidian.Primary),
+        fontWeight = FontWeight.Bold,
+        letterSpacing = 0.08.sp,
+    )
+
+    Spacer(modifier = Modifier.height(10.dp))
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .cardSurface()
+            .padding(18.dp),
+    ) {
+        Column {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Demo learning profile",
+                        style = bodyMd(color = WarmObsidian.OnSurface),
+                        fontWeight = FontWeight.Medium,
+                    )
+                    Text(
+                        text = "Wider worth ranges so a few taps visibly change decisions. Off after restart.",
+                        style = labelMd(color = WarmObsidian.Outline),
+                        fontSize = 12.sp,
+                    )
+                }
+                Spacer(modifier = Modifier.width(12.dp))
+                Switch(
+                    checked = demoLearning,
+                    onCheckedChange = onToggleDemoLearning,
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = WarmObsidian.Primary,
+                        checkedTrackColor = WarmObsidian.PrimaryContainer,
+                        uncheckedThumbColor = WarmObsidian.Outline,
+                        uncheckedTrackColor = WarmObsidian.SurfaceContainerHigh,
+                    ),
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = {
+                    val applied = onRunLearningReplay()
+                    replayResult = if (applied > 0) {
+                        "Learned from $applied simulated Instagram outcomes"
+                    } else {
+                        "Replay file could not be read; see the Debug log"
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(44.dp),
+                shape = ShapePill,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = WarmObsidian.SurfaceContainerHigh,
+                    contentColor = WarmObsidian.OnSurface,
+                ),
+            ) {
+                Text(
+                    text = "Run learning replay (simulated)",
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
+
+            replayResult?.let {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = it,
+                    style = labelMd(color = WarmObsidian.Secondary),
+                    fontSize = 12.sp,
+                )
             }
         }
     }

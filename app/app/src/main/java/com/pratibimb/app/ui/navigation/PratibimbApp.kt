@@ -56,6 +56,8 @@ fun PratibimbApp(
     val liveNotifications by viewModel.liveNotifications.collectAsStateWithLifecycle()
     val heldTray by viewModel.heldTray.collectAsStateWithLifecycle()
     val selectedPersona by viewModel.selectedPersona.collectAsStateWithLifecycle()
+    val demoLearning by viewModel.demoLearning.collectAsStateWithLifecycle()
+    val breakSecondsLeft by viewModel.breakSecondsLeft.collectAsStateWithLifecycle()
     val useLivePermissions by viewModel.useLivePermissions.collectAsStateWithLifecycle()
     val focusStatus by viewModel.focusStatus.collectAsStateWithLifecycle()
     val logEntries by viewModel.logEntries.collectAsStateWithLifecycle()
@@ -131,9 +133,11 @@ fun PratibimbApp(
                                 autonomy = autonomy,
                                 heldTodayCount = heldTodayCount,
                                 netMinutesProtected = netMinutesProtected,
+                                breakSecondsLeft = breakSecondsLeft,
                                 onSelectDuration = viewModel::selectDuration,
                                 onStartFocus = viewModel::startFocus,
                                 onStopFocus = viewModel::stopFocus,
+                                onTakeBreak = viewModel::takeBreak,
                                 onOpenPersona = { selectedTab = AppTab.SETTINGS },
                             )
                         }
@@ -175,6 +179,9 @@ fun PratibimbApp(
                             SettingsScreen(
                                 selectedPersona = selectedPersona,
                                 onSelectPersona = viewModel::setPersona,
+                                demoLearning = demoLearning,
+                                onToggleDemoLearning = viewModel::setDemoLearning,
+                                onRunLearningReplay = viewModel::runLearningReplay,
                                 onDeleteAllData = viewModel::resetAllCounts,
                             )
                         }
