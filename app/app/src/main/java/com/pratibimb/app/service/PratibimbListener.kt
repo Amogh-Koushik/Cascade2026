@@ -8,18 +8,22 @@ import android.service.notification.StatusBarNotification
 import com.pratibimb.app.data.NotificationLog
 import com.pratibimb.app.data.SpikeSettings
 import com.pratibimb.app.dnd.AlertPing
+import com.pratibimb.app.engine.TwinRouter
 
-// Receives every notification posted on the phone. For now it records what Android exposes
-// for each one (importance, channel, conversation flag, removal reason), so we can confirm on
-// each demo phone that the fields the feature builder will need are really there.
+/**
+ * Receives every notification posted on the phone and routes them to TwinRouter for
+ * real-time decision evaluation (HOLD vs DELIVER), feature extraction, and feedback capture.
+ */
 class PratibimbListener : NotificationListenerService() {
 
     override fun onListenerConnected() {
+        TwinRouter.onListenerConnected(this)
         NotificationLog.setListenerConnected(true)
         NotificationLog.add(SOURCE, "Listener connected")
     }
 
     override fun onListenerDisconnected() {
+        TwinRouter.onListenerDisconnected()
         NotificationLog.setListenerConnected(false)
         NotificationLog.add(SOURCE, "Listener disconnected")
     }
@@ -45,7 +49,10 @@ class PratibimbListener : NotificationListenerService() {
             timeMillis = sbn.postTime,
         )
 
-        // Our own pings are skipped so a ping can never trigger another ping.
+        // Route live notification into the Twin engine
+        TwinRouter.onNotificationPosted(sbn, rankingMap)
+
+        // Optional debug spike ping:
         if (SpikeSettings.pingOnPost.value && sbn.packageName != packageName && !sbn.isOngoing) {
             val result = AlertPing.post(
                 context = this,
@@ -63,6 +70,7 @@ class PratibimbListener : NotificationListenerService() {
         reason: Int,
     ) {
         NotificationLog.add(sbn.packageName, "removed: ${removalReasonName(reason)}")
+        TwinRouter.onNotificationRemoved(sbn, rankingMap, reason)
     }
 
     private companion object {
@@ -70,7 +78,7 @@ class PratibimbListener : NotificationListenerService() {
     }
 }
 
-// "tapped" is the signal the twin will later use for "opened within 10 minutes".
+// "tapped" is the signal the twin uses for "opened within 10 minutes".
 private fun removalReasonName(reason: Int): String = when (reason) {
     NotificationListenerService.REASON_CLICK -> "tapped"
     NotificationListenerService.REASON_CANCEL -> "dismissed"

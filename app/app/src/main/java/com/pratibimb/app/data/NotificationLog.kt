@@ -1,5 +1,6 @@
 package com.pratibimb.app.data
 
+import android.util.Log
 import java.util.concurrent.atomic.AtomicLong
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,6 +17,7 @@ data class LogEntry(
 // Live, in-memory feed of everything the listener and the DND test do, shown on screen.
 // Nothing here is written to disk; the encrypted store replaces it once the real pipeline exists.
 object NotificationLog {
+    private const val TAG = "PratibimbTwin"
     private const val MAX_ENTRIES = 200
 
     private val nextId = AtomicLong(0)
@@ -26,6 +28,7 @@ object NotificationLog {
     val listenerConnected: StateFlow<Boolean> = _listenerConnected.asStateFlow()
 
     fun add(source: String, message: String, timeMillis: Long = System.currentTimeMillis()) {
+        Log.i(TAG, "[$source] $message")
         val entry = LogEntry(nextId.incrementAndGet(), timeMillis, source, message)
         _entries.update { current -> (listOf(entry) + current).take(MAX_ENTRIES) }
     }
@@ -35,6 +38,7 @@ object NotificationLog {
     }
 
     fun setListenerConnected(connected: Boolean) {
+        Log.i(TAG, "Listener connected = $connected")
         _listenerConnected.value = connected
     }
 }

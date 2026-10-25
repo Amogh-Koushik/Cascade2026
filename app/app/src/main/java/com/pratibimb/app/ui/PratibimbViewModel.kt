@@ -1,15 +1,17 @@
 package com.pratibimb.app.ui
 
+import android.app.Application
+import android.app.PendingIntent
 import android.content.Context
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.pratibimb.app.engine.MockScenario
 import com.pratibimb.app.engine.StubEngine
+import com.pratibimb.app.engine.TwinRouter
 import com.pratibimb.twin.Action
 import com.pratibimb.twin.Autonomy
 import com.pratibimb.twin.Decision
 import com.pratibimb.twin.FatigueRisk
-import com.pratibimb.twin.FeedbackEvent
 import com.pratibimb.twin.PhoneState
 import com.pratibimb.twin.WorthLabelKind
 import kotlinx.coroutines.Job
@@ -43,11 +45,12 @@ data class HeldTrayItem(
     val timeAgo: String,
     val minutesUntilRelease: Int,
     val decision: Decision,
+    val contentIntent: PendingIntent? = null,
 )
 
-class PratibimbViewModel : ViewModel() {
+class PratibimbViewModel(application: Application) : AndroidViewModel(application) {
 
-    val engine = StubEngine()
+    val engine: StubEngine get() = TwinRouter.engine
 
     // ── Permissions ────────────────────────────────────────────────────────
     private val _permissionStatus = MutableStateFlow(PermissionStatus.MOCK_CHECKLIST)
@@ -84,40 +87,35 @@ class PratibimbViewModel : ViewModel() {
     }
 
     // ── Delivery mode: Mode A (Priority DND) vs Mode B (Fallback) ──────────
-    private val _isModeA = MutableStateFlow(true)
-    val isModeA: StateFlow<Boolean> = _isModeA.asStateFlow()
+    val isModeA: StateFlow<Boolean> = TwinRouter.isModeA
 
     fun setModeA(modeA: Boolean) {
-        _isModeA.value = modeA
+        TwinRouter.setModeA(modeA)
     }
 
     // ── Phone state & context ──────────────────────────────────────────────
-    private val _phoneState = MutableStateFlow(PhoneState.FREE)
-    val phoneState: StateFlow<PhoneState> = _phoneState.asStateFlow()
+    val phoneState: StateFlow<PhoneState> = TwinRouter.phoneState
 
     fun setPhoneState(state: PhoneState) {
-        _phoneState.value = state
+        TwinRouter.setPhoneState(state)
     }
 
-    private val _autonomy = MutableStateFlow(Autonomy.AUTO)
-    val autonomy: StateFlow<Autonomy> = _autonomy.asStateFlow()
+    val autonomy: StateFlow<Autonomy> = TwinRouter.autonomy
 
     fun setAutonomy(autonomy: Autonomy) {
-        _autonomy.value = autonomy
+        TwinRouter.setAutonomy(autonomy)
     }
 
-    private val _fatigueRisk = MutableStateFlow(FatigueRisk.LOW)
-    val fatigueRisk: StateFlow<FatigueRisk> = _fatigueRisk.asStateFlow()
+    val fatigueRisk: StateFlow<FatigueRisk> = TwinRouter.fatigueRisk
 
     fun setFatigueRisk(risk: FatigueRisk) {
-        _fatigueRisk.value = risk
+        TwinRouter.setFatigueRisk(risk)
     }
 
-    private val _selectedPersona = MutableStateFlow("Deep work (balanced)")
-    val selectedPersona: StateFlow<String> = _selectedPersona.asStateFlow()
+    val selectedPersona: StateFlow<String> = TwinRouter.selectedPersona
 
     fun setPersona(persona: String) {
-        _selectedPersona.value = persona
+        TwinRouter.setPersona(persona)
     }
 
     // ── Focus Session ──────────────────────────────────────────────────────
@@ -141,7 +139,7 @@ class PratibimbViewModel : ViewModel() {
 
     fun startFocus() {
         _isFocusActive.value = true
-        _phoneState.value = PhoneState.FOCUS_STEADY
+        TwinRouter.setPhoneState(PhoneState.FOCUS_STEADY)
         _remainingSeconds.value = _selectedDurationMinutes.value * 60
 
         timerJob?.cancel()
@@ -158,190 +156,49 @@ class PratibimbViewModel : ViewModel() {
 
     fun stopFocus() {
         _isFocusActive.value = false
-        _phoneState.value = PhoneState.FREE
+        TwinRouter.setPhoneState(PhoneState.FREE)
         timerJob?.cancel()
         _remainingSeconds.value = _selectedDurationMinutes.value * 60
-        releaseAllDigest()
+        TwinRouter.releaseAllDigest(getApplication())
     }
 
-    // ── Today metrics ──────────────────────────────────────────────────────
-    private val _heldTodayCount = MutableStateFlow(18)
-    val heldTodayCount: StateFlow<Int> = _heldTodayCount.asStateFlow()
+    // ── Metrics & Feeds (Delegated to TwinRouter singleton) ────────────────
+    val heldTodayCount: StateFlow<Int> = TwinRouter.heldTodayCount
+    val netMinutesProtected: StateFlow<Double> = TwinRouter.netMinutesProtected
+    val liveNotifications: StateFlow<List<LiveNotificationItem>> = TwinRouter.liveNotifications
+    val heldTray: StateFlow<List<HeldTrayItem>> = TwinRouter.heldTray
+    val isListenerConnected: StateFlow<Boolean> = TwinRouter.isListenerConnected
 
-    private val _netMinutesProtected = MutableStateFlow(42.0)
-    val netMinutesProtected: StateFlow<Double> = _netMinutesProtected.asStateFlow()
-
-    // ── Live notifications feed & Tray ─────────────────────────────────────
-    private val _liveNotifications = MutableStateFlow<List<LiveNotificationItem>>(emptyList())
-    val liveNotifications: StateFlow<List<LiveNotificationItem>> = _liveNotifications.asStateFlow()
-
-    private val _heldTray = MutableStateFlow<List<HeldTrayItem>>(emptyList())
-    val heldTray: StateFlow<List<HeldTrayItem>> = _heldTray.asStateFlow()
-
-    init {
-        // Pre-populate with realistic initial entries matching PRD scenario examples
-        loadInitialData()
-    }
-
-    private fun loadInitialData() {
-        val initialLive = mutableListOf<LiveNotificationItem>()
-        val initialTray = mutableListOf<HeldTrayItem>()
-
-        // Load 4 baseline scenarios into live feed & tray
-        StubEngine.SCENARIOS.take(4).forEachIndexed { idx, sc ->
-            val decision = sc.decision
-            val item = LiveNotificationItem(
-                id = "init_${sc.id}",
-                app = sc.display.app,
-                title = sc.display.title,
-                text = sc.display.text,
-                timeLabel = "${(idx + 1) * 3}m ago",
-                decision = decision,
-                senderDisplayName = sc.features.senderDisplayName,
-                packageName = sc.features.packageName,
-            )
-            initialLive.add(item)
-
-            if (decision.action == Action.HOLD) {
-                initialTray.add(
-                    HeldTrayItem(
-                        id = "tray_${sc.id}",
-                        app = sc.display.app,
-                        title = sc.display.title,
-                        text = sc.display.text,
-                        sender = sc.features.senderDisplayName,
-                        packageName = sc.features.packageName,
-                        heldReason = decision.reason,
-                        timeAgo = "${(idx + 1) * 3}m ago",
-                        minutesUntilRelease = decision.card.minutesUntilRelease.toInt(),
-                        decision = decision,
-                    )
-                )
-            }
-        }
-
-        _liveNotifications.value = initialLive
-        _heldTray.value = initialTray
-    }
-
-    // ── Scenario execution ─────────────────────────────────────────────────
+    // ── Scenario execution & User Actions ──────────────────────────────────
     fun triggerScenario(scenario: MockScenario) {
-        val currentContext = scenario.context.copy(
-            state = if (_isFocusActive.value) _phoneState.value else PhoneState.FREE,
-            autonomy = _autonomy.value,
-            fatigueRisk = _fatigueRisk.value,
-        )
-
-        val decision = engine.decide(scenario.features, currentContext)
-
-        val liveItem = LiveNotificationItem(
-            id = "sc_${System.currentTimeMillis()}_${scenario.id}",
-            app = scenario.display.app,
-            title = scenario.display.title,
-            text = scenario.display.text,
-            timeLabel = "Just now",
-            decision = decision,
-            senderDisplayName = scenario.features.senderDisplayName,
-            packageName = scenario.features.packageName,
-        )
-
-        _liveNotifications.value = listOf(liveItem) + _liveNotifications.value
-
-        if (decision.action == Action.HOLD) {
-            _heldTodayCount.value += 1
-            _netMinutesProtected.value += decision.card.netMinutesProtected
-
-            val trayItem = HeldTrayItem(
-                id = "tray_${System.currentTimeMillis()}_${scenario.id}",
-                app = scenario.display.app,
-                title = scenario.display.title,
-                text = scenario.display.text,
-                sender = scenario.features.senderDisplayName,
-                packageName = scenario.features.packageName,
-                heldReason = decision.reason,
-                timeAgo = "Just now",
-                minutesUntilRelease = decision.card.minutesUntilRelease.toInt().coerceAtLeast(1),
-                decision = decision,
-            )
-            _heldTray.value = listOf(trayItem) + _heldTray.value
-        }
+        TwinRouter.triggerScenario(scenario)
     }
 
-    // ── Feedback actions ───────────────────────────────────────────────────
     fun submitWorthFeedback(itemId: String, isWorth: Boolean) {
-        val label = if (isWorth) WorthLabelKind.WORTH_IT else WorthLabelKind.NOT_WORTH_IT
-
-        _liveNotifications.value = _liveNotifications.value.map { item ->
-            if (item.id == itemId) {
-                engine.applyFeedback(
-                    FeedbackEvent.WorthLabel(
-                        packageName = item.packageName,
-                        senderHash = null,
-                        label = label,
-                    )
-                )
-                item.copy(feedbackLabel = label)
-            } else {
-                item
-            }
-        }
+        TwinRouter.submitWorthFeedback(itemId, isWorth)
     }
 
     fun releaseHeldItem(trayId: String) {
-        val item = _heldTray.value.firstOrNull { it.id == trayId } ?: return
-        engine.applyFeedback(
-            FeedbackEvent.WorthLabel(
-                packageName = item.packageName,
-                senderHash = null,
-                label = WorthLabelKind.RELEASE_NOW,
-            )
-        )
-        _heldTray.value = _heldTray.value.filterNot { it.id == trayId }
+        TwinRouter.releaseHeldItem(getApplication(), trayId)
     }
 
     fun alwaysDeliverSender(trayId: String) {
-        val item = _heldTray.value.firstOrNull { it.id == trayId } ?: return
-        engine.applyFeedback(
-            FeedbackEvent.WorthLabel(
-                packageName = item.packageName,
-                senderHash = null,
-                label = WorthLabelKind.ALWAYS_DELIVER,
-            )
-        )
-        _heldTray.value = _heldTray.value.filterNot { it.id == trayId }
+        TwinRouter.alwaysDeliverSender(trayId)
     }
 
     fun markHeldWrong(trayId: String) {
-        val item = _heldTray.value.firstOrNull { it.id == trayId } ?: return
-        engine.applyFeedback(
-            FeedbackEvent.WorthLabel(
-                packageName = item.packageName,
-                senderHash = null,
-                label = WorthLabelKind.SHOULD_HAVE_COME_THROUGH,
-            )
-        )
-        _heldTray.value = _heldTray.value.filterNot { it.id == trayId }
+        TwinRouter.markHeldWrong(trayId)
     }
 
     fun markHeldCorrect(trayId: String) {
-        val item = _heldTray.value.firstOrNull { it.id == trayId } ?: return
-        engine.applyFeedback(
-            FeedbackEvent.WorthLabel(
-                packageName = item.packageName,
-                senderHash = null,
-                label = WorthLabelKind.CORRECT_HOLD,
-            )
-        )
+        TwinRouter.markHeldCorrect(trayId)
     }
 
     fun releaseAllDigest() {
-        _heldTray.value = emptyList()
+        TwinRouter.releaseAllDigest(getApplication())
     }
 
     fun resetAllCounts() {
-        engine.resetCounts()
-        _heldTodayCount.value = 0
-        _netMinutesProtected.value = 0.0
-        _heldTray.value = emptyList()
+        TwinRouter.resetAll()
     }
 }
