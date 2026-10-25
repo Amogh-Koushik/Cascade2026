@@ -13,6 +13,7 @@ import com.pratibimb.app.engine.MockScenario
 import com.pratibimb.app.engine.PersonaOption
 import com.pratibimb.app.engine.Personas
 import com.pratibimb.app.engine.TwinRouter
+import com.pratibimb.app.service.FocusTileService
 import com.pratibimb.twin.Action
 import com.pratibimb.twin.Autonomy
 import com.pratibimb.twin.Decision
@@ -265,6 +266,7 @@ class PratibimbViewModel(application: Application) : AndroidViewModel(applicatio
     private fun enterFocus(event: String) {
         TwinRouter.setPhoneState(PhoneState.FOCUS_STEADY)
         TwinRouter.startSession(_remainingSeconds.value)
+        FocusTileService.refresh(getApplication())
         if (TwinRouter.isModeA.value) {
             if (focusDnd.enterPriority()) {
                 NotificationLog.add("focus", "$event: Priority DND on")
@@ -307,7 +309,13 @@ class PratibimbViewModel(application: Application) : AndroidViewModel(applicatio
         timerJob?.cancel()
         _remainingSeconds.value = _selectedDurationMinutes.value * 60
         TwinRouter.releaseAllDigest(getApplication(), "Focus session complete")
+        FocusTileService.refresh(getApplication())
         refreshFocusStatus()
+    }
+
+    // From the quick-settings tile: starts focus with the selected duration unless one runs.
+    fun startFocusFromTile() {
+        if (!_isFocusActive.value) startFocus()
     }
 
     // The session timer lives in viewModelScope, so the session ends with this view model;
@@ -332,7 +340,7 @@ class PratibimbViewModel(application: Application) : AndroidViewModel(applicatio
 
     // ── Scenario execution & User Actions ──────────────────────────────────
     fun triggerScenario(scenario: MockScenario) {
-        TwinRouter.triggerScenario(scenario)
+        TwinRouter.triggerScenario(getApplication(), scenario)
     }
 
     fun submitWorthFeedback(itemId: String, isWorth: Boolean) {

@@ -2,6 +2,7 @@ package com.pratibimb.app.engine
 
 import android.app.Notification
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.SharedPreferences
 import android.service.notification.NotificationListenerService
@@ -12,7 +13,10 @@ import com.pratibimb.app.data.NotificationLog
 import com.pratibimb.app.data.TrayStore
 import com.pratibimb.app.data.UsageReader
 import com.pratibimb.app.dnd.AlertPing
+import com.pratibimb.app.dnd.DemoNotifier
 import com.pratibimb.app.dnd.DigestNotifier
+import com.pratibimb.app.dnd.WorthPrompt
+import com.pratibimb.app.dnd.WorthPrompts
 import com.pratibimb.app.service.PratibimbListener
 import com.pratibimb.app.ui.HeldTrayItem
 import com.pratibimb.app.ui.LiveNotificationItem
@@ -35,6 +39,7 @@ import java.io.IOException
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.min
 
 /**
@@ -54,6 +59,8 @@ object TwinRouter {
 
     // Bounds the re-post memory; clearing it only means one extra decision for an old key.
     private const val MAX_TRACKED_KEYS = 500
+
+    private const val WORTH_PROMPT_EVERY = 3
 
     // Used when an open cannot be timed from usage events: no usage access, the open happened
     // outside focus (usage is only read during focus), or its app never showed up in the events.
@@ -76,6 +83,9 @@ object TwinRouter {
 
     @Volatile
     private var sessionEndMillis = 0L
+
+    // When the running focus session ends; 0 when none is running (or during a break).
+    val sessionEndsAtMillis: Long get() = sessionEndMillis
 
     // policy.cap_min from the params: nothing waits in the tray longer than this.
     @Volatile
@@ -163,6 +173,8 @@ object TwinRouter {
 
     @Volatile
     private var usageAccessWarned = false
+
+    private val deliveredInFocus = AtomicInteger(0)
 
     // Loads the saved persona's params, the counts learned so far and the user's settings.
     // Both the activity and the listener call this, because after a reboot the listener can
@@ -308,8 +320,9 @@ object TwinRouter {
         rankingMap: NotificationListenerService.RankingMap,
     ) {
         val listener = activeListener ?: return
-        if (sbn.packageName == listener.packageName) return
         if (sbn.isOngoing) return
+        // The app's own notifications are skipped, except demo posts standing in for another app.
+        val demo = if (sbn.packageName == listener.packageName) demoScenarioOf(sbn) ?: return else null
         // Without params the engine cannot decide; leaving the notification alone is the safe choice.
         val rules = featureRules ?: return
         // A group summary ("3 new messages") only bundles notifications decided on their own.
@@ -324,7 +337,8 @@ object TwinRouter {
         }
 
         // 1. Build features from live StatusBarNotification
-        val features = FeatureBuilder.build(sbn, rankingMap, rules, senderSalt)
+        val features = demo?.features?.copy(key = sbn.key, postedAtMillis = sbn.postTime)
+            ?: FeatureBuilder.build(sbn, rankingMap, rules, senderSalt)
 
         // 2. Engine evaluates features against the current focus session
         val decision = engine.decide(features, currentContext())
@@ -332,7 +346,7 @@ object TwinRouter {
         seenByKey[sbn.key] = SeenPost(content, decision.action == Action.HOLD)
 
         // 4. Extract display metadata
-        val appLabel = getAppLabel(listener, sbn.packageName)
+        val appLabel = demo?.display?.app ?: getAppLabel(listener, sbn.packageName)
         val extras = sbn.notification.extras
         val rawTitle = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString().orEmpty()
         val title = if (rawTitle.isNotBlank()) rawTitle else appLabel
@@ -340,7 +354,7 @@ object TwinRouter {
         val contentIntent = sbn.notification.contentIntent
 
         NotificationLog.add(
-            source = appLabel,
+            source = if (demo != null) "demo: $appLabel" else appLabel,
             message = describeDecision(
                 title,
                 features.category,
@@ -360,7 +374,7 @@ object TwinRouter {
             timeLabel = "Just now",
             decision = decision,
             senderDisplayName = features.senderDisplayName,
-            packageName = sbn.packageName,
+            packageName = features.packageName,
             senderHash = features.senderHash,
         )
         _liveNotifications.value = (listOf(liveItem) + _liveNotifications.value).take(60)
@@ -377,7 +391,7 @@ object TwinRouter {
                 title = title,
                 text = text,
                 sender = features.senderDisplayName,
-                packageName = sbn.packageName,
+                packageName = features.packageName,
                 heldReason = decision.reason,
                 timeAgo = "Just now",
                 minutesUntilRelease = decision.card.minutesUntilRelease.toInt().coerceAtLeast(1),
@@ -389,25 +403,64 @@ object TwinRouter {
             _heldTodayCount.value += 1
             _netMinutesProtected.value += decision.card.netMinutesProtected
         } else {
-            outcomes.delivered(
-                sbn.key,
-                sbn.packageName,
-                features.category,
-                _phoneState.value,
-                System.currentTimeMillis(),
-            )
-            // DELIVER: If in Mode A (DND on) and user is in focus, send bypass alert
-            if (_isModeA.value && _phoneState.value != PhoneState.FREE) {
-                val ping = AlertPing.post(
-                    context = listener,
-                    title = "[$appLabel] $title",
-                    text = text,
-                    contentIntent = contentIntent,
-                    tag = sbn.key,
+            // A demo post has no real app behind it to open, so it teaches nothing about pull.
+            if (demo == null) {
+                outcomes.delivered(
+                    sbn.key,
+                    sbn.packageName,
+                    features.category,
+                    _phoneState.value,
+                    System.currentTimeMillis(),
                 )
-                NotificationLog.add("alert", "Ping for $appLabel: ${ping.label}")
             }
+            if (_phoneState.value != PhoneState.FREE) deliverInFocus(listener, sbn.key, liveItem, contentIntent)
         }
+    }
+
+    // In Mode A a delivered notification is silenced by Priority mode, so the twin pings for
+    // it. One in three delivered alerts also asks "Worth it?" (on the ping in Mode A, on a
+    // silent notification in Mode B, where the real app made its own sound).
+    private fun deliverInFocus(
+        listener: PratibimbListener,
+        key: String,
+        item: LiveNotificationItem,
+        contentIntent: PendingIntent?,
+    ) {
+        val prompt = if (deliveredInFocus.incrementAndGet() % WORTH_PROMPT_EVERY == 0) {
+            WorthPrompt(item.id, item.packageName, item.senderHash)
+        } else {
+            null
+        }
+        if (_isModeA.value) {
+            val ping = AlertPing.post(
+                context = listener,
+                title = "[${item.app}] ${item.title}",
+                text = item.text,
+                contentIntent = contentIntent,
+                tag = key,
+                prompt = prompt,
+            )
+            NotificationLog.add("alert", "Ping for ${item.app}: ${ping.label}" + if (prompt != null) ", asks worth it" else "")
+        } else if (prompt != null) {
+            WorthPrompts.postSilent(listener, item.app, item.title, prompt)
+            NotificationLog.add("alert", "Asked worth it for ${item.app}")
+        }
+    }
+
+    private fun demoScenarioOf(sbn: StatusBarNotification): MockScenario? {
+        if (sbn.notification.channelId != DemoNotifier.CHANNEL_ID) return null
+        val id = sbn.notification.extras.getString(DemoNotifier.EXTRA_SCENARIO) ?: return null
+        return StubEngine.SCENARIOS.firstOrNull { it.id == id }
+    }
+
+    // A "Worth it / Not worth it" tap on a delivered alert.
+    fun recordAlertFeedback(liveItemId: String?, packageName: String, senderHash: String?, worth: Boolean) {
+        val label = if (worth) WorthLabelKind.WORTH_IT else WorthLabelKind.NOT_WORTH_IT
+        learn(FeedbackEvent.WorthLabel(packageName = packageName, senderHash = senderHash, label = label))
+        _liveNotifications.update { items ->
+            items.map { if (it.id == liveItemId) it.copy(feedbackLabel = label) else it }
+        }
+        NotificationLog.add("TwinRouter", "Feedback from alert: $packageName " + if (worth) "worth it" else "not worth it")
     }
 
     // Title and text identify a notification's content; a re-post with both unchanged is
@@ -760,11 +813,15 @@ object TwinRouter {
         }
     }
 
-    fun triggerScenario(scenario: MockScenario) {
+    // A Debug scenario is posted as a silent demo notification, so it takes the real listener,
+    // hold and ping path. Without the listener or the post permission it is decided directly.
+    fun triggerScenario(context: Context, scenario: MockScenario) {
         if (appContext == null) {
             NotificationLog.add("TwinRouter", "Scenario ignored: engine params not loaded yet")
             return
         }
+        if (activeListener != null && DemoNotifier.post(context, scenario)) return
+        NotificationLog.add("TwinRouter", "Demo post unavailable, deciding the sample directly")
         val currentContext = scenario.context.copy(
             state = _phoneState.value,
             autonomy = _autonomy.value,
