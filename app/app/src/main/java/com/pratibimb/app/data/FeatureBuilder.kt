@@ -3,59 +3,24 @@ package com.pratibimb.app.data
 import android.app.Notification
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
-import com.pratibimb.twin.Category
 import com.pratibimb.twin.NotificationFeatures
+import java.security.MessageDigest
 
 /**
- * Extracts a [NotificationFeatures] row from a live [StatusBarNotification].
+ * Builds a [NotificationFeatures] row from a live [StatusBarNotification], by the rules in
+ * CONTRACTS.md section 3, so the phone feeds the engine exactly what engine.py would see.
  */
 object FeatureBuilder {
 
-    private val BAIT_REGEX = Regex(
-        "like|liked|reacted|comment|share|watch|check out|trending|viral|" +
-        "deal|offer|sale|discount|off|save|cashback|win|won|free|limited|flash",
-        RegexOption.IGNORE_CASE
-    )
+    // Earlier conversation notifications per sender hash, for the repeated-ping override.
+    private val recentBySender = HashMap<String, ArrayDeque<Long>>()
 
-    private val URGENCY_REGEX = Regex(
-        "urgent|asap|immediately|right now|emergency|help|call me|" +
-        "expires|expiring|last chance|hurry|today only|ends soon",
-        RegexOption.IGNORE_CASE
-    )
-
-    private val OTP_REGEX = Regex(
-        """\b(otp|one.?time|passcode|verification code|auth code)[^\d]{0,30}\d{4,8}|""" +
-        """\b\d{4,8}\b.{0,20}(otp|one.?time|passcode|verification|auth code)""",
-        RegexOption.IGNORE_CASE
-    )
-
-    private val PACKAGE_CATEGORY: Map<String, Category> = mapOf(
-        "com.instagram.android"              to Category.SOCIAL,
-        "com.facebook.katana"                to Category.SOCIAL,
-        "com.twitter.android"                to Category.SOCIAL,
-        "com.snapchat.android"               to Category.SOCIAL,
-        "com.linkedin.android"               to Category.WORK_EMAIL,
-        "com.whatsapp"                       to Category.MESSAGING,
-        "org.telegram.messenger"             to Category.MESSAGING,
-        "com.google.android.apps.messaging"  to Category.MESSAGING,
-        "com.samsung.android.messaging"      to Category.MESSAGING,
-        "com.google.android.gm"              to Category.WORK_EMAIL,
-        "com.microsoft.office.outlook"       to Category.WORK_EMAIL,
-        "com.google.android.youtube"         to Category.SHORT_VIDEO,
-        "com.zhiliaoapp.musically"           to Category.SHORT_VIDEO,
-        "com.flipkart.android"               to Category.SHOPPING_PROMO,
-        "in.amazon.mShop.android.shopping"   to Category.SHOPPING_PROMO,
-        "in.swiggy.android"                  to Category.SHOPPING_PROMO,
-        "app.zomato"                         to Category.SHOPPING_PROMO,
-        "com.phonepe.app"                    to Category.OTHER,
-        "net.one97.paytm"                    to Category.OTHER,
-        "com.google.android.apps.maps"       to Category.OTHER,
-    )
-
+    @Synchronized
     fun build(
         sbn: StatusBarNotification,
         rankingMap: NotificationListenerService.RankingMap,
-        recentPackagePings: Map<String, Int>,
+        rules: FeatureRules,
+        senderSalt: String,
     ): NotificationFeatures {
         val ranking = NotificationListenerService.Ranking()
             .takeIf { rankingMap.getRanking(sbn.key, it) }
@@ -63,39 +28,67 @@ object FeatureBuilder {
         val extras = notification.extras
 
         val title = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString().orEmpty()
-        val text  = extras.getCharSequence(Notification.EXTRA_TEXT)?.toString().orEmpty()
-        val body  = "$title $text"
+        val text = extras.getCharSequence(Notification.EXTRA_TEXT)?.toString().orEmpty()
+        val haystack = FeatureRules.haystack(title, text)
 
-        val senderDisplayName: String? =
-            extras.getCharSequence(Notification.EXTRA_CONVERSATION_TITLE)?.toString()
-                ?: extras.getCharSequence(Notification.EXTRA_TITLE)?.toString()
-                    ?.takeIf { sbn.notification.category == Notification.CATEGORY_MESSAGE }
+        // Messaging apps do not always publish Android's conversation shortcut, so a message
+        // notification or a MessagingStyle notification counts as a conversation too.
+        val isConversation = ranking?.isConversation == true ||
+            notification.category == Notification.CATEGORY_MESSAGE ||
+            extras.containsKey(Notification.EXTRA_MESSAGES)
 
-        val androidCat = notification.category
-        val category: Category = when {
-            androidCat == Notification.CATEGORY_MESSAGE   -> Category.MESSAGING
-            androidCat == Notification.CATEGORY_EMAIL     -> Category.WORK_EMAIL
-            androidCat == Notification.CATEGORY_PROMO     -> Category.SHOPPING_PROMO
-            else -> PACKAGE_CATEGORY[sbn.packageName] ?: Category.OTHER
-        }
+        // WhatsApp and Telegram mark groups with a conversation title or a group channel.
+        val channelId = ranking?.channel?.id ?: notification.channelId.orEmpty()
+        val groupChat = isConversation && (
+            extras.getBoolean(Notification.EXTRA_IS_GROUP_CONVERSATION, false) ||
+                extras.getCharSequence(Notification.EXTRA_CONVERSATION_TITLE) != null ||
+                channelId.contains("group", ignoreCase = true)
+            )
+
+        // A one-to-one chat's title is the person. In a group the title names the group, not
+        // who wrote, so a group gets no sender: group chatter can never pass as one person
+        // pinging twice.
+        val senderDisplayName = title.takeIf { isConversation && !groupChat && it.isNotBlank() }
+        val senderHash = senderDisplayName?.let { hashSender(it, senderSalt) }
 
         return NotificationFeatures(
-            key               = sbn.key,
-            postedAtMillis    = sbn.postTime,
-            packageName       = sbn.packageName,
-            category          = category,
-            androidCategory   = androidCat,
-            channelImportance = ranking?.importance ?: (notification.priority + 3),
-            isOngoing         = sbn.isOngoing,
-            isConversation    = ranking?.isConversation ?: false,
-            priorityConversation = ranking?.channel?.isImportantConversation ?: false,
-            groupChat         = extras.getBoolean(Notification.EXTRA_IS_GROUP_CONVERSATION, false),
-            senderHash        = senderDisplayName?.hashCode()?.toString(),
+            key = sbn.key,
+            postedAtMillis = sbn.postTime,
+            packageName = sbn.packageName,
+            category = rules.categoryOf(sbn.packageName),
+            androidCategory = notification.category,
+            channelImportance = ranking?.importance ?: 3,
+            isOngoing = sbn.isOngoing,
+            isConversation = isConversation,
+            priorityConversation = ranking?.channel?.isImportantConversation == true,
+            groupChat = groupChat,
+            senderHash = senderHash,
             senderDisplayName = senderDisplayName,
-            sameSenderRecentPings = recentPackagePings[sbn.packageName] ?: 0,
-            baitHit           = BAIT_REGEX.containsMatchIn(body),
-            urgencyHit        = URGENCY_REGEX.containsMatchIn(body),
-            otpPattern        = OTP_REGEX.containsMatchIn(body),
+            sameSenderRecentPings = recentPings(senderHash, sbn.postTime, rules.repeatWindowMillis),
+            baitHit = rules.baitHit(haystack),
+            urgencyHit = rules.urgencyHit(haystack),
+            otpPattern = rules.otpPattern(haystack, text),
         )
+    }
+
+    @Synchronized
+    fun reset() {
+        recentBySender.clear()
+    }
+
+    // Counts earlier pings from this sender inside the window, then records this one.
+    private fun recentPings(senderHash: String?, postedAt: Long, windowMillis: Long): Int {
+        if (senderHash == null) return 0
+        val times = recentBySender.getOrPut(senderHash) { ArrayDeque() }
+        while (times.isNotEmpty() && postedAt - times.first() > windowMillis) times.removeFirst()
+        val earlier = times.size
+        times.addLast(postedAt)
+        return earlier
+    }
+
+    // Salted, so the stored hash cannot be matched against a list of names.
+    private fun hashSender(name: String, salt: String): String {
+        val digest = MessageDigest.getInstance("SHA-256").digest("$salt:$name".toByteArray())
+        return "s_" + digest.take(6).joinToString("") { "%02x".format(it) }
     }
 }

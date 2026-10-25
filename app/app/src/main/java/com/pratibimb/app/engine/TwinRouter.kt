@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import com.pratibimb.app.data.FeatureBuilder
+import com.pratibimb.app.data.FeatureRules
 import com.pratibimb.app.data.NotificationLog
 import com.pratibimb.app.dnd.AlertPing
 import com.pratibimb.app.dnd.DigestNotifier
@@ -22,12 +23,14 @@ import com.pratibimb.twin.FatigueRisk
 import com.pratibimb.twin.FeedbackEvent
 import com.pratibimb.twin.PhoneState
 import com.pratibimb.twin.RealTwinEngine
+import com.pratibimb.twin.SimpleJsonParser
 import com.pratibimb.twin.TwinContext
 import com.pratibimb.twin.WorthLabelKind
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.io.IOException
+import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.min
 
@@ -41,6 +44,11 @@ object TwinRouter {
     private const val PARAMS_ASSET = "twin_params_student_coder.json"
     private const val COUNTS_PREFS = "twin_counts"
     private const val COUNTS_KEY = "counts_json"
+    private const val IDENTITY_PREFS = "twin_identity"
+    private const val SALT_KEY = "sender_salt"
+
+    // Bounds the re-post memory; clearing it only means one extra decision for an old key.
+    private const val MAX_TRACKED_KEYS = 500
 
     // The plan's hold cap: nothing waits longer than this before release.
     private const val HOLD_CAP_MIN = 45.0
@@ -96,8 +104,21 @@ object TwinRouter {
     private val _isModeA = MutableStateFlow(false)
     val isModeA: StateFlow<Boolean> = _isModeA.asStateFlow()
 
-    // Tracks recent notifications per package for burst detection
-    private val recentPackagePings = ConcurrentHashMap<String, Int>()
+    // Feature rules (app categories, keyword lists, repeat window) come from the same params
+    // file the engine decides with.
+    @Volatile
+    private var featureRules: FeatureRules? = null
+
+    // Per-install secret for sender hashes, so a stored hash cannot be matched to a name.
+    @Volatile
+    private var senderSalt = ""
+
+    // What was last decided for each notification key. Messaging apps re-post the same key to
+    // update a count or a summary; a re-post with the same content must not be decided,
+    // logged or pinged again, but a held one is cancelled again so it cannot slip back in.
+    private data class SeenPost(val content: Int, val held: Boolean, val category: Category)
+
+    private val seenByKey = ConcurrentHashMap<String, SeenPost>()
 
     // Loads the persona params and the counts learned so far. Both the activity and the
     // listener call this, because after a reboot the listener can start first; only the first
@@ -109,10 +130,19 @@ object TwinRouter {
         try {
             val paramsJson = app.assets.open(PARAMS_ASSET).bufferedReader().use { it.readText() }
             engine.loadParams(paramsJson)
+            @Suppress("UNCHECKED_CAST")
+            val params = SimpleJsonParser(paramsJson).parse() as Map<String, Any?>
+            featureRules = FeatureRules.fromParams(params)
         } catch (e: IOException) {
             NotificationLog.add("TwinRouter", "Could not load $PARAMS_ASSET: ${e.message}")
             return
+        } catch (e: RuntimeException) {
+            NotificationLog.add("TwinRouter", "$PARAMS_ASSET is not a valid params file: ${e.message}")
+            return
         }
+        val identity = app.getSharedPreferences(IDENTITY_PREFS, Context.MODE_PRIVATE)
+        senderSalt = identity.getString(SALT_KEY, null)
+            ?: UUID.randomUUID().toString().also { identity.edit().putString(SALT_KEY, it).apply() }
         app.getSharedPreferences(COUNTS_PREFS, Context.MODE_PRIVATE)
             .getString(COUNTS_KEY, null)
             ?.let { engine.importCounts(it) }
@@ -149,7 +179,10 @@ object TwinRouter {
             explorationDraw = 0.5,
             alwaysDeliverSenders = emptySet(),
             alwaysDeliverPackages = emptySet(),
-            demoLearning = true,
+            // Real notifications use the normal priors. The demo-learning profile makes every
+            // worth estimate so uncertain that nearly every message counts as "might matter";
+            // it is meant for the scripted demo, not for live decisions.
+            demoLearning = false,
         )
     }
 
@@ -192,14 +225,24 @@ object TwinRouter {
         if (sbn.packageName == listener.packageName) return
         if (sbn.isOngoing) return
         // Without params the engine cannot decide; leaving the notification alone is the safe choice.
-        if (appContext == null) return
+        val rules = featureRules ?: return
+        // A group summary ("3 new messages") only bundles notifications decided on their own.
+        if ((sbn.notification.flags and Notification.FLAG_GROUP_SUMMARY) != 0) return
+
+        val content = contentOf(sbn)
+        val previous = seenByKey[sbn.key]
+        if (previous != null && previous.content == content) {
+            if (previous.held) cancelQuietly(listener, sbn.key)
+            return
+        }
 
         // 1. Build features from live StatusBarNotification
-        val features = FeatureBuilder.build(sbn, rankingMap, recentPackagePings)
-        recentPackagePings[sbn.packageName] = (recentPackagePings[sbn.packageName] ?: 0) + 1
+        val features = FeatureBuilder.build(sbn, rankingMap, rules, senderSalt)
 
         // 2. Engine evaluates features against the current focus session
         val decision = engine.decide(features, currentContext())
+        if (seenByKey.size > MAX_TRACKED_KEYS) seenByKey.clear()
+        seenByKey[sbn.key] = SeenPost(content, decision.action == Action.HOLD, features.category)
 
         // 4. Extract display metadata
         val appLabel = getAppLabel(listener, sbn.packageName)
@@ -211,7 +254,13 @@ object TwinRouter {
 
         NotificationLog.add(
             source = appLabel,
-            message = describeDecision(title, features.category, features.isConversation, decision),
+            message = describeDecision(
+                title,
+                features.category,
+                features.isConversation,
+                decision,
+                features.groupChat,
+            ),
             timeMillis = sbn.postTime,
         )
 
@@ -231,12 +280,7 @@ object TwinRouter {
         // 6. Action Execution: HOLD vs DELIVER
         if (decision.action == Action.HOLD) {
             // Cancel notification from Android system shade to keep user in focus
-            try {
-                listener.cancelNotification(sbn.key)
-                NotificationLog.add("TwinRouter", "Suppressed notification: ${sbn.key}")
-            } catch (e: Exception) {
-                NotificationLog.add("TwinRouter", "Failed to cancel notification: ${e.message}")
-            }
+            cancelQuietly(listener, sbn.key)
 
             val trayItem = HeldTrayItem(
                 id = "tray_${sbn.key.hashCode()}_${System.currentTimeMillis()}",
@@ -268,6 +312,23 @@ object TwinRouter {
         }
     }
 
+    // Title and text identify a notification's content; a re-post with both unchanged is
+    // the same notification, not a new message.
+    private fun contentOf(sbn: StatusBarNotification): Int {
+        val extras = sbn.notification.extras
+        val title = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString().orEmpty()
+        val text = extras.getCharSequence(Notification.EXTRA_TEXT)?.toString().orEmpty()
+        return "$title\n$text".hashCode()
+    }
+
+    private fun cancelQuietly(listener: PratibimbListener, key: String) {
+        try {
+            listener.cancelNotification(key)
+        } catch (e: SecurityException) {
+            NotificationLog.add("TwinRouter", "Could not hold $key: ${e.message}")
+        }
+    }
+
     // One readable line per decision for the Debug log: what happened, why, and the two
     // numbers behind it.
     private fun describeDecision(
@@ -275,9 +336,14 @@ object TwinRouter {
         category: Category,
         isConversation: Boolean,
         decision: Decision,
+        groupChat: Boolean = false,
     ): String {
         val card = decision.card
-        val kind = if (isConversation) "${category.key}, conversation" else category.key
+        val kind = when {
+            groupChat -> "${category.key}, group chat"
+            isConversation -> "${category.key}, conversation"
+            else -> category.key
+        }
         return "${decision.action.name} \"$title\" [$kind] ${decision.rule.name}: ${decision.reason}" +
             " · hold wins ${card.holdBetterPerHundred}/100 · worth up to %.2f".format(card.qUpper80)
     }
@@ -291,7 +357,7 @@ object TwinRouter {
             // User opened notification: feedback signal
             learn(
                 FeedbackEvent.PullOutcome(
-                    category = Category.OTHER,
+                    category = seenByKey[sbn.key]?.category ?: Category.OTHER,
                     state = _phoneState.value,
                     opened = true,
                     minutesLost = 5.0,
@@ -465,7 +531,8 @@ object TwinRouter {
     fun resetAll() {
         engine.resetCounts()
         saveCounts()
-        recentPackagePings.clear()
+        FeatureBuilder.reset()
+        seenByKey.clear()
         _heldTodayCount.value = 0
         _netMinutesProtected.value = 0.0
         _heldTray.value = emptyList()
