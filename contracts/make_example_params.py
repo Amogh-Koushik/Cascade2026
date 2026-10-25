@@ -7,6 +7,7 @@
 import json
 from typing import Any
 
+from contracts.lexicons import LEXICONS
 from contracts.params import PARAMS_DIR, load_draw_bank, validate_params
 
 OUTPUT_PATH = PARAMS_DIR / "twin_params_example.json"
@@ -127,11 +128,7 @@ def build_example_params() -> dict[str, Any]:
                 "net.one97.paytm",
             ],
         },
-        "lexicons": {
-            "urgency": ["urgent", "call me", "emergency", "jaldi", "asap"],
-            "bait": ["liked your", "don't miss", "% off", "trending", "you won't believe"],
-            "otp_keywords": ["otp", "one time password", "verification code"],
-        },
+        "lexicons": {name: list(words) for name, words in LEXICONS.items()},
         "draw_bank": load_draw_bank(),
     }
 

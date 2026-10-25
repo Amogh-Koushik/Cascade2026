@@ -2,11 +2,12 @@
 # the contract schema, so the edge server can serve them and both engines can load them.
 #
 # Rules: every fitted value is kept. Keys the contract needs but the fit file lacks are filled
-# from the example params; renamed keys are mapped; lists (never-hold, lexicons, app map) are
-# the union of both; the draw bank is always the shared one. One exception to "fitted wins":
-# an app's category follows the contract's app map, because the text bank, the red-team set
-# and the sample scenarios are all labelled with it. Every change is reported, and the result
-# must pass the schema before it is written.
+# from the example params; renamed keys are mapped; never-hold lists and the app map are the
+# union of both; the draw bank is always the shared one. Two exceptions to "fitted wins": an
+# app's category follows the contract's app map, and the keyword lists are the contract's
+# (contracts/lexicons.py), because the text bank, the red-team set, the sample scenarios and
+# the phone's feature builder are all checked against them. Every change is reported, and the
+# result must pass the schema before it is written.
 #
 # Run: uv run python -m fit.convert_params [fit files...]
 
@@ -18,6 +19,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from contracts.lexicons import LEXICONS
 from contracts.params import PARAMS_DIR, ParamsError, load_draw_bank, load_params, validate_params
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -35,9 +37,6 @@ RENAMES = (
     (("never_hold",), "otp_sources", "otp_source_packages"),
 )
 
-# Urgency words that also match every OTP message, so OTP promos would all read as urgent.
-OTP_LIKE_URGENCY = frozenset({"otp", "code"})
-
 
 @dataclass
 class ConversionReport:
@@ -48,7 +47,6 @@ class ConversionReport:
     conflicts: list[str] = field(default_factory=list)
     corrected: list[str] = field(default_factory=list)
     dropped: list[str] = field(default_factory=list)
-    warnings: list[str] = field(default_factory=list)
 
     def lines(self) -> list[str]:
         sections = (
@@ -56,9 +54,8 @@ class ConversionReport:
             ("filled from example", self.filled),
             ("lists merged", self.merged),
             ("kept fitted value over example", self.conflicts),
-            ("set to the contract's category", self.corrected),
+            ("set to the contract", self.corrected),
             ("dropped (not in contract)", self.dropped),
-            ("warnings", self.warnings),
         )
         out = [f"{self.persona}:"]
         for title, items in sections:
@@ -154,19 +151,23 @@ def convert(
         report,
         example_wins=True,
     )
+    # Keyword lists follow the contract, like app categories: the text bank, the red-team set
+    # and the phone's feature builder are all checked against contracts/lexicons.py.
+    for name, words in LEXICONS.items():
+        fitted_words = converted["lexicons"].get(name, [])
+        dropped = [w for w in fitted_words if w not in words]
+        if dropped:
+            report.corrected.append(f"lexicons.{name}: dropped {dropped}, not in the contract")
+        converted["lexicons"][name] = list(words)
+
     provenance = {k: str(v) for k, v in open_maps["provenance"].items()}
     provenance["conversion"] = (
         f"converted from {source} by fit/convert_params.py: {len(report.filled)} keys filled "
-        "from the example params, draw bank replaced with contracts/draw_bank.json"
+        "from the example params, lexicons from contracts/lexicons.py, draw bank replaced "
+        "with contracts/draw_bank.json"
     )
     converted["provenance"] = provenance
     converted["draw_bank"] = load_draw_bank()
-
-    risky = sorted(OTP_LIKE_URGENCY & {w.lower() for w in converted["lexicons"]["urgency"]})
-    if risky:
-        report.warnings.append(
-            f"urgency lexicon contains {risky}: every OTP-style message will also count as urgent"
-        )
     validate_params(converted)
     return converted, report
 

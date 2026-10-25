@@ -5,6 +5,7 @@ from typing import Any
 
 import pytest
 
+from contracts.lexicons import LEXICONS
 from contracts.params import PARAMS_DIR, load_draw_bank, load_params, validate_params
 from fit.convert_params import DEFAULT_INPUTS, EXAMPLE_PATH, convert
 from sim.persona_adapter import GENERATED_PERSONAS, adapt
@@ -48,7 +49,14 @@ def test_conversion_reports_renames_fills_and_conflicts(example: dict[str, Any])
     assert "never_hold.otp_sources -> otp_source_packages" in report.renamed
     assert "pull.prior_weights.sigma" in report.filled
     assert "app_category_map.com.instagram.android: 'short_video' -> 'social'" in report.corrected
-    assert any("'otp'" in warning for warning in report.warnings)
+    assert any(c.startswith("lexicons.urgency: dropped") and "'otp'" in c for c in report.corrected)
+
+
+@pytest.mark.parametrize("name", sorted(FITTED))
+def test_converted_files_use_the_contract_lexicons(name: str, example: dict[str, Any]) -> None:
+    converted, _ = convert(FITTED[name], example, name)
+
+    assert converted["lexicons"] == LEXICONS
 
 
 def test_lists_keep_fitted_entries_and_add_the_examples(example: dict[str, Any]) -> None:
