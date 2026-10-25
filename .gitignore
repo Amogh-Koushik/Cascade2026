@@ -28,3 +28,7 @@ captures/
 .vscode/
 .DS_Store
 Thumbs.db
+
+# Half-finished agent runs (resumed on the next run)
+*.progress.json
+*.progress.json.tmp

@@ -1,8 +1,9 @@
 # Text-bank agent: writes 250 labelled Indian notifications in ten themed batches of 25, so each
 # reply stays small enough for a local model. Every batch is validated (shape, allowed apps,
-# label sanity, no duplicates across the whole bank) before it is kept.
+# label sanity, no duplicates across the whole bank) before it is kept, and saved straight
+# away, so a run that stops can be continued by running it again.
 #
-# Run: uv run python -m agents.text_bank_agent [--seeds data/text_bank_seeds.json]
+# Run: uv run --env-file .env python -m agents.text_bank_agent [--seeds data/text_bank_seeds.json]
 
 import argparse
 import json
@@ -16,7 +17,8 @@ from typing import Any
 
 from agents import llm
 from agents.app_catalogue import APP_NAMES, APPS, category_of, describe_apps
-from agents.json_generation import AskFn, GenerationError, generate_json, ollama_json
+from agents.checkpoint import Checkpoint, progress_path
+from agents.json_generation import AskFn, GenerationError, generate_json, model_json
 from agents.text_bank import ALL_PACKAGES, TextBankError, normalised, validate_items
 from contracts.params import PARAMS_DIR, load_params
 
@@ -125,19 +127,29 @@ def generate_text_bank(
     params: dict[str, Any],
     seeds_path: Path | None = None,
     clock: Callable[[], datetime] = lambda: datetime.now(UTC),
+    checkpoint: Checkpoint | None = None,
 ) -> dict[str, Any]:
+    done = checkpoint.load() if checkpoint else {}
     items: list[dict[str, Any]] = []
     seen: set[str] = set()
+    models: set[str] = set()
     for batch in BATCHES:
-        new_items = generate_batch(ask, batch, seen, params, start_index=len(items) + 1)
+        if batch.theme in done:
+            new_items, model = done[batch.theme].data, done[batch.theme].model
+        else:
+            new_items = generate_batch(ask, batch, seen, params, start_index=len(items) + 1)
+            model = llm.model_name()
+            if checkpoint:
+                checkpoint.save(batch.theme, model, new_items)
         items += new_items
+        models.add(model)
         seen.update(normalised(item) for item in new_items)
     if seeds_path is not None:
         items += load_seeds(seeds_path, params, len(items) + 1, seen)
 
     return {
         "generated_by": "agents/text_bank_agent.py",
-        "model": llm.model_name(),
+        "models": sorted(models),
         "created_at": clock().isoformat(timespec="seconds"),
         "label": "LLM-written notifications with LLM labels; 50 are hand-checked by the team",
         "items": items,
@@ -152,16 +164,22 @@ def main() -> int:
     args = parser.parse_args()
 
     params = load_params(PARAMS_DIR / "twin_params_example.json")
+    checkpoint = Checkpoint(progress_path(args.out))
     try:
         document = generate_text_bank(
-            ollama_json(temperature=0.9, context_tokens=8192), params, args.seeds
+            model_json(temperature=0.9, context_tokens=8192),
+            params,
+            args.seeds,
+            checkpoint=checkpoint,
         )
     except (llm.LLMError, GenerationError, TextBankError) as error:
         print(f"Failed: {error}")
+        print(f"Finished batches are kept in {checkpoint.path}; run again to continue.")
         return 1
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(document, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+    checkpoint.clear()
     print(f"Wrote {len(document['items'])} items to {args.out}")
     return 0
 

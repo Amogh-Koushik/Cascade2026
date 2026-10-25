@@ -26,9 +26,17 @@ Requires [uv](https://docs.astral.sh/uv/).
 ```bash
 uv sync
 cp .env.example .env
-uv run python -m agents.check_llm
-uv run python -m contracts.make_draw_bank
+uv run --env-file .env python -m agents.check_llm
 uv run uvicorn server.main:app --host 0.0.0.0 --port 8000
+```
+
+Generated data (run once; the outputs are committed):
+
+```bash
+uv run --env-file .env python -m agents.persona_agent
+uv run --env-file .env python -m agents.text_bank_agent
+uv run --env-file .env python -m agents.redteam_agent
+uv run python -m agents.redteam_runner --out eval/redteam_report.md
 ```
 
 Checks:
@@ -48,4 +56,5 @@ before switching on notification access.
 ## Credits
 
 Built with the help of AI coding assistants (Claude). Laptop-side agents use a local model
-through Ollama. Public datasets and libraries are credited here as they are added.
+through Ollama or Google Gemini. Public datasets and libraries are credited here as they are
+added.

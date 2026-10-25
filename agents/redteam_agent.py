@@ -1,8 +1,9 @@
 # Red-team agent: writes 60 synthetic attacks, ten per attack type, in the same format as the
 # hand-written set, so the runner scores both the same way. The agent fills in ids and source
-# itself; the model only writes the notifications and their labels.
+# itself; the model only writes the notifications and their labels. Each attack type is saved
+# as soon as it passes, so a run that stops can be continued by running it again.
 #
-# Run: uv run python -m agents.redteam_agent [--out data/generated/redteam_set.json]
+# Run: uv run --env-file .env python -m agents.redteam_agent
 
 import argparse
 import json
@@ -15,7 +16,8 @@ from typing import Any
 
 from agents import llm
 from agents.app_catalogue import APPS, describe_apps
-from agents.json_generation import AskFn, GenerationError, generate_json, ollama_json
+from agents.checkpoint import Checkpoint, progress_path
+from agents.json_generation import AskFn, GenerationError, generate_json, model_json
 from agents.redteam_schema import (
     ATTACK_TYPES,
     MAX_NOTIFICATIONS,
@@ -99,14 +101,27 @@ def generate_attacks(ask: AskFn, attack_type: str) -> list[dict[str, Any]]:
 
 
 def generate_redteam_set(
-    ask: AskFn, clock: Callable[[], datetime] = lambda: datetime.now(UTC)
+    ask: AskFn,
+    clock: Callable[[], datetime] = lambda: datetime.now(UTC),
+    checkpoint: Checkpoint | None = None,
 ) -> dict[str, Any]:
-    attacks = [
-        attack for attack_type in ATTACK_TYPES for attack in generate_attacks(ask, attack_type)
-    ]
+    done = checkpoint.load() if checkpoint else {}
+    attacks: list[dict[str, Any]] = []
+    models: set[str] = set()
+    for attack_type in ATTACK_TYPES:
+        if attack_type in done:
+            new_attacks, model = done[attack_type].data, done[attack_type].model
+        else:
+            new_attacks = generate_attacks(ask, attack_type)
+            model = llm.model_name()
+            if checkpoint:
+                checkpoint.save(attack_type, model, new_attacks)
+        attacks += new_attacks
+        models.add(model)
+
     document = {
         "generated_by": "agents/redteam_agent.py",
-        "model": llm.model_name(),
+        "models": sorted(models),
         "created_at": clock().isoformat(timespec="seconds"),
         "label": "imagined attacks with LLM labels; the team hand-checks the labels",
         "attacks": attacks,
@@ -121,14 +136,19 @@ def main() -> int:
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     args = parser.parse_args()
 
+    checkpoint = Checkpoint(progress_path(args.out))
     try:
-        document = generate_redteam_set(ollama_json(temperature=0.9, context_tokens=8192))
+        document = generate_redteam_set(
+            model_json(temperature=0.9, context_tokens=8192), checkpoint=checkpoint
+        )
     except (llm.LLMError, GenerationError) as error:
         print(f"Failed: {error}")
+        print(f"Finished attack types are kept in {checkpoint.path}; run again to continue.")
         return 1
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(document, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+    checkpoint.clear()
     print(f"Wrote {len(document['attacks'])} attacks to {args.out}")
     return 0
 

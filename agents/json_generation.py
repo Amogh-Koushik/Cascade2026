@@ -23,7 +23,7 @@ class GenerationError(RuntimeError):
     pass
 
 
-def ollama_json(temperature: float = 0.7, context_tokens: int = 8192) -> AskFn:
+def model_json(temperature: float = 0.7, context_tokens: int = 8192) -> AskFn:
     def ask(system: str, prompt: str) -> str:
         return llm.ask(
             system,

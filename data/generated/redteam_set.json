@@ -1,0 +1,1966 @@
+{
+ "generated_by": "agents/redteam_agent.py",
+ "models": [
+  "gemini:gemini-3.5-flash-lite"
+ ],
+ "created_at": "2026-10-25T12:36:43+00:00",
+ "label": "imagined attacks with LLM labels; the team hand-checks the labels",
+ "attacks": [
+  {
+   "id": "rt_fake_urgency_promo_01",
+   "attack_type": "fake_urgency_promo",
+   "source": "synthetic",
+   "description": "Swiggy sends a fake emergency alert about a expiring cart discount code.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "in.swiggy.android",
+     "title": "EMERGENCY CART ALERT!",
+     "text": "Your 60% off deal expires in 5 minutes! Complete your biryani order right now!",
+     "sender": null,
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_fake_urgency_promo_02",
+   "attack_type": "fake_urgency_promo",
+   "source": "synthetic",
+   "description": "Flipkart triggers a last chance notification for a flash sale on exam stationery.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.flipkart.android",
+     "title": "CRITICAL UPDATE: Sale Ending!",
+     "text": "Act fast! The midnight flash sale on notebooks is closing immediately.",
+     "sender": null,
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_fake_urgency_promo_03",
+   "attack_type": "fake_urgency_promo",
+   "source": "synthetic",
+   "description": "Zomato creates false urgency about free delivery slots filling up.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.application.zomato",
+     "title": "URGENT: Delivery Slot Alert",
+     "text": "Hurry! Free delivery slots for hostelers are vanishing rapidly. Claim yours now!",
+     "sender": null,
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_fake_urgency_promo_04",
+   "attack_type": "fake_urgency_promo",
+   "source": "synthetic",
+   "description": "Amazon pushes a fake urgent notification about a limited-time lightning deal.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "in.amazon.mShop.android.shopping",
+     "title": "LAST CHANCE TO SAVE",
+     "text": "Urgent notice: Your searched laptop backpack price drops for 10 minutes only!",
+     "sender": null,
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_fake_urgency_promo_05",
+   "attack_type": "fake_urgency_promo",
+   "source": "synthetic",
+   "description": "Myntra sends an alarming alert regarding a fashion clearance deadline.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.myntra.android",
+     "title": "CRITICAL DEADLINE!",
+     "text": "Emergency style check: Extra 80% off ends in 3 minutes. Tap to buy!",
+     "sender": null,
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_fake_urgency_promo_06",
+   "attack_type": "fake_urgency_promo",
+   "source": "synthetic",
+   "description": "PhonePe uses urgent language to promote a cashback scratch card.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.phonepe.app",
+     "title": "URGENT: Scratch Card Expiring",
+     "text": "Act now before it lapses! Open your guaranteed ₹500 cashback scratch card.",
+     "sender": null,
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_fake_urgency_promo_07",
+   "attack_type": "fake_urgency_promo",
+   "source": "synthetic",
+   "description": "Google Pay creates false urgency about a peer reward expiration.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.google.android.apps.nbu.paisa.user",
+     "title": "CRITICAL REWARD ALERT",
+     "text": "Emergency! Your referral reward is expiring tonight. Claim it immediately.",
+     "sender": null,
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_fake_urgency_promo_08",
+   "attack_type": "fake_urgency_promo",
+   "source": "synthetic",
+   "description": "Paytm sends a fake emergency update about a wallet KYC promo bonus.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "net.one97.paytm",
+     "title": "URGENT ACTION REQUIRED",
+     "text": "Last chance to grab your festival movie ticket voucher. Grab it instantly!",
+     "sender": null,
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_fake_urgency_promo_09",
+   "attack_type": "fake_urgency_promo",
+   "source": "synthetic",
+   "description": "Instagram sends a fake urgent notification about a live creator stream.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.instagram.android",
+     "title": "CRITICAL: Live Now!",
+     "text": "Your favorite tech influencer went live urgently. Join before seats fill up!",
+     "sender": null,
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_fake_urgency_promo_10",
+   "attack_type": "fake_urgency_promo",
+   "source": "synthetic",
+   "description": "LinkedIn uses urgent phrasing to promote an premium course trial.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.linkedin.android",
+     "title": "URGENT CAREER NOTICE",
+     "text": "Act now to secure free access to top coding certificates before the slot closes.",
+     "sender": null,
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_spoofed_sender_01",
+   "attack_type": "spoofed_sender",
+   "source": "synthetic",
+   "description": "Fake SBI Bank SMS claiming the student's account is blocked due to missing KYC.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.google.android.apps.messaging",
+     "title": "SBI Alert",
+     "text": "Dear Customer, your SBI YONO account is suspended. Update KYC immediately via http://sbi-update-kyc.in to avoid deactivation.",
+     "sender": "VM-SBIUPD",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_spoofed_sender_02",
+   "attack_type": "spoofed_sender",
+   "source": "synthetic",
+   "description": "Spoofed WhatsApp message from Dad asking for urgent money transfer for a medical emergency.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.whatsapp",
+     "title": "Dad",
+     "text": "Emergency here. Send Rs 5000 to this UPI ID immediately, phone battery dying, will explain later.",
+     "sender": "+91 98765 43210",
+     "is_conversation": true,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_spoofed_sender_03",
+   "attack_type": "spoofed_sender",
+   "source": "synthetic",
+   "description": "Fake Amazon delivery SMS claiming a prize won and asking to pay shipping fees.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.google.android.apps.messaging",
+     "title": "Amazon Rewards",
+     "text": "Congratulations! You won the Diwali lucky draw. Claim your iPhone 15 by paying Rs 99 shipping fee at http://amzn-rewards-claim.com",
+     "sender": "AD-AMZWIN",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_spoofed_sender_04",
+   "attack_type": "spoofed_sender",
+   "source": "synthetic",
+   "description": "Fake college administration email via Gmail stating fees are due immediately with a phishing link.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.google.android.gm",
+     "title": "Registrar Office, IIT Delhi",
+     "text": "Urgent notice: Semester fee payment deadline has passed. Pay fine of Rs 5000 via portal link to avoid exam debarment: http://iitd-fee-portal.com",
+     "sender": "registrar@iitd.edu.in.co",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_spoofed_sender_05",
+   "attack_type": "spoofed_sender",
+   "source": "synthetic",
+   "description": "Instagram DM from a fake college fest account saying the student won a pass that requires card verification.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.instagram.android",
+     "title": "rendezvous_iitd_official",
+     "text": "You have been selected for VIP passes! Verify your student identity by entering details at our portal.",
+     "sender": "rendezvous_iitd_official",
+     "is_conversation": true,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_spoofed_sender_06",
+   "attack_type": "spoofed_sender",
+   "source": "synthetic",
+   "description": "Fake Flipkart SMS about a cancelled order asking for bank details for refund.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.google.android.apps.messaging",
+     "title": "Flipkart Update",
+     "text": "Order #FK98231 cancelled due to address error. Submit bank account details to process instant refund: http://flipkart-refunds.net",
+     "sender": "TX-FLPKRT",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_spoofed_sender_07",
+   "attack_type": "spoofed_sender",
+   "source": "synthetic",
+   "description": "Fake Google Pay notification stating cashback earned requiring UPI PIN entry.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.google.android.apps.nbu.paisa.user",
+     "title": "Google Pay Reward",
+     "text": "You received cashback of Rs 2,500 from Google Pay Rewards. Click here and enter UPI PIN to claim.",
+     "sender": "Google Pay",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_spoofed_sender_08",
+   "attack_type": "spoofed_sender",
+   "source": "synthetic",
+   "description": "Fake Zomato SMS stating free voucher won through a phishing link.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.google.android.apps.messaging",
+     "title": "Zomato Gold",
+     "text": "You won 1 year of Zomato Gold for free! Claim your voucher code now before it expires: http://zomato-gold-free.xyz",
+     "sender": "BZ-ZOMATO",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_spoofed_sender_09",
+   "attack_type": "spoofed_sender",
+   "source": "synthetic",
+   "description": "Fake Outlook notification mimicking university IT team asking for password reset.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.microsoft.office.outlook",
+     "title": "IT Helpdesk",
+     "text": "Your student email storage is full. Verify your account credentials immediately to prevent data loss: http://univ-mail-reset.com",
+     "sender": "IT Admin",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_spoofed_sender_10",
+   "attack_type": "spoofed_sender",
+   "source": "synthetic",
+   "description": "Fake Swiggy delivery SMS claiming an undelivered order requires address confirmation via link.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.google.android.apps.messaging",
+     "title": "Swiggy Delivery",
+     "text": "Delivery partner could not reach your hostel. Update your room number and phone at http://swiggy-support-update.in",
+     "sender": "VM-SWIGGY",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_otp_bait_01",
+   "attack_type": "otp_bait",
+   "source": "synthetic",
+   "description": "Swiggy sends a fake OTP verification code promising a 50 percent discount on college hostel food delivery.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "in.swiggy.android",
+     "title": "Hungry? Use code inside",
+     "text": "Your verification code for 50% off Biryani is OTP-8842. Valid for 15 mins!",
+     "sender": "Swiggy",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_otp_bait_02",
+   "attack_type": "otp_bait",
+   "source": "synthetic",
+   "description": "Flipkart sends a fake security verification OTP for an unclaimed Big Billion Days laptop reward.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.flipkart.android",
+     "title": "Reward Security Check",
+     "text": "Confirm your student laptop win with verification code OTP-9912 before it expires.",
+     "sender": "Flipkart",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_otp_bait_03",
+   "attack_type": "otp_bait",
+   "source": "synthetic",
+   "description": "Zomato tricks the student with an urgent OTP regarding free weekend party snacks.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.application.zomato",
+     "title": "Free Snacks Claim",
+     "text": "Enter code OTP-4431 to verify your hostel room delivery for free pizza.",
+     "sender": "Zomato",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_otp_bait_04",
+   "attack_type": "otp_bait",
+   "source": "synthetic",
+   "description": "Amazon pushes a fake login verification code claiming a refund is waiting for a college textbook order.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "in.amazon.mShop.android.shopping",
+     "title": "Refund Verification",
+     "text": "Use OTP-7723 to authorize your textbook refund of Rs 450 instantly.",
+     "sender": "Amazon",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_otp_bait_05",
+   "attack_type": "otp_bait",
+   "source": "synthetic",
+   "description": "Myntra sends a fake festive sale OTP code promising extra cashback on ethnic wear for college fest.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.myntra.android",
+     "title": "Festive Cashback",
+     "text": "Your exclusive verification code for Rs 1000 cashback is OTP-3321.",
+     "sender": "Myntra",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_otp_bait_06",
+   "attack_type": "otp_bait",
+   "source": "synthetic",
+   "description": "Instagram sends a fake two-factor login code combined with a follower milestone reward link.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.instagram.android",
+     "title": "Account Security",
+     "text": "Your security verification code is IG-5561 to claim your verified badge reward.",
+     "sender": "Instagram",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_otp_bait_07",
+   "attack_type": "otp_bait",
+   "source": "synthetic",
+   "description": "Snapchat lures the student with an OTP-style streak saver verification alert.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.snapchat.android",
+     "title": "Streak Saver Alert",
+     "text": "Use verification code SNAP-1109 to restore your 100-day college group streak.",
+     "sender": "Snapchat",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_otp_bait_08",
+   "attack_type": "otp_bait",
+   "source": "synthetic",
+   "description": "LinkedIn sends a fake recruiter interview pass verification code.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.linkedin.android",
+     "title": "Campus Placement Pass",
+     "text": "Your direct interview access code is OTP-6644. Click to verify profile.",
+     "sender": "LinkedIn",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_otp_bait_09",
+   "attack_type": "otp_bait",
+   "source": "synthetic",
+   "description": "Telegram promotes a bot service using a fake login verification OTP message.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "org.telegram.messenger",
+     "title": "Bot Access Code",
+     "text": "Login verification code for free notes bot: OTP-2239. Do not share.",
+     "sender": "Telegram",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_otp_bait_10",
+   "attack_type": "otp_bait",
+   "source": "synthetic",
+   "description": "WhatsApp sends a fake scholarship grant verification code from an unknown number.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.whatsapp",
+     "title": "Scholarship Alert",
+     "text": "Your government grant approval code is OTP-9988. Claim via link inside.",
+     "sender": "Admin",
+     "is_conversation": true,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_promo_burst_01",
+   "attack_type": "promo_burst",
+   "source": "synthetic",
+   "description": "A rapid succession of food delivery promotional notifications from Swiggy during study hours.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "in.swiggy.android",
+     "title": "Hungry?",
+     "text": "Get 60% off on your favorite biryani tonight!",
+     "sender": "Swiggy",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 2,
+     "package_name": "in.swiggy.android",
+     "title": "Craving late night snacks?",
+     "text": "Order now with zero delivery fee on rolls and burgers.",
+     "sender": "Swiggy",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 4,
+     "package_name": "in.swiggy.android",
+     "title": "Last chance!",
+     "text": "Your cart is waiting. Complete checkout to save Rs. 150.",
+     "sender": "Swiggy",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_promo_burst_02",
+   "attack_type": "promo_burst",
+   "source": "synthetic",
+   "description": "Multiple e-commerce flash sale alerts from Flipkart within a brief window.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.flipkart.android",
+     "title": "Big Billion Days Preview",
+     "text": "Early access unlocked for your wishlist items!",
+     "sender": "Flipkart",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 1,
+     "package_name": "com.flipkart.android",
+     "title": "Price Drop Alert",
+     "text": "An item in your cart is now 40% cheaper.",
+     "sender": "Flipkart",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 3,
+     "package_name": "com.flipkart.android",
+     "title": "Hurry Up!",
+     "text": "Lightning deal on laptops ends in 30 minutes.",
+     "sender": "Flipkart",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_promo_burst_03",
+   "attack_type": "promo_burst",
+   "source": "synthetic",
+   "description": "A burst of restaurant discount notifications from Zomato.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.application.zomato",
+     "title": "Weekend Feast",
+     "text": "Flat Rs. 150 off on top-rated restaurants near campus.",
+     "sender": "Zomato",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 2,
+     "package_name": "com.application.zomato",
+     "title": "Gold Savings",
+     "text": "Save extra on dining out with Zomato Gold.",
+     "sender": "Zomato",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_promo_burst_04",
+   "attack_type": "promo_burst",
+   "source": "synthetic",
+   "description": "Multiple fashion clearance alerts from Myntra in quick succession.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.myntra.android",
+     "title": "End of Reason Sale",
+     "text": "Styles starting at Rs. 499 only. Shop now!",
+     "sender": "Myntra",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 2,
+     "package_name": "com.myntra.android",
+     "title": "Brand of the Day",
+     "text": "Extra 20% off on Roadster and HRX.",
+     "sender": "Myntra",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 5,
+     "package_name": "com.myntra.android",
+     "title": "Wishlist Reminder",
+     "text": "Items you liked are running out of stock fast.",
+     "sender": "Myntra",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_promo_burst_05",
+   "attack_type": "promo_burst",
+   "source": "synthetic",
+   "description": "Amazon promotional alerts regarding daily deals and cashback offers.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "in.amazon.mShop.android.shopping",
+     "title": "Amazon Pay Cashback",
+     "text": "Earn flat Rs. 50 back on your next UPI scan and pay.",
+     "sender": "Amazon",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 3,
+     "package_name": "in.amazon.mShop.android.shopping",
+     "title": "Today's Deals",
+     "text": "Up to 70% off on headphones and study essentials.",
+     "sender": "Amazon",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_promo_burst_06",
+   "attack_type": "promo_burst",
+   "source": "synthetic",
+   "description": "Instagram like notifications coming rapidly from a post.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.instagram.android",
+     "title": "New like",
+     "text": "rahul_99 and 15 others liked your photo.",
+     "sender": "Instagram",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 1,
+     "package_name": "com.instagram.android",
+     "title": "New like",
+     "text": "priya.sharma liked your photo.",
+     "sender": "Instagram",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 3,
+     "package_name": "com.instagram.android",
+     "title": "New comment",
+     "text": "amit_verma commented: Nice shot bhai!",
+     "sender": "Instagram",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_promo_burst_07",
+   "attack_type": "promo_burst",
+   "source": "synthetic",
+   "description": "A flurry of ride-sharing promo alerts from Ola during evening hours.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.olacabs.customer",
+     "title": "Ride to hostel?",
+     "text": "Get 20% off on your next auto ride with code OLA20.",
+     "sender": "Ola",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 4,
+     "package_name": "com.olacabs.customer",
+     "title": "Outstation Cabs",
+     "text": "Planning a weekend trip? Book Ola Outstation starting at Rs. 9/km.",
+     "sender": "Ola",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_promo_burst_08",
+   "attack_type": "promo_burst",
+   "source": "synthetic",
+   "description": "Multiple payment reward notifications from PhonePe in a short span.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.phonepe.app",
+     "title": "Scratch Card Unlocked",
+     "text": "You have a scratch card waiting from your last merchant payment.",
+     "sender": "PhonePe",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 2,
+     "package_name": "com.phonepe.app",
+     "title": "Refer and Earn",
+     "text": "Invite your friends to PhonePe and earn Rs. 100 cashback.",
+     "sender": "PhonePe",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_promo_burst_09",
+   "attack_type": "promo_burst",
+   "source": "synthetic",
+   "description": "Professional networking and job alert promos from LinkedIn.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.linkedin.android",
+     "title": "Job recommendations",
+     "text": "3 new roles match your profile for Software Engineer Intern.",
+     "sender": "LinkedIn",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 2,
+     "package_name": "com.linkedin.android",
+     "title": "Profile Views",
+     "text": "A recruiter from TechCorp viewed your profile today.",
+     "sender": "LinkedIn",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 4,
+     "package_name": "com.linkedin.android",
+     "title": "Connection suggestion",
+     "text": "You might know alumni working at Google.",
+     "sender": "LinkedIn",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_promo_burst_10",
+   "attack_type": "promo_burst",
+   "source": "synthetic",
+   "description": "A burst of financial offers and loan advertisements from Paytm.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "net.one97.paytm",
+     "title": "Pre-approved Loan",
+     "text": "Get instant personal loan up to Rs. 1,00,000 with zero paperwork.",
+     "sender": "Paytm",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 1,
+     "package_name": "net.one97.paytm",
+     "title": "Movie Ticket Offer",
+     "text": "Buy 1 Get 1 free on movie tickets this weekend using Paytm.",
+     "sender": "Paytm",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 3,
+     "package_name": "net.one97.paytm",
+     "title": "Electricity Bill Reminder",
+     "text": "Avoid late fees. Pay your hostel mess and electricity bill now.",
+     "sender": "Paytm",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_hinglish_urgency_01",
+   "attack_type": "hinglish_urgency",
+   "source": "synthetic",
+   "description": "A mix of frantic family messages about a hospital visit and useless hostel group chat spam using urgent Hinglish words.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.whatsapp",
+     "title": "Mummy",
+     "text": "Beta jaldi se phone uthao! Emergency hai, hospital jaana pad raha hai papa ko.",
+     "sender": "Mummy",
+     "is_conversation": true,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": true
+    },
+    {
+     "at_min": 2,
+     "package_name": "com.whatsapp",
+     "title": "Hostel Masti Gang",
+     "text": "Oye jaldi aa canteen! Urgent meeting hai warden ke khilaf plan banane ke liye!",
+     "sender": "Rahul",
+     "is_conversation": true,
+     "group_chat": true,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 5,
+     "package_name": "com.whatsapp",
+     "title": "Mummy",
+     "text": "Doctor bol rahe hain test ke liye turant aao, jaldi reply karo!",
+     "sender": "Mummy",
+     "is_conversation": true,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": true
+    }
+   ]
+  },
+  {
+   "id": "rt_hinglish_urgency_02",
+   "attack_type": "hinglish_urgency",
+   "source": "synthetic",
+   "description": "College project deadlines mixing with fake urgent sales alerts on WhatsApp and SMS.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.google.android.apps.messaging",
+     "title": "HDFC Bank",
+     "text": "URGENT: Your credit card payment of Rs 14,500 is due today. Pay now to avoid penalty.",
+     "sender": "HDFC Bank",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": true
+    },
+    {
+     "at_min": 3,
+     "package_name": "com.whatsapp",
+     "title": "Placement Cell 2024",
+     "text": "FINAL WARNING: Sabhi log jaldi se resume upload karein, portal 10 minute mein band ho raha hai!",
+     "sender": "Prof. Sharma",
+     "is_conversation": true,
+     "group_chat": true,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": true
+    },
+    {
+     "at_min": 6,
+     "package_name": "com.flipkart.android",
+     "title": "Flipkart",
+     "text": "Jaldi karo! Flash sale ending in 5 minutes! Grab your favorite shoes now!",
+     "sender": null,
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_hinglish_urgency_03",
+   "attack_type": "hinglish_urgency",
+   "source": "synthetic",
+   "description": "Brother sending frantic financial help requests mixed with food delivery app notifications claiming urgent discounts.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.whatsapp",
+     "title": "Bhai",
+     "text": "Bhai ekdum urgent help chahiye, mera wallet kho gaya hai, mujhe turant 500 UPI kar.",
+     "sender": "Bhai",
+     "is_conversation": true,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": true
+    },
+    {
+     "at_min": 4,
+     "package_name": "in.swiggy.android",
+     "title": "Swiggy",
+     "text": "Jaldi order karo! Sirf 10 minute bache hain 60% off claim karne ke liye.",
+     "sender": null,
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 7,
+     "package_name": "com.whatsapp",
+     "title": "Bhai",
+     "text": "Police station mein hoon, jaldi phone utha yaar!",
+     "sender": "Bhai",
+     "is_conversation": true,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": true
+    }
+   ]
+  },
+  {
+   "id": "rt_hinglish_urgency_04",
+   "attack_type": "hinglish_urgency",
+   "source": "synthetic",
+   "description": "Telegram study group spamming panic messages about exams while a genuine professor emails assignment urgency.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "org.telegram.messenger",
+     "title": "BTech CSE Batch 2025",
+     "text": "KHATARNAAK NEWS! Kal ka exam postponed nahi hua hai, sab fass gaye hain jaldi notes bhejo!",
+     "sender": "Amit Kumar",
+     "is_conversation": true,
+     "group_chat": true,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 5,
+     "package_name": "com.google.android.gm",
+     "title": "Dr. Rameshwar Rao",
+     "text": "URGENT: Your lab submission has errors, please correct and resubmit before 5 PM today.",
+     "sender": "Dr. Rameshwar Rao",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": true
+    }
+   ]
+  },
+  {
+   "id": "rt_hinglish_urgency_05",
+   "attack_type": "hinglish_urgency",
+   "source": "synthetic",
+   "description": "Real cab booking emergency mixing with Zomato claiming food is arriving urgently.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.ubercab",
+     "title": "Uber",
+     "text": "Your driver Ramesh is calling you urgently regarding your pickup location.",
+     "sender": null,
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": true,
+     "android_category": "call",
+     "important": true
+    },
+    {
+     "at_min": 3,
+     "package_name": "com.application.zomato",
+     "title": "Zomato",
+     "text": "Jaldi dekho! Delivery partner ghar ke paas pahunch gaya hai, gate kholo!",
+     "sender": null,
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_hinglish_urgency_06",
+   "attack_type": "hinglish_urgency",
+   "source": "synthetic",
+   "description": "Father sending urgent medical updates mixed with Amazon flash sale notifications using the word 'Jaldi'.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.whatsapp",
+     "title": "Papa",
+     "text": "Beta ghar aaja jaldi, Dada ji ki tabiyat bohot zyada kharab ho gayi hai.",
+     "sender": "Papa",
+     "is_conversation": true,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": true
+    },
+    {
+     "at_min": 2,
+     "package_name": "in.amazon.mShop.android.shopping",
+     "title": "Amazon India",
+     "text": "Jaldi grab karo! Lightning deal live hai, sirf kuch stock bacha hai.",
+     "sender": null,
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_hinglish_urgency_07",
+   "attack_type": "hinglish_urgency",
+   "source": "synthetic",
+   "description": "Slack office internship alerts mixed with friends hyping up useless plans.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.Slack",
+     "title": "Internship Project Channel",
+     "text": "@channel URGENT: Client ne build reject kar diya hai, sabhi log turant call pe join karo.",
+     "sender": "Project Manager",
+     "is_conversation": true,
+     "group_chat": true,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": true
+    },
+    {
+     "at_min": 4,
+     "package_name": "com.instagram.android",
+     "title": "Instagram",
+     "text": "riya_sharma sent a reel: 'Bhai yeh dekh jaldi, epic comedy hai has has ke pagal ho jayega!'",
+     "sender": "riya_sharma",
+     "is_conversation": true,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_hinglish_urgency_08",
+   "attack_type": "hinglish_urgency",
+   "source": "synthetic",
+   "description": "Payment app alerts regarding failed transactions mixed with group chat drama.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.google.android.apps.nbu.paisa.user",
+     "title": "Google Pay",
+     "text": "Alert: Transaction of Rs 2,500 failed due to bank server down. Please retry urgently.",
+     "sender": null,
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": true
+    },
+    {
+     "at_min": 5,
+     "package_name": "com.whatsapp",
+     "title": "College Foodies",
+     "text": "Jaldi batao kaun kaun pizza kha raha hai aaj raat ko, warna order nahi karunga!",
+     "sender": "Karan",
+     "is_conversation": true,
+     "group_chat": true,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_hinglish_urgency_09",
+   "attack_type": "hinglish_urgency",
+   "source": "synthetic",
+   "description": "Landlord sending strict rent warnings mixed with Myntra end of reason sale hype.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.google.android.apps.messaging",
+     "title": "Landlord Uncle",
+     "text": "Beta rent dene ki last date aaj hai, jaldi se Google Pay kar warna penalty lagegi.",
+     "sender": "Landlord Uncle",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": true
+    },
+    {
+     "at_min": 3,
+     "package_name": "com.myntra.android",
+     "title": "Myntra",
+     "text": "Jaldi loot lo! End of Reason Sale starts now, flat 80% off on top brands!",
+     "sender": null,
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_hinglish_urgency_10",
+   "attack_type": "hinglish_urgency",
+   "source": "synthetic",
+   "description": "Mother calling urgently about a power failure at home versus automated news flashes.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.nis.app",
+     "title": "Inshorts",
+     "text": "BREAKING NEWS: Jaldi dekhiye desh ki sabse badi khabar, stock market mein bhari giraawat.",
+     "sender": null,
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 2,
+     "package_name": "com.whatsapp",
+     "title": "Mummy",
+     "text": "Ghar mein short circuit ho gaya hai, light chali gayi hai aur dhuan nikal raha hai, jaldi phone utha!",
+     "sender": "Mummy",
+     "is_conversation": true,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": true
+    }
+   ]
+  },
+  {
+   "id": "rt_buried_urgent_01",
+   "attack_type": "buried_urgent",
+   "source": "synthetic",
+   "description": "Four notifications where a placement cell email is buried under promotional shopping and social updates.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "in.amazon.mShop.android.shopping",
+     "title": "Amazon Great Indian Festival",
+     "text": "Mega discounts on laptops and electronics starting tonight!",
+     "sender": null,
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 2,
+     "package_name": "com.instagram.android",
+     "title": "Aarav shared a new reel",
+     "text": "Check out this hilarious campus meme.",
+     "sender": "Aarav",
+     "is_conversation": true,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 4,
+     "package_name": "com.google.android.gm",
+     "title": "Placement Cell - IIT Delhi",
+     "text": "URGENT: Submit your resume verification documents by 5 PM today to be eligible for Day 1 companies.",
+     "sender": "Placement Cell",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": true
+    },
+    {
+     "at_min": 6,
+     "package_name": "in.swiggy.android",
+     "title": "Hungry?",
+     "text": "Get 60% off on your evening biryani order using code CRAVINGS.",
+     "sender": null,
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_buried_urgent_02",
+   "attack_type": "buried_urgent",
+   "source": "synthetic",
+   "description": "Five WhatsApp messages where a lab partner's urgent code fix is hidden in hostel group spam.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.whatsapp",
+     "title": "Hostel Block C 🏢",
+     "text": "Rohan: Who took my mug from the common washroom?",
+     "sender": "Rohan",
+     "is_conversation": true,
+     "group_chat": true,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 1,
+     "package_name": "com.whatsapp",
+     "title": "Hostel Block C 🏢",
+     "text": "Karan: Not me bro, check with the second-floor guys.",
+     "sender": "Karan",
+     "is_conversation": true,
+     "group_chat": true,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 3,
+     "package_name": "com.whatsapp",
+     "title": "DBA Lab Group 💻",
+     "text": "Priya: Guys the prof is taking viva early! Send the updated GitHub repo right now!",
+     "sender": "Priya",
+     "is_conversation": true,
+     "group_chat": true,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": true
+    },
+    {
+     "at_min": 5,
+     "package_name": "com.flipkart.android",
+     "title": "Flipkart",
+     "text": "Your wishlist items are running out of stock. Buy now!",
+     "sender": null,
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 7,
+     "package_name": "com.whatsapp",
+     "title": "Hostel Block C 🏢",
+     "text": "Amit: Ordering Maggie at 2 AM, who wants?",
+     "sender": "Amit",
+     "is_conversation": true,
+     "group_chat": true,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_buried_urgent_03",
+   "attack_type": "buried_urgent",
+   "source": "synthetic",
+   "description": "Three notifications where a bank payment failure alert is masked by food delivery promos.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "in.swiggy.android",
+     "title": "Swiggy Instamart",
+     "text": "Fresh milk and bread delivered in 10 minutes.",
+     "sender": null,
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 1,
+     "package_name": "com.google.android.apps.nbu.paisa.user",
+     "title": "Google Pay",
+     "text": "Payment of ₹1,450 to Mess Vendor failed. Tap to retry or money will be refunded in 3-5 days.",
+     "sender": null,
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": true
+    },
+    {
+     "at_min": 3,
+     "package_name": "com.application.zomato",
+     "title": "Zomato",
+     "text": "Craving pizza? Get flat ₹150 off on Domino's orders.",
+     "sender": null,
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_buried_urgent_04",
+   "attack_type": "buried_urgent",
+   "source": "synthetic",
+   "description": "Four notifications where an academic fee deadline reminder is buried under news and shopping updates.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.nis.app",
+     "title": "Inshorts",
+     "text": "Tech stocks rally as AI sector sees massive investments.",
+     "sender": null,
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 2,
+     "package_name": "com.myntra.android",
+     "title": "Myntra End of Reason Sale",
+     "text": "Extra 20% off on ethnic wear for college fest season.",
+     "sender": null,
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 3,
+     "package_name": "com.google.android.gm",
+     "title": "Accounts Department",
+     "text": "FINAL NOTICE: Semester fee payment pending. Pay by midnight to avoid late fine of ₹5000.",
+     "sender": "Accounts",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": true
+    },
+    {
+     "at_min": 5,
+     "package_name": "com.google.android.youtube",
+     "title": "YouTube",
+     "text": "New video from Coding Ninjas: Master Dynamic Programming in 1 Hour.",
+     "sender": null,
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_buried_urgent_05",
+   "attack_type": "buried_urgent",
+   "source": "synthetic",
+   "description": "Six messages where an emergency roommate call notification is masked by festive group chatter.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.whatsapp",
+     "title": "College Fest Core Committee 🎉",
+     "text": "Neha: DJ night passes are almost sold out!",
+     "sender": "Neha",
+     "is_conversation": true,
+     "group_chat": true,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 1,
+     "package_name": "com.whatsapp",
+     "title": "College Fest Core Committee 🎉",
+     "text": "Rahul: Collect your ID cards from the audit room.",
+     "sender": "Rahul",
+     "is_conversation": true,
+     "group_chat": true,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 2,
+     "package_name": "com.whatsapp",
+     "title": "College Fest Core Committee 🎉",
+     "text": "Simran: Speaker delivery got delayed by 1 hour.",
+     "sender": "Simran",
+     "is_conversation": true,
+     "group_chat": true,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 3,
+     "package_name": "com.whatsapp",
+     "title": "Roommate 🏠",
+     "text": "Bro I left my scooty keys in the library and have high fever, please pick me up from hostel gate 2 urgently.",
+     "sender": "Roommate",
+     "is_conversation": true,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": true
+    },
+    {
+     "at_min": 4,
+     "package_name": "com.whatsapp",
+     "title": "College Fest Core Committee 🎉",
+     "text": "Karan: Posters are printed, come pick them up.",
+     "sender": "Karan",
+     "is_conversation": true,
+     "group_chat": true,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 5,
+     "package_name": "com.whatsapp",
+     "title": "College Fest Core Committee 🎉",
+     "text": "Pooja: Meeting at 6 PM sharp in CLT.",
+     "sender": "Pooja",
+     "is_conversation": true,
+     "group_chat": true,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_buried_urgent_06",
+   "attack_type": "buried_urgent",
+   "source": "synthetic",
+   "description": "Four notifications where an internship interview link email is hidden among commute and shopping updates.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.ubercab",
+     "title": "Uber",
+     "text": "Save 20% on your next 3 rides to the campus metro station.",
+     "sender": null,
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 2,
+     "package_name": "com.microsoft.office.outlook",
+     "title": "Microsoft Talent Acquisition",
+     "text": "ACTION REQUIRED: Your technical interview starts in 30 minutes. Join via MS Teams link inside.",
+     "sender": "Recruiter",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": true
+    },
+    {
+     "at_min": 4,
+     "package_name": "in.amazon.mShop.android.shopping",
+     "title": "Amazon",
+     "text": "Your order for study desk lamps has been shipped.",
+     "sender": null,
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 6,
+     "package_name": "com.application.zomato",
+     "title": "Zomato Gold",
+     "text": "Enjoy free dining offers at top restaurants in your area.",
+     "sender": null,
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_buried_urgent_07",
+   "attack_type": "buried_urgent",
+   "source": "synthetic",
+   "description": "Five notifications where an exam hall ticket release SMS is buried beneath Telegram study channel spam.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "org.telegram.messenger",
+     "title": "GATE 2025 Aspirants 📚",
+     "text": "Bot: Check out our new mock test series for engineering mathematics.",
+     "sender": "Channel Bot",
+     "is_conversation": true,
+     "group_chat": true,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 1,
+     "package_name": "org.telegram.messenger",
+     "title": "GATE 2025 Aspirants 📚",
+     "text": "Vikram: Does anyone have the PDF for previous year calculus solutions?",
+     "sender": "Vikram",
+     "is_conversation": true,
+     "group_chat": true,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 2,
+     "package_name": "com.google.android.apps.messaging",
+     "title": "Exam Cell - Anna University",
+     "text": "Your End Semester Exam Hall Ticket is now available for download on the student portal. Download immediately.",
+     "sender": "Exam Cell",
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": true
+    },
+    {
+     "at_min": 4,
+     "package_name": "org.telegram.messenger",
+     "title": "GATE 2025 Aspirants 📚",
+     "text": "Ananya: Shared a file: 'Fluid_Mechanics_Short_Notes.pdf'",
+     "sender": "Ananya",
+     "is_conversation": true,
+     "group_chat": true,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 6,
+     "package_name": "org.telegram.messenger",
+     "title": "GATE 2025 Aspirants 📚",
+     "text": "Rahul: Thanks for sharing! This will save so much time.",
+     "sender": "Rahul",
+     "is_conversation": true,
+     "group_chat": true,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_buried_urgent_08",
+   "attack_type": "buried_urgent",
+   "source": "synthetic",
+   "description": "Four notifications where a dad's emergency money request WhatsApp is masked by promotional offers.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "net.one97.paytm",
+     "title": "Paytm",
+     "text": "Win scratch cards worth up to ₹100 on mobile recharges.",
+     "sender": null,
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 1,
+     "package_name": "com.whatsapp",
+     "title": "Dad ❤️",
+     "text": "Urgent call me immediately. SBI ATM card is blocked, need to transfer hostel fee right now.",
+     "sender": "Dad",
+     "is_conversation": true,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": true
+    },
+    {
+     "at_min": 3,
+     "package_name": "com.phonepe.app",
+     "title": "PhonePe",
+     "text": "Pay electricity bills via PhonePe and get flat ₹50 cashback.",
+     "sender": null,
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 5,
+     "package_name": "com.rapido.passenger",
+     "title": "Rapido",
+     "text": "Your ride coupon is expiring soon! Book a bike taxi now.",
+     "sender": null,
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_buried_urgent_09",
+   "attack_type": "buried_urgent",
+   "source": "synthetic",
+   "description": "Five notifications where an urgent project submission deadline reminder on Slack is hidden among shopping alerts.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.myntra.android",
+     "title": "Myntra",
+     "text": "Flash Sale: Nike and Puma sneakers at 50% off.",
+     "sender": null,
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 1,
+     "package_name": "in.amazon.mShop.android.shopping",
+     "title": "Amazon",
+     "text": "Your package containing scientific calculator has been dispatched.",
+     "sender": null,
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 3,
+     "package_name": "com.Slack",
+     "title": "Capstones Project Workspace",
+     "text": "Prof. Sharma: Team leads must upload the final prototype code repository to portal by 4:00 PM or face zero marks.",
+     "sender": "Prof. Sharma",
+     "is_conversation": true,
+     "group_chat": true,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": true
+    },
+    {
+     "at_min": 4,
+     "package_name": "in.swiggy.android",
+     "title": "Swiggy",
+     "text": "Craving midnight snacks? Instamart is open 24/7.",
+     "sender": null,
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 6,
+     "package_name": "com.flipkart.android",
+     "title": "Flipkart",
+     "text": "Pay Later limit increased! Shop now and pay next month.",
+     "sender": null,
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  },
+  {
+   "id": "rt_buried_urgent_10",
+   "attack_type": "buried_urgent",
+   "source": "synthetic",
+   "description": "Four notifications where a professor's class cancellation notice on WhatsApp is buried under cab and food promotions.",
+   "notifications": [
+    {
+     "at_min": 0,
+     "package_name": "com.olacabs.customer",
+     "title": "Ola Cabs",
+     "text": "Ride to railway station starting at just ₹199.",
+     "sender": null,
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 1,
+     "package_name": "com.whatsapp",
+     "title": "ECE Final Year Official 🎓",
+     "text": "Dr. Varma: Today's 9 AM VLSI lecture stands cancelled due to an urgent senate meeting. We will have a makeup class on Saturday.",
+     "sender": "Dr. Varma",
+     "is_conversation": true,
+     "group_chat": true,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": true
+    },
+    {
+     "at_min": 3,
+     "package_name": "com.application.zomato",
+     "title": "Zomato",
+     "text": "Order breakfast combos from Chai Point delivered hot to your room.",
+     "sender": null,
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    },
+    {
+     "at_min": 5,
+     "package_name": "com.google.android.youtube",
+     "title": "YouTube",
+     "text": "New lofi hip hop radio beats to study and relax to.",
+     "sender": null,
+     "is_conversation": false,
+     "group_chat": false,
+     "is_ongoing": false,
+     "android_category": null,
+     "important": false
+    }
+   ]
+  }
+ ]
+}

@@ -15,7 +15,7 @@ from typing import Any
 
 from agents import llm
 from agents import persona_ranges as ranges
-from agents.json_generation import AskFn, GenerationError, generate_json, ollama_json
+from agents.json_generation import AskFn, GenerationError, generate_json, model_json
 from agents.persona_briefs import PERSONA_BRIEFS, PERSONA_NAMES
 from agents.persona_validator import ValidationReport, validate_persona, validate_personas
 from contracts.params import CATEGORIES
@@ -99,7 +99,7 @@ def main() -> int:
     args = parser.parse_args()
 
     try:
-        document = generate_personas(ollama_json(temperature=0.6, context_tokens=8192))
+        document = generate_personas(model_json(temperature=0.6, context_tokens=8192))
     except (llm.LLMError, GenerationError) as error:
         print(f"Failed: {error}")
         return 1

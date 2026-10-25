@@ -2,11 +2,14 @@ import json
 import re
 from collections.abc import Callable
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any
 
 import pytest
 
+from agents.checkpoint import Checkpoint, progress_path
 from agents.json_generation import GenerationError, extract_json, generate_json
+from agents.llm_errors import LLMError
 from agents.persona_agent import generate_personas, persona_prompt
 from agents.persona_briefs import PERSONA_BRIEFS, PERSONA_NAMES
 from agents.persona_validator import validate_personas
@@ -232,3 +235,51 @@ def test_the_redteam_agent_owns_ids_and_types_whatever_the_model_says() -> None:
 
     assert attacks[10]["id"] == "rt_spoofed_sender_01"
     assert attacks[10]["attack_type"] == "spoofed_sender"
+
+
+def test_a_stopped_text_bank_run_resumes_without_redoing_finished_batches(
+    params: dict[str, Any], tmp_path: Path
+) -> None:
+    checkpoint = Checkpoint(tmp_path / "text_bank.progress.json")
+
+    def quota_runs_out(prompt: str, call: int) -> str:
+        if call == 4:
+            raise LLMError("quota used up")
+        return text_bank_reply(prompt, call)
+
+    first = ScriptedLLM(quota_runs_out)
+    with pytest.raises(LLMError):
+        generate_text_bank(first, params, clock=fixed_clock, checkpoint=checkpoint)
+
+    second = ScriptedLLM(text_bank_reply)
+    document = generate_text_bank(second, params, clock=fixed_clock, checkpoint=checkpoint)
+
+    assert len(second.prompts) == len(BATCHES) - 3
+    assert [item["id"] for item in document["items"]] == [f"tb{i:03d}" for i in range(1, 251)]
+
+
+def test_a_stopped_redteam_run_resumes_from_the_next_attack_type(tmp_path: Path) -> None:
+    checkpoint = Checkpoint(tmp_path / "redteam_set.progress.json")
+
+    def fails_on_third(prompt: str, call: int) -> str:
+        if call == 3:
+            raise LLMError("network down")
+        return redteam_reply(prompt, call)
+
+    with pytest.raises(LLMError):
+        generate_redteam_set(ScriptedLLM(fails_on_third), clock=fixed_clock, checkpoint=checkpoint)
+
+    second = ScriptedLLM(redteam_reply)
+    document = generate_redteam_set(second, clock=fixed_clock, checkpoint=checkpoint)
+
+    assert len(second.prompts) == len(ATTACK_TYPES) - 2
+    assert len(document["attacks"]) == 60
+
+
+def test_checkpoint_clear_removes_the_progress_file(tmp_path: Path) -> None:
+    checkpoint = Checkpoint(progress_path(tmp_path / "out.json"))
+    checkpoint.save("step", "ollama:test", [1, 2])
+
+    assert checkpoint.load()["step"].data == [1, 2]
+    checkpoint.clear()
+    assert checkpoint.load() == {}
