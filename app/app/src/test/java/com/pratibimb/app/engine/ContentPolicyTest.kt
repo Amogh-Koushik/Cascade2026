@@ -48,12 +48,49 @@ class ContentPolicyTest {
         return ContentPolicy.apply(decision, features, content, flags, mentions, newSender)
     }
 
+    private val off = ContentRuleFlags(focusGate = false)
+
     @Test
     fun withEveryFlagOffNothingChanges() {
         val features = message()
         val decision = engine.decide(features, context)
 
-        assertSame(decision, ContentPolicy.apply(decision, features, link, ContentRuleFlags(), false, true).decision)
+        assertSame(decision, ContentPolicy.apply(decision, features, link, off, false, true).decision)
+    }
+
+    private fun delivered(features: NotificationFeatures) =
+        engine.decide(features, context).copy(action = Action.DELIVER, rule = DecisionRule.MIGHT_MATTER)
+
+    @Test
+    fun theFocusGateHoldsEverythingButTypedMessagesFromPeople() {
+        val gate = ContentRuleFlags()
+        val typed = ContentPolicy.apply(delivered(message()), message(), ContentFeatures.PLAIN, gate, false, false)
+        val reel = ContentPolicy.apply(delivered(message()), message(), ContentFeatures.PLAIN.copy(kind = ContentKind.FORWARD), gate, false, false)
+        val email = ContentPolicy.apply(delivered(like.copy(baitHit = false)), like.copy(baitHit = false), ContentFeatures.PLAIN, gate, false, false)
+
+        assertEquals(Action.DELIVER, typed.decision.action)
+        assertEquals(Action.HOLD, reel.decision.action)
+        assertEquals(Action.HOLD, email.decision.action)
+        assertEquals("Held: not a typed message from a person", email.decision.reason)
+    }
+
+    @Test
+    fun urgentEmailPassesTheGateButAnUrgentPromoDoesNot() {
+        val gate = ContentRuleFlags()
+        val urgentEmail = like.copy(urgencyHit = true)
+        val urgentPromo = like.copy(urgencyHit = true, category = Category.SHOPPING_PROMO, packageName = "com.flipkart.android")
+
+        assertEquals(Action.DELIVER, ContentPolicy.apply(delivered(urgentEmail), urgentEmail, ContentFeatures.PLAIN, gate, false, false).decision.action)
+        assertEquals(Action.HOLD, ContentPolicy.apply(delivered(urgentPromo), urgentPromo, ContentFeatures.PLAIN, gate, false, false).decision.action)
+    }
+
+    @Test
+    fun contextsAndDeadlinesStillGetThroughTheGate() {
+        val gate = ContentRuleFlags()
+        val soon = ContentFeatures.PLAIN.copy(deadlinePhrase = "in 30 min", deadlineAtMillis = 30 * 60_000L)
+
+        assertEquals(Action.DELIVER, ContentPolicy.apply(delivered(like), like, ContentFeatures.PLAIN, gate, false, false, "Placements").decision.action)
+        assertEquals(Action.DELIVER, ContentPolicy.apply(delivered(like), like, soon, gate, false, false, nowMillis = 0L).decision.action)
     }
 
     @Test
@@ -77,7 +114,7 @@ class ContentPolicyTest {
     @Test
     fun aGroupMessageWithoutAMentionIsHeldUnlessItMentionsYou() {
         val group = message(group = true)
-        val flags = ContentRuleFlags(holdUnmentionedGroups = true)
+        val flags = ContentRuleFlags(holdUnmentionedGroups = true, focusGate = false)
         val unmentioned = ruled(group, ContentFeatures.PLAIN, flags)
         val mentioned = ruled(group, ContentFeatures.PLAIN, flags, mentions = true)
 
@@ -101,7 +138,7 @@ class ContentPolicyTest {
         val later = ContentFeatures.PLAIN.copy(deadlinePhrase = "by 9 pm", deadlineAtMillis = 3 * hour)
 
         val delivered = ContentPolicy.apply(heldByEngine(), like, soon, ContentRuleFlags(), false, false, nowMillis = 0L)
-        val stillHeld = ContentPolicy.apply(heldByEngine(), like, later, ContentRuleFlags(), false, false, nowMillis = 0L)
+        val stillHeld = ContentPolicy.apply(heldByEngine(), like, later, off, false, false, nowMillis = 0L)
 
         assertEquals(Action.DELIVER, delivered.decision.action)
         assertEquals("Delivered: deadline within 2 hours (by 6 pm)", delivered.decision.reason)
@@ -130,7 +167,7 @@ class ContentPolicyTest {
     fun aContextMatchKeepsAGroupMessageFromTheMentionRule() {
         val group = message(group = true)
         val decision = engine.decide(group, context)
-        val result = ContentPolicy.apply(decision, group, ContentFeatures.PLAIN, ContentRuleFlags(holdUnmentionedGroups = true), false, false, "Placements")
+        val result = ContentPolicy.apply(decision, group, ContentFeatures.PLAIN, ContentRuleFlags(holdUnmentionedGroups = true, focusGate = false), false, false, "Placements")
 
         assertEquals(decision.action, result.decision.action)
     }

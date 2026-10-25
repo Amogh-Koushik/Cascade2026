@@ -1,6 +1,7 @@
 package com.pratibimb.app.engine
 
 import com.pratibimb.twin.Action
+import com.pratibimb.twin.Category
 import com.pratibimb.twin.Decision
 import com.pratibimb.twin.DecisionRule
 import com.pratibimb.twin.NotificationFeatures
@@ -9,13 +10,17 @@ import com.pratibimb.twin.NotificationFeatures
 // state, Observe mode or a Suggest-mode recommendation. In order: a new sender's link is held
 // and flagged (safety before urgency, which is how a fake "register by 6 pm" link is caught);
 // a new sender's plain text is delivered once; a deadline within two hours, or a match with an
-// active context, is delivered; a group message that doesn't mention you is held. The three
-// switchable rules are off until the user turns them on; deadline and context always apply.
+// active context, is delivered; anything that is not a typed message from a person is held
+// (focus gate, on by default); a group message that doesn't mention you is held. The other
+// three switchable rules are off until the user turns them on; deadline and context always apply.
 // The repeat-ping rule (text messages only) acts earlier, in the feature builder.
 data class ContentRuleFlags(
     val textOnlyRepeatPings: Boolean = false,
     val holdUnmentionedGroups: Boolean = false,
     val newSenderLinks: Boolean = false,
+    // In focus, only a typed message from a person is left to the model; shares, snaps, social
+    // activity, email, promos and news wait, unless a person or an email uses urgent words.
+    val focusGate: Boolean = true,
 )
 
 data class RuledDecision(
@@ -65,6 +70,14 @@ object ContentPolicy {
         }
         if (contextLabel != null) {
             return deliverIfHeld(decision, "Delivered: matches your $contextLabel context", "context $contextLabel")
+        }
+        if (flags.focusGate && decision.action == Action.DELIVER) {
+            val typedByAPerson = features.isConversation && content.kind == ContentKind.TEXT
+            // Urgent words count from people and email only; a promo shouting "urgent" still waits.
+            val urgent = features.urgencyHit && (features.isConversation || features.category == Category.WORK_EMAIL)
+            if (!typedByAPerson && !urgent) {
+                return RuledDecision(hold(decision, "Held: not a typed message from a person"), "focus gate", null)
+            }
         }
         if (flags.holdUnmentionedGroups && features.groupChat && !mentionsYou && decision.action == Action.DELIVER) {
             return RuledDecision(

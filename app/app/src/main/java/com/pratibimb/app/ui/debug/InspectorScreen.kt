@@ -100,7 +100,12 @@ private fun RulesCard(
     var names by remember(mentionNames) { mutableStateOf(mentionNames.joinToString(", ")) }
     Box(modifier = Modifier.fillMaxWidth().cardSurface().padding(16.dp)) {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(text = "Content rules (off by default)", style = titleMd(color = WarmObsidian.OnSurface))
+            Text(text = "Content rules", style = titleMd(color = WarmObsidian.OnSurface))
+            RuleSwitch(
+                "Focus gate (on by default)",
+                "In focus, only typed messages from people get through on the model; the rest waits.",
+                flags.focusGate,
+            ) { onSetRuleFlags(flags.copy(focusGate = it)) }
             RuleSwitch(
                 "Repeat pings count text only",
                 "Reels, photos and forwards no longer count towards a repeated ping.",

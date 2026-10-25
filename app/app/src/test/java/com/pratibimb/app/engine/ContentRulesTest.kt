@@ -27,7 +27,7 @@ class ContentRulesTest {
 
     @Test
     fun reelsPostsAndForwardsAreForwards() {
-        listOf("Forwarded", "sent you a reel", "shared a post", "sent a reel by memes.daily", "Forwarded: lol")
+        listOf("Forwarded", "sent you a reel", "shared a post", "sent a reel by memes.daily", "Forwarded: lol", "sent you a Snap")
             .forEach { assertEquals(it, ContentKind.FORWARD, classify(it).kind) }
     }
 

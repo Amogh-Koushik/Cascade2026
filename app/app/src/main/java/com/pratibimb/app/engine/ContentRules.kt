@@ -33,7 +33,7 @@ object ContentRules {
     // Reels, posts and stories passed along, and anything marked forwarded.
     private val FORWARD = Regex(
         "\\bforwarded\\b|\\b(sent|shared) (you )?(a |an )?(reel|post|story|video)\\b|" +
-            "\\bsent (you )?a (reel|post) by\\b",
+            "\\bsent (you )?a (reel|post) by\\b|\\bsent (you )?a snap\\b",
     )
 
     private val URL = Regex(

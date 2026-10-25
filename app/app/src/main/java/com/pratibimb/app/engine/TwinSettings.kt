@@ -16,6 +16,7 @@ object TwinSettings {
     private const val RULE_TEXT_ONLY_KEY = "rule_text_only_repeat"
     private const val RULE_GROUPS_KEY = "rule_hold_unmentioned_groups"
     private const val RULE_NEW_SENDER_KEY = "rule_new_sender_links"
+    private const val RULE_FOCUS_GATE_KEY = "rule_focus_gate"
     private const val MENTION_NAMES_KEY = "mention_names"
     private const val KNOWN_SENDERS_KEY = "known_senders"
     private const val MAX_KNOWN_SENDERS = 2000
@@ -60,6 +61,7 @@ object TwinSettings {
             textOnlyRepeatPings = loaded.getBoolean(RULE_TEXT_ONLY_KEY, false),
             holdUnmentionedGroups = loaded.getBoolean(RULE_GROUPS_KEY, false),
             newSenderLinks = loaded.getBoolean(RULE_NEW_SENDER_KEY, false),
+            focusGate = loaded.getBoolean(RULE_FOCUS_GATE_KEY, true),
         )
         _mentionNames.value = loaded.getStringSet(MENTION_NAMES_KEY, null).orEmpty().toSet()
         knownSenders = loaded.getStringSet(KNOWN_SENDERS_KEY, null).orEmpty().toSet()
@@ -72,6 +74,7 @@ object TwinSettings {
             ?.putBoolean(RULE_TEXT_ONLY_KEY, flags.textOnlyRepeatPings)
             ?.putBoolean(RULE_GROUPS_KEY, flags.holdUnmentionedGroups)
             ?.putBoolean(RULE_NEW_SENDER_KEY, flags.newSenderLinks)
+            ?.putBoolean(RULE_FOCUS_GATE_KEY, flags.focusGate)
             ?.apply()
     }
 
