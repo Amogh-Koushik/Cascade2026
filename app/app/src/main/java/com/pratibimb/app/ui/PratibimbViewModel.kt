@@ -53,11 +53,12 @@ class PratibimbViewModel(application: Application) : AndroidViewModel(applicatio
     val engine: StubEngine get() = TwinRouter.engine
 
     // ── Permissions ────────────────────────────────────────────────────────
-    private val _permissionStatus = MutableStateFlow(PermissionStatus.MOCK_CHECKLIST)
-    val permissionStatus: StateFlow<PermissionStatus> = _permissionStatus.asStateFlow()
-
-    private val _useLivePermissions = MutableStateFlow(false)
+    // Real permission status by default; the mockup is only for the Debug screen's design view.
+    private val _useLivePermissions = MutableStateFlow(true)
     val useLivePermissions: StateFlow<Boolean> = _useLivePermissions.asStateFlow()
+
+    private val _permissionStatus = MutableStateFlow(PermissionStatus.read(application))
+    val permissionStatus: StateFlow<PermissionStatus> = _permissionStatus.asStateFlow()
 
     fun refreshPermissions(context: Context) {
         if (_useLivePermissions.value) {
@@ -65,13 +66,14 @@ class PratibimbViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
-    fun setLivePermissionMode(enabled: Boolean, context: Context? = null) {
+    fun setLivePermissionMode(enabled: Boolean) {
         _useLivePermissions.value = enabled
-        if (enabled && context != null) {
-            _permissionStatus.value = PermissionStatus.read(context)
-        } else if (!enabled) {
-            _permissionStatus.value = PermissionStatus.MOCK_CHECKLIST
-        }
+        _permissionStatus.value =
+            if (enabled) {
+                PermissionStatus.read(getApplication<Application>())
+            } else {
+                PermissionStatus.MOCK_CHECKLIST
+            }
     }
 
     fun simulateAllPermissionsGranted() {
