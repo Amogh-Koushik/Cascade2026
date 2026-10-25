@@ -62,12 +62,15 @@ object DigestNotifier {
             .notify(nextId.getAndIncrement(), notification)
     }
 
+    // One notification for many released items: at the end of focus, at a break, or when
+    // items reach the hold cap.
     fun postBatchDigest(
         context: Context,
-        count: Int,
+        title: String,
         summaryLines: List<String>,
     ) {
-        if (count <= 0) return
+        val count = summaryLines.size
+        if (count == 0) return
         val permission = context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)
         if (permission != PackageManager.PERMISSION_GRANTED) return
         ensureChannel(context)
@@ -80,7 +83,7 @@ object DigestNotifier {
         )
 
         val inboxStyle = Notification.InboxStyle()
-            .setBigContentTitle("Focus Session Digest ($count held)")
+            .setBigContentTitle("$title ($count held)")
         summaryLines.take(5).forEach { inboxStyle.addLine(it) }
         if (summaryLines.size > 5) {
             inboxStyle.setSummaryText("+${summaryLines.size - 5} more")
@@ -88,8 +91,8 @@ object DigestNotifier {
 
         val notification = Notification.Builder(context, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle("Focus Session Complete")
-            .setContentText("$count notification${if (count > 1) "s were" else " was"} held during your focus session.")
+            .setContentTitle(title)
+            .setContentText("$count notification${if (count > 1) "s were" else " was"} held for you.")
             .setStyle(inboxStyle)
             .setContentIntent(appIntent)
             .setAutoCancel(true)

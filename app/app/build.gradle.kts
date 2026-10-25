@@ -43,6 +43,8 @@ android {
         getByName("main") {
             java.srcDir("../../contracts/kotlin")
             assets.srcDir("../../contracts/params")
+            // The demo's Learning replay events.
+            assets.srcDir("../../contracts/demo")
         }
     }
 }

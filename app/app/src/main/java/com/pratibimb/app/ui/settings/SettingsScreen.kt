@@ -33,6 +33,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.pratibimb.app.engine.Personas
 import com.pratibimb.app.ui.theme.ShapePill
 import com.pratibimb.app.ui.theme.WarmObsidian
 import com.pratibimb.app.ui.theme.bodyLg
@@ -109,20 +110,15 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        val personas = listOf(
-            "Deep work (balanced)" to "Balanced priors between social pull and message importance.",
-            "Student (heavy social)" to "Higher pull risk on Instagram, YouTube and short videos.",
-            "Professional (urgent email)" to "Delivers work email and calendar invites immediately.",
-        )
-
+        // One card per bundled params file; selectedPersona is the persona id.
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            personas.forEach { (name, desc) ->
-                val isSelected = selectedPersona == name
+            Personas.all.forEach { persona ->
+                val isSelected = selectedPersona == persona.id
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .cardSurface()
-                        .clickable { onSelectPersona(name) }
+                        .clickable { onSelectPersona(persona.id) }
                         .padding(16.dp),
                 ) {
                     Row(
@@ -132,13 +128,13 @@ fun SettingsScreen(
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = name,
+                                text = persona.label,
                                 style = bodyLg(color = WarmObsidian.OnSurface),
                                 fontWeight = FontWeight.SemiBold,
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = desc,
+                                text = persona.description,
                                 style = bodyMd(color = WarmObsidian.OnSurfaceVariant),
                                 fontSize = 13.sp,
                             )

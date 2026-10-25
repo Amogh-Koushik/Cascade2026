@@ -10,6 +10,8 @@ import com.pratibimb.app.data.NotificationLog
 import com.pratibimb.app.dnd.AlertChannel
 import com.pratibimb.app.dnd.FocusDnd
 import com.pratibimb.app.engine.MockScenario
+import com.pratibimb.app.engine.PersonaOption
+import com.pratibimb.app.engine.Personas
 import com.pratibimb.app.engine.TwinRouter
 import com.pratibimb.twin.Action
 import com.pratibimb.twin.Autonomy
@@ -36,6 +38,8 @@ data class LiveNotificationItem(
     val senderDisplayName: String?,
     val packageName: String,
     val feedbackLabel: WorthLabelKind? = null,
+    // Salted sender hash, so a tap teaches the twin about this sender and not just the app.
+    val senderHash: String? = null,
 )
 
 data class HeldTrayItem(
@@ -50,6 +54,9 @@ data class HeldTrayItem(
     val minutesUntilRelease: Int,
     val decision: Decision,
     val contentIntent: PendingIntent? = null,
+    val senderHash: String? = null,
+    // When it was held; the hold cap releases it once it has waited policy.cap_min minutes.
+    val heldAtMillis: Long = System.currentTimeMillis(),
 )
 
 class PratibimbViewModel(application: Application) : AndroidViewModel(application) {
@@ -101,10 +108,11 @@ class PratibimbViewModel(application: Application) : AndroidViewModel(applicatio
     val isModeA: StateFlow<Boolean> = TwinRouter.isModeA
 
     // A switch during a running session takes effect at once, so the phone is never left in a
-    // DND state that no longer matches the mode shown on screen.
+    // DND state that no longer matches the mode shown on screen. During a break the phone stays
+    // unsilenced; the new mode applies when focus resumes.
     fun setModeA(modeA: Boolean) {
         var effective = modeA
-        if (_isFocusActive.value) {
+        if (_isFocusActive.value && _breakSecondsLeft.value == 0) {
             if (modeA && !focusDnd.enterPriority()) {
                 effective = false
                 NotificationLog.add("focus", "Priority mode refused by the phone; staying in Mode B")
@@ -136,11 +144,25 @@ class PratibimbViewModel(application: Application) : AndroidViewModel(applicatio
         TwinRouter.setFatigueRisk(risk)
     }
 
+    val personas: List<PersonaOption> = Personas.all
+
+    // The selected persona's id.
     val selectedPersona: StateFlow<String> = TwinRouter.selectedPersona
 
-    fun setPersona(persona: String) {
-        TwinRouter.setPersona(persona)
+    // Takes a persona id (or its label); the learned counts are kept across the switch.
+    fun setPersona(idOrLabel: String) {
+        TwinRouter.setPersona(idOrLabel)
+        refreshFocusStatus()
     }
+
+    val demoLearning: StateFlow<Boolean> = TwinRouter.demoLearning
+
+    fun setDemoLearning(enabled: Boolean) {
+        TwinRouter.setDemoLearning(enabled)
+    }
+
+    // Returns how many simulated outcomes were applied (0 if the file could not be read).
+    fun runLearningReplay(): Int = TwinRouter.runLearningReplay()
 
     // ── Focus Session ──────────────────────────────────────────────────────
     private val _isFocusActive = MutableStateFlow(false)
@@ -151,6 +173,10 @@ class PratibimbViewModel(application: Application) : AndroidViewModel(applicatio
 
     private val _remainingSeconds = MutableStateFlow(50 * 60)
     val remainingSeconds: StateFlow<Int> = _remainingSeconds.asStateFlow()
+
+    // Seconds left in the current break; 0 when focus is running or stopped.
+    private val _breakSecondsLeft = MutableStateFlow(0)
+    val breakSecondsLeft: StateFlow<Int> = _breakSecondsLeft.asStateFlow()
 
     private var timerJob: Job? = null
 
@@ -173,7 +199,9 @@ class PratibimbViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
     fun refreshFocusStatus() {
-        val session = if (_isFocusActive.value) {
+        val session = if (_breakSecondsLeft.value > 0) {
+            "on a break, ${_breakSecondsLeft.value / 60 + 1} min left"
+        } else if (_isFocusActive.value) {
             "running, ${_remainingSeconds.value / 60} min left"
         } else {
             "not running"
@@ -201,30 +229,24 @@ class PratibimbViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun startFocus() {
         _isFocusActive.value = true
-        TwinRouter.setPhoneState(PhoneState.FOCUS_STEADY)
-        TwinRouter.startSession(_selectedDurationMinutes.value)
+        _breakSecondsLeft.value = 0
         _remainingSeconds.value = _selectedDurationMinutes.value * 60
-
-        // Mode A silences the phone with Priority mode. If the phone refuses (no DND access, or
-        // its own DND schedule is in charge), fall back to Mode B: holds still work, but real
-        // apps may buzz once.
-        if (TwinRouter.isModeA.value) {
-            if (focusDnd.enterPriority()) {
-                NotificationLog.add("focus", "Focus started: Priority DND on")
-            } else {
-                TwinRouter.setModeA(false)
-                NotificationLog.add("focus", "Focus started: Priority DND refused, using Mode B")
-            }
-        } else {
-            NotificationLog.add("focus", "Focus started: Mode B (hold-only)")
-        }
-        refreshFocusStatus()
+        enterFocus("Focus started")
 
         timerJob?.cancel()
         timerJob = viewModelScope.launch {
+            var ticks = 0
             while (isActive && _remainingSeconds.value > 0) {
                 delay(1000)
-                _remainingSeconds.value -= 1
+                // A break pauses the focus clock.
+                if (_breakSecondsLeft.value > 0) {
+                    _breakSecondsLeft.value -= 1
+                    if (_breakSecondsLeft.value == 0) enterFocus("Break over, focus resumed")
+                } else {
+                    _remainingSeconds.value -= 1
+                }
+                ticks += 1
+                if (ticks % TICK_SECONDS == 0) TwinRouter.tick(getApplication())
             }
             if (_remainingSeconds.value <= 0) {
                 stopFocus()
@@ -232,8 +254,41 @@ class PratibimbViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
+    // Starts the twin's session for the focus time left and silences the phone. Mode A uses
+    // Priority mode; if the phone refuses (no DND access, or its own DND schedule is in
+    // charge), fall back to Mode B: holds still work, but real apps may buzz once.
+    private fun enterFocus(event: String) {
+        TwinRouter.setPhoneState(PhoneState.FOCUS_STEADY)
+        TwinRouter.startSession(_remainingSeconds.value)
+        if (TwinRouter.isModeA.value) {
+            if (focusDnd.enterPriority()) {
+                NotificationLog.add("focus", "$event: Priority DND on")
+            } else {
+                TwinRouter.setModeA(false)
+                NotificationLog.add("focus", "$event: Priority DND refused, using Mode B")
+            }
+        } else {
+            NotificationLog.add("focus", "$event: Mode B (hold-only)")
+        }
+        refreshFocusStatus()
+    }
+
+    // A short break: everything held so far is released, the phone rings normally, and the
+    // focus clock waits until the break is over.
+    fun takeBreak() {
+        if (!_isFocusActive.value || _breakSecondsLeft.value > 0) return
+        _breakSecondsLeft.value = BREAK_MINUTES * 60
+        TwinRouter.setPhoneState(PhoneState.FREE)
+        TwinRouter.endSession()
+        focusDnd.restore()
+        TwinRouter.releaseAllDigest(getApplication(), "Break time")
+        NotificationLog.add("focus", "Break started: $BREAK_MINUTES min, held items released")
+        refreshFocusStatus()
+    }
+
     fun stopFocus() {
         _isFocusActive.value = false
+        _breakSecondsLeft.value = 0
         TwinRouter.setPhoneState(PhoneState.FREE)
         TwinRouter.endSession()
         // Puts back the user's own filter and policy; does nothing if Priority was never set.
@@ -244,7 +299,7 @@ class PratibimbViewModel(application: Application) : AndroidViewModel(applicatio
         )
         timerJob?.cancel()
         _remainingSeconds.value = _selectedDurationMinutes.value * 60
-        TwinRouter.releaseAllDigest(getApplication())
+        TwinRouter.releaseAllDigest(getApplication(), "Focus session complete")
         refreshFocusStatus()
     }
 
@@ -280,7 +335,7 @@ class PratibimbViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
     fun alwaysDeliverSender(trayId: String) {
-        TwinRouter.alwaysDeliverSender(trayId)
+        TwinRouter.alwaysDeliverSender(getApplication(), trayId)
     }
 
     fun markHeldWrong(trayId: String) {
@@ -292,10 +347,18 @@ class PratibimbViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
     fun releaseAllDigest() {
-        TwinRouter.releaseAllDigest(getApplication())
+        TwinRouter.releaseAllDigest(getApplication(), "Released from the tray")
     }
 
     fun resetAllCounts() {
         TwinRouter.resetAll()
+    }
+
+    private companion object {
+        const val BREAK_MINUTES = 5
+
+        // How often, in seconds, held items are checked against the hold cap and delivered
+        // ones against the open window.
+        const val TICK_SECONDS = 15
     }
 }

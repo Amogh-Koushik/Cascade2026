@@ -1,4 +1,4 @@
-# Writes contracts/learning_replay.json: 30 recorded outcomes of delivered Instagram
+# Writes contracts/demo/learning_replay.json: 30 recorded outcomes of delivered Instagram
 # notifications during steady focus, for the demo's Learning replay button (FR-9.3). The phone
 # pushes them through the same applyFeedback code as real taps, so the "if shown" range
 # visibly narrows. They come from a simulated user and the file is labelled that way.
@@ -11,7 +11,7 @@ import random
 from pathlib import Path
 from typing import Any
 
-OUTPUT_PATH = Path(__file__).resolve().parent.parent / "contracts" / "learning_replay.json"
+OUTPUT_PATH = Path(__file__).resolve().parent.parent / "contracts" / "demo" / "learning_replay.json"
 
 SEED = 2026
 EVENT_COUNT = 30

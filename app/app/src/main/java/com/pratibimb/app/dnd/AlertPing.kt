@@ -16,7 +16,8 @@ enum class PingResult(val label: String) {
 
 // A short-lived alert on the bypass channel. The original notification stays in the shade
 // untouched (silenced by Priority mode, reply buttons intact); the ping only makes the sound,
-// opens the original's content when tapped, and removes itself after a few seconds.
+// opens the original's content when tapped, and removes itself after a few seconds. The tag
+// carries the original's key, so a tap on the ping can be credited to the original.
 object AlertPing {
     private const val TIMEOUT_MS = 8_000L
 
@@ -28,6 +29,7 @@ object AlertPing {
         title: String,
         text: String,
         contentIntent: PendingIntent?,
+        tag: String? = null,
     ): PingResult {
         val permission = context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)
         if (permission != PackageManager.PERMISSION_GRANTED) return PingResult.NO_POST_PERMISSION
@@ -42,7 +44,7 @@ object AlertPing {
             .setTimeoutAfter(TIMEOUT_MS)
             .build()
         context.getSystemService(NotificationManager::class.java)
-            .notify(nextId.getAndIncrement(), ping)
+            .notify(tag, nextId.getAndIncrement(), ping)
         return PingResult.POSTED
     }
 }

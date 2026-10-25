@@ -2,9 +2,8 @@ package com.pratibimb.app.engine
 
 import android.app.Notification
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.Context
-import android.content.pm.PackageManager
+import android.content.SharedPreferences
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import com.pratibimb.app.data.FeatureBuilder
@@ -39,19 +38,22 @@ import kotlin.math.min
  * the TwinEngine decision engine, and the Pratibimb UI state.
  */
 object TwinRouter {
-    // Bundled from contracts/params (see app/app/build.gradle.kts). The persona switcher can
-    // load another file later; until then every decision uses the student persona.
-    private const val PARAMS_ASSET = "twin_params_student_coder.json"
     private const val COUNTS_PREFS = "twin_counts"
     private const val COUNTS_KEY = "counts_json"
     private const val IDENTITY_PREFS = "twin_identity"
     private const val SALT_KEY = "sender_salt"
+    private const val SETTINGS_PREFS = "twin_settings"
+    private const val PERSONA_KEY = "persona_id"
+    private const val AUTONOMY_KEY = "autonomy"
+    private const val ALWAYS_SENDERS_KEY = "always_deliver_senders"
+    private const val ALWAYS_PACKAGES_KEY = "always_deliver_packages"
 
     // Bounds the re-post memory; clearing it only means one extra decision for an old key.
     private const val MAX_TRACKED_KEYS = 500
 
-    // The plan's hold cap: nothing waits longer than this before release.
-    private const val HOLD_CAP_MIN = 45.0
+    // The phone cannot yet measure how long an opened notification kept the user away, so an
+    // open is recorded with this estimate; the clip to [0.1, 60] happens in the engine.
+    private const val OPENED_MINUTES_ESTIMATE = 5.0
 
     val engine = RealTwinEngine()
 
@@ -60,13 +62,20 @@ object TwinRouter {
     private var appContext: Context? = null
 
     val engineStatus: String
-        get() = if (appContext != null) "ready ($PARAMS_ASSET)" else "not loaded"
+        get() = if (appContext != null) "ready (${currentPersona.asset})" else "not loaded"
+
+    @Volatile
+    private var currentPersona = Personas.default
 
     @Volatile
     private var sessionStartMillis = 0L
 
     @Volatile
     private var sessionEndMillis = 0L
+
+    // policy.cap_min from the params: nothing waits in the tray longer than this.
+    @Volatile
+    private var holdCapMin = 45.0
 
     @Volatile
     var activeListener: PratibimbListener? = null
@@ -97,12 +106,26 @@ object TwinRouter {
     private val _fatigueRisk = MutableStateFlow(FatigueRisk.LOW)
     val fatigueRisk: StateFlow<FatigueRisk> = _fatigueRisk.asStateFlow()
 
-    private val _selectedPersona = MutableStateFlow("Deep work (balanced)")
+    // The persona id (see Personas).
+    private val _selectedPersona = MutableStateFlow(Personas.default.id)
     val selectedPersona: StateFlow<String> = _selectedPersona.asStateFlow()
+
+    // The demo-learning profile makes every worth estimate so uncertain that nearly every
+    // message counts as "might matter", so a few taps visibly move the ranges. It is for the
+    // scripted demo, never on by default, and not saved across restarts.
+    private val _demoLearning = MutableStateFlow(false)
+    val demoLearning: StateFlow<Boolean> = _demoLearning.asStateFlow()
 
     // Mode A is only claimed once DND access is confirmed in init().
     private val _isModeA = MutableStateFlow(false)
     val isModeA: StateFlow<Boolean> = _isModeA.asStateFlow()
+
+    // Senders (salted hashes) and apps the user marked "always deliver" from the tray.
+    @Volatile
+    private var alwaysDeliverSenders: Set<String> = emptySet()
+
+    @Volatile
+    private var alwaysDeliverPackages: Set<String> = emptySet()
 
     // Feature rules (app categories, keyword lists, repeat window) come from the same params
     // file the engine decides with.
@@ -116,46 +139,79 @@ object TwinRouter {
     // What was last decided for each notification key. Messaging apps re-post the same key to
     // update a count or a summary; a re-post with the same content must not be decided,
     // logged or pinged again, but a held one is cancelled again so it cannot slip back in.
-    private data class SeenPost(val content: Int, val held: Boolean, val category: Category)
+    private data class SeenPost(val content: Int, val held: Boolean)
 
     private val seenByKey = ConcurrentHashMap<String, SeenPost>()
 
-    // Loads the persona params and the counts learned so far. Both the activity and the
-    // listener call this, because after a reboot the listener can start first; only the first
-    // successful call does the work.
+    private val outcomes = OutcomeTracker(openWindowMillis = 10 * 60_000L)
+
+    // Loads the saved persona's params, the counts learned so far and the user's settings.
+    // Both the activity and the listener call this, because after a reboot the listener can
+    // start first; only the first successful call does the work.
     @Synchronized
     fun init(context: Context) {
         if (appContext != null) return
         val app = context.applicationContext
-        try {
-            val paramsJson = app.assets.open(PARAMS_ASSET).bufferedReader().use { it.readText() }
-            engine.loadParams(paramsJson)
-            @Suppress("UNCHECKED_CAST")
-            val params = SimpleJsonParser(paramsJson).parse() as Map<String, Any?>
-            featureRules = FeatureRules.fromParams(params)
-        } catch (e: IOException) {
-            NotificationLog.add("TwinRouter", "Could not load $PARAMS_ASSET: ${e.message}")
-            return
-        } catch (e: RuntimeException) {
-            NotificationLog.add("TwinRouter", "$PARAMS_ASSET is not a valid params file: ${e.message}")
-            return
-        }
+        val settings = settingsOf(app)
+        val saved = settings.getString(PERSONA_KEY, null)?.let { Personas.find(it) }
+        val loaded = (saved != null && loadPersona(app, saved)) ||
+            (saved != Personas.default && loadPersona(app, Personas.default))
+        if (!loaded) return
+
         val identity = app.getSharedPreferences(IDENTITY_PREFS, Context.MODE_PRIVATE)
         senderSalt = identity.getString(SALT_KEY, null)
             ?: UUID.randomUUID().toString().also { identity.edit().putString(SALT_KEY, it).apply() }
         app.getSharedPreferences(COUNTS_PREFS, Context.MODE_PRIVATE)
             .getString(COUNTS_KEY, null)
             ?.let { engine.importCounts(it) }
+        settings.getString(AUTONOMY_KEY, null)
+            ?.let { name -> Autonomy.entries.firstOrNull { it.name == name } }
+            ?.let { _autonomy.value = it }
+        alwaysDeliverSenders = settings.getStringSet(ALWAYS_SENDERS_KEY, null).orEmpty().toSet()
+        alwaysDeliverPackages = settings.getStringSet(ALWAYS_PACKAGES_KEY, null).orEmpty().toSet()
         _isModeA.value = app.getSystemService(NotificationManager::class.java)
             .isNotificationPolicyAccessGranted
         appContext = app
-        NotificationLog.add("TwinRouter", "Engine ready with $PARAMS_ASSET")
+        NotificationLog.add("TwinRouter", "Engine ready with ${currentPersona.asset}")
     }
 
-    fun startSession(durationMinutes: Int) {
+    // Parses everything first, so a broken file leaves the previous persona fully in place.
+    @Suppress("UNCHECKED_CAST")
+    private fun loadPersona(app: Context, persona: PersonaOption): Boolean {
+        try {
+            val paramsJson = app.assets.open(persona.asset).bufferedReader().use { it.readText() }
+            val params = SimpleJsonParser(paramsJson).parse() as Map<String, Any?>
+            val rules = FeatureRules.fromParams(params)
+            val policy = params["policy"] as Map<String, Any?>
+            val capMin = (policy["cap_min"] as Number).toDouble()
+            val openWindowMin = (policy["open_window_min"] as Number).toDouble()
+            engine.loadParams(paramsJson)
+            featureRules = rules
+            holdCapMin = capMin
+            outcomes.openWindowMillis = (openWindowMin * 60_000).toLong()
+        } catch (e: IOException) {
+            NotificationLog.add("TwinRouter", "Could not load ${persona.asset}: ${e.message}")
+            return false
+        } catch (e: RuntimeException) {
+            NotificationLog.add("TwinRouter", "${persona.asset} is not a valid params file: ${e.message}")
+            return false
+        }
+        currentPersona = persona
+        _selectedPersona.value = persona.id
+        return true
+    }
+
+    private fun settingsOf(context: Context): SharedPreferences =
+        context.getSharedPreferences(SETTINGS_PREFS, Context.MODE_PRIVATE)
+
+    private fun editSettings(change: SharedPreferences.Editor.() -> Unit) {
+        appContext?.let { settingsOf(it).edit().apply(change).apply() }
+    }
+
+    fun startSession(durationSeconds: Int) {
         val now = System.currentTimeMillis()
         sessionStartMillis = now
-        sessionEndMillis = now + durationMinutes * 60_000L
+        sessionEndMillis = now + durationSeconds * 1000L
     }
 
     fun endSession() {
@@ -173,22 +229,24 @@ object TwinRouter {
         return TwinContext(
             state = _phoneState.value,
             autonomy = _autonomy.value,
-            minutesUntilRelease = min(remainingMin, HOLD_CAP_MIN),
+            minutesUntilRelease = min(remainingMin, holdCapMin),
             focusMinutesElapsed = elapsedMin,
             fatigueRisk = _fatigueRisk.value,
             explorationDraw = 0.5,
-            alwaysDeliverSenders = emptySet(),
-            alwaysDeliverPackages = emptySet(),
-            // Real notifications use the normal priors. The demo-learning profile makes every
-            // worth estimate so uncertain that nearly every message counts as "might matter";
-            // it is meant for the scripted demo, not for live decisions.
-            demoLearning = false,
+            alwaysDeliverSenders = alwaysDeliverSenders,
+            alwaysDeliverPackages = alwaysDeliverPackages,
+            demoLearning = _demoLearning.value,
         )
     }
 
     // Every feedback goes through here, so what the twin learns survives a restart.
     private fun learn(event: FeedbackEvent) {
-        engine.applyFeedback(event)
+        learnAll(listOf(event))
+    }
+
+    private fun learnAll(events: List<FeedbackEvent>) {
+        if (events.isEmpty()) return
+        events.forEach { engine.applyFeedback(it) }
         saveCounts()
     }
 
@@ -228,6 +286,7 @@ object TwinRouter {
         val rules = featureRules ?: return
         // A group summary ("3 new messages") only bundles notifications decided on their own.
         if ((sbn.notification.flags and Notification.FLAG_GROUP_SUMMARY) != 0) return
+        sweepOutcomes()
 
         val content = contentOf(sbn)
         val previous = seenByKey[sbn.key]
@@ -242,7 +301,7 @@ object TwinRouter {
         // 2. Engine evaluates features against the current focus session
         val decision = engine.decide(features, currentContext())
         if (seenByKey.size > MAX_TRACKED_KEYS) seenByKey.clear()
-        seenByKey[sbn.key] = SeenPost(content, decision.action == Action.HOLD, features.category)
+        seenByKey[sbn.key] = SeenPost(content, decision.action == Action.HOLD)
 
         // 4. Extract display metadata
         val appLabel = getAppLabel(listener, sbn.packageName)
@@ -274,11 +333,13 @@ object TwinRouter {
             decision = decision,
             senderDisplayName = features.senderDisplayName,
             packageName = sbn.packageName,
+            senderHash = features.senderHash,
         )
         _liveNotifications.value = (listOf(liveItem) + _liveNotifications.value).take(60)
 
         // 6. Action Execution: HOLD vs DELIVER
         if (decision.action == Action.HOLD) {
+            outcomes.forget(sbn.key)
             // Cancel notification from Android system shade to keep user in focus
             cancelQuietly(listener, sbn.key)
 
@@ -294,11 +355,13 @@ object TwinRouter {
                 minutesUntilRelease = decision.card.minutesUntilRelease.toInt().coerceAtLeast(1),
                 decision = decision,
                 contentIntent = contentIntent,
+                senderHash = features.senderHash,
             )
             _heldTray.value = listOf(trayItem) + _heldTray.value
             _heldTodayCount.value += 1
             _netMinutesProtected.value += decision.card.netMinutesProtected
         } else {
+            outcomes.delivered(sbn.key, features.category, _phoneState.value, System.currentTimeMillis())
             // DELIVER: If in Mode A (DND on) and user is in focus, send bypass alert
             if (_isModeA.value && _phoneState.value != PhoneState.FREE) {
                 val ping = AlertPing.post(
@@ -306,6 +369,7 @@ object TwinRouter {
                     title = "[$appLabel] $title",
                     text = text,
                     contentIntent = contentIntent,
+                    tag = sbn.key,
                 )
                 NotificationLog.add("alert", "Ping for $appLabel: ${ping.label}")
             }
@@ -353,19 +417,67 @@ object TwinRouter {
         rankingMap: NotificationListenerService.RankingMap,
         reason: Int,
     ) {
-        if (reason == NotificationListenerService.REASON_CLICK) {
-            // User opened notification: feedback signal
-            learn(
-                FeedbackEvent.PullOutcome(
-                    category = seenByKey[sbn.key]?.category ?: Category.OTHER,
-                    state = _phoneState.value,
-                    opened = true,
-                    minutesLost = 5.0,
-                    releasedFromTray = false,
-                )
-            )
-            NotificationLog.add("TwinRouter", "Feedback: user opened ${sbn.packageName}")
+        // A tapped alert ping stands for its original, whose key it carries as its tag. The
+        // app's other notifications (digests, released items) say nothing about pull.
+        val key = when {
+            sbn.packageName != appContext?.packageName -> sbn.key
+            reason == NotificationListenerService.REASON_CLICK -> sbn.tag
+            else -> null
         }
+        if (key != null) {
+            val outcome = when (reason) {
+                NotificationListenerService.REASON_CLICK ->
+                    outcomes.opened(key, System.currentTimeMillis(), OPENED_MINUTES_ESTIMATE)
+                NotificationListenerService.REASON_CANCEL,
+                NotificationListenerService.REASON_CANCEL_ALL -> outcomes.dismissed(key)
+                // Cancelled by the app itself (often because the user opened it some other way)
+                // or by the system: not evidence either way, so it is not learned from.
+                else -> {
+                    outcomes.forget(key)
+                    null
+                }
+            }
+            outcome?.let {
+                learn(it)
+                val what = if (it.opened) "opened" else "dismissed unopened"
+                NotificationLog.add("TwinRouter", "Feedback: ${it.category.key} $what in ${it.state}")
+            }
+        }
+        sweepOutcomes()
+    }
+
+    // Delivered notifications nobody opened within the open window are learned as not opened.
+    private fun sweepOutcomes() {
+        val expired = outcomes.expired(System.currentTimeMillis())
+        if (expired.isEmpty()) return
+        learnAll(expired)
+        NotificationLog.add("TwinRouter", "Feedback: ${expired.size} delivered, not opened in time")
+    }
+
+    // Called every few seconds while focus runs: settles pull outcomes and releases anything
+    // that has waited for the hold cap.
+    fun tick(context: Context) {
+        sweepOutcomes()
+        releaseExpiredHolds(context, System.currentTimeMillis())
+    }
+
+    private fun releaseExpiredHolds(context: Context, nowMillis: Long) {
+        val capMillis = (holdCapMin * 60_000).toLong()
+        val expired = _heldTray.value.filter { nowMillis - it.heldAtMillis >= capMillis }
+        if (expired.isEmpty()) return
+        val ids = expired.map { it.id }.toSet()
+        _heldTray.value = _heldTray.value.filterNot { it.id in ids }
+        if (expired.size == 1) {
+            val item = expired.single()
+            DigestNotifier.postReleasedNotification(context, item.app, item.title, item.text, item.contentIntent)
+        } else {
+            DigestNotifier.postBatchDigest(
+                context = context,
+                title = "Held for ${holdCapMin.toInt()} minutes",
+                summaryLines = expired.map { "${it.app}: ${it.title}" },
+            )
+        }
+        NotificationLog.add("TwinRouter", "Hold cap: released ${expired.size} after ${holdCapMin.toInt()} min")
     }
 
     // ── User Interactive Controls ──────────────────────────────────────────
@@ -379,14 +491,51 @@ object TwinRouter {
 
     fun setAutonomy(autonomy: Autonomy) {
         _autonomy.value = autonomy
+        editSettings { putString(AUTONOMY_KEY, autonomy.name) }
     }
 
     fun setFatigueRisk(risk: FatigueRisk) {
         _fatigueRisk.value = risk
     }
 
-    fun setPersona(persona: String) {
-        _selectedPersona.value = persona
+    fun setDemoLearning(enabled: Boolean) {
+        _demoLearning.value = enabled
+        NotificationLog.add("TwinRouter", "Demo learning " + if (enabled) "on" else "off")
+    }
+
+    // Loads another persona's priors; the learned counts stay. Returns false if the persona is
+    // unknown or its file could not be loaded, in which case nothing changes.
+    @Synchronized
+    fun setPersona(idOrLabel: String): Boolean {
+        val app = appContext ?: return false
+        val persona = Personas.find(idOrLabel)
+        if (persona == null) {
+            NotificationLog.add("TwinRouter", "Unknown persona \"$idOrLabel\"")
+            return false
+        }
+        if (persona == currentPersona) return true
+        if (!loadPersona(app, persona)) return false
+        editSettings { putString(PERSONA_KEY, persona.id) }
+        NotificationLog.add("TwinRouter", "Persona switched to ${persona.label} (${persona.asset})")
+        return true
+    }
+
+    // Pushes the bundled simulated outcomes through the normal learning path. Returns how
+    // many were applied.
+    fun runLearningReplay(): Int {
+        val app = appContext ?: return 0
+        val events = try {
+            LearningReplay.parse(app.assets.open(LearningReplay.ASSET).bufferedReader().use { it.readText() })
+        } catch (e: IOException) {
+            NotificationLog.add("TwinRouter", "Could not load ${LearningReplay.ASSET}: ${e.message}")
+            return 0
+        } catch (e: RuntimeException) {
+            NotificationLog.add("TwinRouter", "${LearningReplay.ASSET} is not a valid replay: ${e.message}")
+            return 0
+        }
+        learnAll(events)
+        NotificationLog.add("TwinRouter", "Learning replay: ${events.size} simulated outcomes applied")
+        return events.size
     }
 
     fun releaseHeldItem(context: Context, trayId: String) {
@@ -401,34 +550,49 @@ object TwinRouter {
         learn(
             FeedbackEvent.WorthLabel(
                 packageName = item.packageName,
-                senderHash = null,
+                senderHash = item.senderHash,
                 label = WorthLabelKind.RELEASE_NOW,
             )
         )
         _heldTray.value = _heldTray.value.filterNot { it.id == trayId }
     }
 
-    fun releaseAllDigest(context: Context) {
+    fun releaseAllDigest(context: Context, title: String) {
         val currentItems = _heldTray.value
         if (currentItems.isNotEmpty()) {
             DigestNotifier.postBatchDigest(
                 context = context,
-                count = currentItems.size,
+                title = title,
                 summaryLines = currentItems.map { "${it.app}: ${it.title}" },
             )
             _heldTray.value = emptyList()
         }
     }
 
-    fun alwaysDeliverSender(trayId: String) {
+    // A rule, not just a label: from now on this sender (or, for items with no sender, this
+    // app) is always delivered by the never-hold overrides. The item itself is released now.
+    fun alwaysDeliverSender(context: Context, trayId: String) {
         val item = _heldTray.value.firstOrNull { it.id == trayId } ?: return
+        val sender = item.senderHash
+        if (sender != null) {
+            alwaysDeliverSenders = alwaysDeliverSenders + sender
+            editSettings { putStringSet(ALWAYS_SENDERS_KEY, alwaysDeliverSenders) }
+        } else {
+            alwaysDeliverPackages = alwaysDeliverPackages + item.packageName
+            editSettings { putStringSet(ALWAYS_PACKAGES_KEY, alwaysDeliverPackages) }
+        }
+        NotificationLog.add(
+            "TwinRouter",
+            "Always deliver: " + if (sender != null) "${item.sender ?: "this sender"} in ${item.app}" else item.app,
+        )
         learn(
             FeedbackEvent.WorthLabel(
                 packageName = item.packageName,
-                senderHash = null,
+                senderHash = sender,
                 label = WorthLabelKind.ALWAYS_DELIVER,
             )
         )
+        DigestNotifier.postReleasedNotification(context, item.app, item.title, item.text, item.contentIntent)
         _heldTray.value = _heldTray.value.filterNot { it.id == trayId }
     }
 
@@ -437,7 +601,7 @@ object TwinRouter {
         learn(
             FeedbackEvent.WorthLabel(
                 packageName = item.packageName,
-                senderHash = null,
+                senderHash = item.senderHash,
                 label = WorthLabelKind.SHOULD_HAVE_COME_THROUGH,
             )
         )
@@ -449,7 +613,7 @@ object TwinRouter {
         learn(
             FeedbackEvent.WorthLabel(
                 packageName = item.packageName,
-                senderHash = null,
+                senderHash = item.senderHash,
                 label = WorthLabelKind.CORRECT_HOLD,
             )
         )
@@ -462,7 +626,7 @@ object TwinRouter {
                 learn(
                     FeedbackEvent.WorthLabel(
                         packageName = item.packageName,
-                        senderHash = null,
+                        senderHash = item.senderHash,
                         label = label,
                     )
                 )
@@ -482,6 +646,9 @@ object TwinRouter {
             state = _phoneState.value,
             autonomy = _autonomy.value,
             fatigueRisk = _fatigueRisk.value,
+            alwaysDeliverSenders = alwaysDeliverSenders,
+            alwaysDeliverPackages = alwaysDeliverPackages,
+            demoLearning = _demoLearning.value,
         )
 
         val decision = engine.decide(scenario.features, currentContext)
@@ -504,6 +671,7 @@ object TwinRouter {
             decision = decision,
             senderDisplayName = scenario.features.senderDisplayName,
             packageName = scenario.features.packageName,
+            senderHash = scenario.features.senderHash,
         )
 
         _liveNotifications.value = listOf(liveItem) + _liveNotifications.value
@@ -523,16 +691,25 @@ object TwinRouter {
                 timeAgo = "Just now",
                 minutesUntilRelease = decision.card.minutesUntilRelease.toInt().coerceAtLeast(1),
                 decision = decision,
+                senderHash = scenario.features.senderHash,
             )
             _heldTray.value = listOf(trayItem) + _heldTray.value
         }
     }
 
+    // Starts the twin over: learned counts, always-deliver rules and today's numbers.
     fun resetAll() {
         engine.resetCounts()
         saveCounts()
         FeatureBuilder.reset()
         seenByKey.clear()
+        outcomes.clear()
+        alwaysDeliverSenders = emptySet()
+        alwaysDeliverPackages = emptySet()
+        editSettings {
+            remove(ALWAYS_SENDERS_KEY)
+            remove(ALWAYS_PACKAGES_KEY)
+        }
         _heldTodayCount.value = 0
         _netMinutesProtected.value = 0.0
         _heldTray.value = emptyList()
