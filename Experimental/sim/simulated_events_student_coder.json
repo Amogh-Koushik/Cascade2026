@@ -1,0 +1,522 @@
+[
+  {
+    "event_id": "sim_notif_0000",
+    "category": "shopping_promo",
+    "state": "FOCUS_RESTLESS",
+    "is_focus": true,
+    "d_minutes_until_release": 15.9,
+    "features": {
+      "is_conversation": false,
+      "group_chat": false,
+      "same_sender_repeats_3m": false,
+      "bait_hit": true,
+      "urgency_hit": false
+    },
+    "ground_truth": {
+      "true_is_important": false,
+      "branch_show_now": {
+        "did_open": false,
+        "minutes_lost": 0.5
+      },
+      "branch_hold": {
+        "immediate_minutes_lost": 0.0,
+        "delay_penalty_minutes": 0.0
+      },
+      "net_minutes_protected_if_held": 0.5
+    }
+  },
+  {
+    "event_id": "sim_notif_0001",
+    "category": "shopping_promo",
+    "state": "FOCUS_STEADY",
+    "is_focus": true,
+    "d_minutes_until_release": 30.9,
+    "features": {
+      "is_conversation": false,
+      "group_chat": false,
+      "same_sender_repeats_3m": false,
+      "bait_hit": false,
+      "urgency_hit": false
+    },
+    "ground_truth": {
+      "true_is_important": false,
+      "branch_show_now": {
+        "did_open": false,
+        "minutes_lost": 0.5
+      },
+      "branch_hold": {
+        "immediate_minutes_lost": 0.0,
+        "delay_penalty_minutes": 0.0
+      },
+      "net_minutes_protected_if_held": 0.5
+    }
+  },
+  {
+    "event_id": "sim_notif_0002",
+    "category": "social",
+    "state": "FOCUS_STEADY",
+    "is_focus": true,
+    "d_minutes_until_release": 45.0,
+    "features": {
+      "is_conversation": false,
+      "group_chat": false,
+      "same_sender_repeats_3m": false,
+      "bait_hit": false,
+      "urgency_hit": false
+    },
+    "ground_truth": {
+      "true_is_important": false,
+      "branch_show_now": {
+        "did_open": false,
+        "minutes_lost": 0.5
+      },
+      "branch_hold": {
+        "immediate_minutes_lost": 0.0,
+        "delay_penalty_minutes": 0.0
+      },
+      "net_minutes_protected_if_held": 0.5
+    }
+  },
+  {
+    "event_id": "sim_notif_0003",
+    "category": "shopping_promo",
+    "state": "FOCUS_RESTLESS",
+    "is_focus": true,
+    "d_minutes_until_release": 6.9,
+    "features": {
+      "is_conversation": false,
+      "group_chat": false,
+      "same_sender_repeats_3m": false,
+      "bait_hit": false,
+      "urgency_hit": false
+    },
+    "ground_truth": {
+      "true_is_important": false,
+      "branch_show_now": {
+        "did_open": false,
+        "minutes_lost": 0.5
+      },
+      "branch_hold": {
+        "immediate_minutes_lost": 0.0,
+        "delay_penalty_minutes": 0.0
+      },
+      "net_minutes_protected_if_held": 0.5
+    }
+  },
+  {
+    "event_id": "sim_notif_0004",
+    "category": "short_video",
+    "state": "FOCUS_STEADY",
+    "is_focus": true,
+    "d_minutes_until_release": 13.7,
+    "features": {
+      "is_conversation": false,
+      "group_chat": false,
+      "same_sender_repeats_3m": false,
+      "bait_hit": false,
+      "urgency_hit": false
+    },
+    "ground_truth": {
+      "true_is_important": false,
+      "branch_show_now": {
+        "did_open": true,
+        "minutes_lost": 24.91
+      },
+      "branch_hold": {
+        "immediate_minutes_lost": 0.0,
+        "delay_penalty_minutes": 0.0
+      },
+      "net_minutes_protected_if_held": 24.91
+    }
+  },
+  {
+    "event_id": "sim_notif_0005",
+    "category": "social",
+    "state": "FOCUS_STEADY",
+    "is_focus": true,
+    "d_minutes_until_release": 42.0,
+    "features": {
+      "is_conversation": false,
+      "group_chat": false,
+      "same_sender_repeats_3m": false,
+      "bait_hit": false,
+      "urgency_hit": false
+    },
+    "ground_truth": {
+      "true_is_important": false,
+      "branch_show_now": {
+        "did_open": false,
+        "minutes_lost": 0.5
+      },
+      "branch_hold": {
+        "immediate_minutes_lost": 0.0,
+        "delay_penalty_minutes": 0.0
+      },
+      "net_minutes_protected_if_held": 0.5
+    }
+  },
+  {
+    "event_id": "sim_notif_0006",
+    "category": "social",
+    "state": "FREE",
+    "is_focus": false,
+    "d_minutes_until_release": 0.0,
+    "features": {
+      "is_conversation": false,
+      "group_chat": false,
+      "same_sender_repeats_3m": false,
+      "bait_hit": false,
+      "urgency_hit": false
+    },
+    "ground_truth": {
+      "true_is_important": false,
+      "branch_show_now": {
+        "did_open": false,
+        "minutes_lost": 0.5
+      },
+      "branch_hold": {
+        "immediate_minutes_lost": 0.0,
+        "delay_penalty_minutes": 0.0
+      },
+      "net_minutes_protected_if_held": 0.5
+    }
+  },
+  {
+    "event_id": "sim_notif_0007",
+    "category": "news",
+    "state": "FREE",
+    "is_focus": false,
+    "d_minutes_until_release": 0.0,
+    "features": {
+      "is_conversation": false,
+      "group_chat": false,
+      "same_sender_repeats_3m": false,
+      "bait_hit": false,
+      "urgency_hit": false
+    },
+    "ground_truth": {
+      "true_is_important": false,
+      "branch_show_now": {
+        "did_open": false,
+        "minutes_lost": 0.5
+      },
+      "branch_hold": {
+        "immediate_minutes_lost": 0.0,
+        "delay_penalty_minutes": 0.0
+      },
+      "net_minutes_protected_if_held": 0.5
+    }
+  },
+  {
+    "event_id": "sim_notif_0008",
+    "category": "messaging",
+    "state": "FOCUS_STEADY",
+    "is_focus": true,
+    "d_minutes_until_release": 45.0,
+    "features": {
+      "is_conversation": true,
+      "group_chat": false,
+      "same_sender_repeats_3m": false,
+      "bait_hit": false,
+      "urgency_hit": false
+    },
+    "ground_truth": {
+      "true_is_important": false,
+      "branch_show_now": {
+        "did_open": true,
+        "minutes_lost": 4.95
+      },
+      "branch_hold": {
+        "immediate_minutes_lost": 0.0,
+        "delay_penalty_minutes": 0.0
+      },
+      "net_minutes_protected_if_held": 4.95
+    }
+  },
+  {
+    "event_id": "sim_notif_0009",
+    "category": "messaging",
+    "state": "FOCUS_STEADY",
+    "is_focus": true,
+    "d_minutes_until_release": 42.7,
+    "features": {
+      "is_conversation": true,
+      "group_chat": false,
+      "same_sender_repeats_3m": false,
+      "bait_hit": false,
+      "urgency_hit": false
+    },
+    "ground_truth": {
+      "true_is_important": false,
+      "branch_show_now": {
+        "did_open": false,
+        "minutes_lost": 0.5
+      },
+      "branch_hold": {
+        "immediate_minutes_lost": 0.0,
+        "delay_penalty_minutes": 0.0
+      },
+      "net_minutes_protected_if_held": 0.5
+    }
+  },
+  {
+    "event_id": "sim_notif_0010",
+    "category": "messaging",
+    "state": "FOCUS_STEADY",
+    "is_focus": true,
+    "d_minutes_until_release": 45.0,
+    "features": {
+      "is_conversation": true,
+      "group_chat": false,
+      "same_sender_repeats_3m": false,
+      "bait_hit": false,
+      "urgency_hit": false
+    },
+    "ground_truth": {
+      "true_is_important": false,
+      "branch_show_now": {
+        "did_open": true,
+        "minutes_lost": 7.6
+      },
+      "branch_hold": {
+        "immediate_minutes_lost": 0.0,
+        "delay_penalty_minutes": 0.0
+      },
+      "net_minutes_protected_if_held": 7.6
+    }
+  },
+  {
+    "event_id": "sim_notif_0011",
+    "category": "social",
+    "state": "FOCUS_STEADY",
+    "is_focus": true,
+    "d_minutes_until_release": 34.5,
+    "features": {
+      "is_conversation": false,
+      "group_chat": false,
+      "same_sender_repeats_3m": false,
+      "bait_hit": false,
+      "urgency_hit": false
+    },
+    "ground_truth": {
+      "true_is_important": false,
+      "branch_show_now": {
+        "did_open": true,
+        "minutes_lost": 12.68
+      },
+      "branch_hold": {
+        "immediate_minutes_lost": 0.0,
+        "delay_penalty_minutes": 0.0
+      },
+      "net_minutes_protected_if_held": 12.68
+    }
+  },
+  {
+    "event_id": "sim_notif_0012",
+    "category": "messaging",
+    "state": "FOCUS_RESTLESS",
+    "is_focus": true,
+    "d_minutes_until_release": 40.3,
+    "features": {
+      "is_conversation": true,
+      "group_chat": true,
+      "same_sender_repeats_3m": false,
+      "bait_hit": false,
+      "urgency_hit": true
+    },
+    "ground_truth": {
+      "true_is_important": true,
+      "branch_show_now": {
+        "did_open": true,
+        "minutes_lost": 1.5
+      },
+      "branch_hold": {
+        "immediate_minutes_lost": 0.0,
+        "delay_penalty_minutes": 20.16
+      },
+      "net_minutes_protected_if_held": -18.66
+    }
+  },
+  {
+    "event_id": "sim_notif_0013",
+    "category": "messaging",
+    "state": "FOCUS_STEADY",
+    "is_focus": true,
+    "d_minutes_until_release": 41.0,
+    "features": {
+      "is_conversation": true,
+      "group_chat": false,
+      "same_sender_repeats_3m": false,
+      "bait_hit": false,
+      "urgency_hit": false
+    },
+    "ground_truth": {
+      "true_is_important": true,
+      "branch_show_now": {
+        "did_open": false,
+        "minutes_lost": 0.5
+      },
+      "branch_hold": {
+        "immediate_minutes_lost": 0.0,
+        "delay_penalty_minutes": 20.5
+      },
+      "net_minutes_protected_if_held": -20.0
+    }
+  },
+  {
+    "event_id": "sim_notif_0014",
+    "category": "social",
+    "state": "FOCUS_STEADY",
+    "is_focus": true,
+    "d_minutes_until_release": 3.8,
+    "features": {
+      "is_conversation": false,
+      "group_chat": false,
+      "same_sender_repeats_3m": false,
+      "bait_hit": false,
+      "urgency_hit": false
+    },
+    "ground_truth": {
+      "true_is_important": false,
+      "branch_show_now": {
+        "did_open": false,
+        "minutes_lost": 0.5
+      },
+      "branch_hold": {
+        "immediate_minutes_lost": 0.0,
+        "delay_penalty_minutes": 0.0
+      },
+      "net_minutes_protected_if_held": 0.5
+    }
+  },
+  {
+    "event_id": "sim_notif_0015",
+    "category": "social",
+    "state": "FREE",
+    "is_focus": false,
+    "d_minutes_until_release": 0.0,
+    "features": {
+      "is_conversation": false,
+      "group_chat": false,
+      "same_sender_repeats_3m": false,
+      "bait_hit": false,
+      "urgency_hit": false
+    },
+    "ground_truth": {
+      "true_is_important": false,
+      "branch_show_now": {
+        "did_open": true,
+        "minutes_lost": 4.79
+      },
+      "branch_hold": {
+        "immediate_minutes_lost": 0.0,
+        "delay_penalty_minutes": 0.0
+      },
+      "net_minutes_protected_if_held": 4.79
+    }
+  },
+  {
+    "event_id": "sim_notif_0016",
+    "category": "social",
+    "state": "FOCUS_RESTLESS",
+    "is_focus": true,
+    "d_minutes_until_release": 27.0,
+    "features": {
+      "is_conversation": false,
+      "group_chat": false,
+      "same_sender_repeats_3m": false,
+      "bait_hit": true,
+      "urgency_hit": false
+    },
+    "ground_truth": {
+      "true_is_important": false,
+      "branch_show_now": {
+        "did_open": false,
+        "minutes_lost": 0.5
+      },
+      "branch_hold": {
+        "immediate_minutes_lost": 0.0,
+        "delay_penalty_minutes": 0.0
+      },
+      "net_minutes_protected_if_held": 0.5
+    }
+  },
+  {
+    "event_id": "sim_notif_0017",
+    "category": "messaging",
+    "state": "FOCUS_RESTLESS",
+    "is_focus": true,
+    "d_minutes_until_release": 13.1,
+    "features": {
+      "is_conversation": true,
+      "group_chat": false,
+      "same_sender_repeats_3m": false,
+      "bait_hit": false,
+      "urgency_hit": false
+    },
+    "ground_truth": {
+      "true_is_important": false,
+      "branch_show_now": {
+        "did_open": false,
+        "minutes_lost": 0.5
+      },
+      "branch_hold": {
+        "immediate_minutes_lost": 0.0,
+        "delay_penalty_minutes": 0.0
+      },
+      "net_minutes_protected_if_held": 0.5
+    }
+  },
+  {
+    "event_id": "sim_notif_0018",
+    "category": "short_video",
+    "state": "FOCUS_STEADY",
+    "is_focus": true,
+    "d_minutes_until_release": 25.3,
+    "features": {
+      "is_conversation": false,
+      "group_chat": false,
+      "same_sender_repeats_3m": false,
+      "bait_hit": true,
+      "urgency_hit": false
+    },
+    "ground_truth": {
+      "true_is_important": false,
+      "branch_show_now": {
+        "did_open": false,
+        "minutes_lost": 0.5
+      },
+      "branch_hold": {
+        "immediate_minutes_lost": 0.0,
+        "delay_penalty_minutes": 0.0
+      },
+      "net_minutes_protected_if_held": 0.5
+    }
+  },
+  {
+    "event_id": "sim_notif_0019",
+    "category": "short_video",
+    "state": "FOCUS_STEADY",
+    "is_focus": true,
+    "d_minutes_until_release": 5.4,
+    "features": {
+      "is_conversation": false,
+      "group_chat": false,
+      "same_sender_repeats_3m": false,
+      "bait_hit": false,
+      "urgency_hit": false
+    },
+    "ground_truth": {
+      "true_is_important": false,
+      "branch_show_now": {
+        "did_open": false,
+        "minutes_lost": 0.5
+      },
+      "branch_hold": {
+        "immediate_minutes_lost": 0.0,
+        "delay_penalty_minutes": 0.0
+      },
+      "net_minutes_protected_if_held": 0.5
+    }
+  }
+]
