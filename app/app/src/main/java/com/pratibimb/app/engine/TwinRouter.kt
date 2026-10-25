@@ -408,23 +408,32 @@ object TwinRouter {
         val contentIntent = sbn.notification.contentIntent
         val content = ContentRules.classify(rawTitle, text, extras.containsKey(Notification.EXTRA_PICTURE), sbn.postTime)
         fun inspect(outcome: String) = NotificationInspector.record(sbn, rankingMap, appLabel, rawTitle, content, outcome)
+        // A notification the twin leaves alone says why in the Debug log too.
+        fun skip(outcome: String) {
+            NotificationLog.add(appLabel, "SKIP \"$rawTitle\": $outcome", sbn.postTime)
+            inspect(outcome)
+        }
 
         if (sbn.isOngoing) return inspect("Ongoing: left alone")
         // Without params the engine cannot decide; leaving the notification alone is the safe choice.
-        val rules = featureRules ?: return inspect("Engine not loaded: left alone")
-        // A group summary ("3 new messages") only bundles notifications decided on their own.
-        if ((sbn.notification.flags and Notification.FLAG_GROUP_SUMMARY) != 0) return inspect("Group summary: skipped")
+        val rules = featureRules ?: return skip("engine not loaded, left alone")
+        // A group summary ("3 new messages") usually bundles notifications decided on their own.
+        // Some apps (WhatsApp on some phones) post only the summary, "Rohan: 3 new messages",
+        // with no notification per message; then the summary is the notification to decide.
+        if ((sbn.notification.flags and Notification.FLAG_GROUP_SUMMARY) != 0 && hasGroupChildren(listener, sbn)) {
+            return skip("group summary, its messages are decided on their own")
+        }
         // Paused, or an app the user opted out: the notification arrives untouched and unlogged.
         val sourcePackage = demo?.features?.packageName ?: sbn.packageName
-        if (TwinSettings.paused.value) return inspect("Paused: left alone")
-        if (!TwinSettings.isManaged(sourcePackage)) return inspect("App opted out: left alone")
+        if (TwinSettings.paused.value) return skip("paused, left alone")
+        if (!TwinSettings.isManaged(sourcePackage)) return skip("app opted out, left alone")
         sweepOutcomes()
 
         val contentHash = contentOf(sbn)
         val previous = seenByKey[sbn.key]
         if (previous != null && previous.content == contentHash) {
             if (previous.held) cancelQuietly(listener, sbn.key)
-            return inspect("Re-post, same content: not decided again")
+            return skip("re-post with the same content, not decided again")
         }
 
         // 1. Build features from live StatusBarNotification
@@ -578,6 +587,20 @@ object TwinRouter {
         )
         NotificationLog.add("TwinRouter", "Released ${earlier.size} earlier messages from the same sender")
     }
+
+    // Whether the app also posted individual notifications in this summary's group.
+    private fun hasGroupChildren(listener: PratibimbListener, summary: StatusBarNotification): Boolean =
+        try {
+            listener.activeNotifications.orEmpty().any {
+                it.key != summary.key &&
+                    it.packageName == summary.packageName &&
+                    it.groupKey == summary.groupKey &&
+                    (it.notification.flags and Notification.FLAG_GROUP_SUMMARY) == 0
+            }
+        } catch (e: SecurityException) {
+            NotificationLog.add("TwinRouter", "Could not read active notifications: ${e.message}")
+            false
+        }
 
     // In Mode A a delivered notification is silenced by Priority mode, so the twin pings for
     // it. Unsure deliveries and one in three of the rest also ask "Worth it?" (on the ping in
