@@ -9,6 +9,7 @@ import android.service.notification.StatusBarNotification
 import com.pratibimb.app.data.FeatureBuilder
 import com.pratibimb.app.data.FeatureRules
 import com.pratibimb.app.data.NotificationLog
+import com.pratibimb.app.data.UsageReader
 import com.pratibimb.app.dnd.AlertPing
 import com.pratibimb.app.dnd.DigestNotifier
 import com.pratibimb.app.service.PratibimbListener
@@ -31,6 +32,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import java.io.IOException
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.math.min
 
 /**
@@ -51,8 +53,8 @@ object TwinRouter {
     // Bounds the re-post memory; clearing it only means one extra decision for an old key.
     private const val MAX_TRACKED_KEYS = 500
 
-    // The phone cannot yet measure how long an opened notification kept the user away, so an
-    // open is recorded with this estimate; the clip to [0.1, 60] happens in the engine.
+    // Used when an open cannot be timed from usage events: no usage access, the open happened
+    // outside focus (usage is only read during focus), or its app never showed up in the events.
     private const val OPENED_MINUTES_ESTIMATE = 5.0
 
     val engine = RealTwinEngine()
@@ -76,6 +78,10 @@ object TwinRouter {
     // policy.cap_min from the params: nothing waits in the tray longer than this.
     @Volatile
     private var holdCapMin = 45.0
+
+    // policy.minutes_lost_cap_min: the most one opened notification is charged.
+    @Volatile
+    private var minutesLostCapMin = 60.0
 
     @Volatile
     var activeListener: PratibimbListener? = null
@@ -145,6 +151,17 @@ object TwinRouter {
 
     private val outcomes = OutcomeTracker(openWindowMillis = 10 * 60_000L)
 
+    // Opens made during focus, waiting for the user to leave the opened app.
+    private val openTimers = CopyOnWriteArrayList<OpenedNotification>()
+
+    // The last state the usage events showed. Detection only changes the phone state when this
+    // changes, so a state picked by hand on the Debug screen stays until behaviour changes.
+    @Volatile
+    private var lastDetectedState: PhoneState? = null
+
+    @Volatile
+    private var usageAccessWarned = false
+
     // Loads the saved persona's params, the counts learned so far and the user's settings.
     // Both the activity and the listener call this, because after a reboot the listener can
     // start first; only the first successful call does the work.
@@ -185,9 +202,11 @@ object TwinRouter {
             val policy = params["policy"] as Map<String, Any?>
             val capMin = (policy["cap_min"] as Number).toDouble()
             val openWindowMin = (policy["open_window_min"] as Number).toDouble()
+            val lostCapMin = (policy["minutes_lost_cap_min"] as Number).toDouble()
             engine.loadParams(paramsJson)
             featureRules = rules
             holdCapMin = capMin
+            minutesLostCapMin = lostCapMin
             outcomes.openWindowMillis = (openWindowMin * 60_000).toLong()
         } catch (e: IOException) {
             NotificationLog.add("TwinRouter", "Could not load ${persona.asset}: ${e.message}")
@@ -361,7 +380,13 @@ object TwinRouter {
             _heldTodayCount.value += 1
             _netMinutesProtected.value += decision.card.netMinutesProtected
         } else {
-            outcomes.delivered(sbn.key, features.category, _phoneState.value, System.currentTimeMillis())
+            outcomes.delivered(
+                sbn.key,
+                sbn.packageName,
+                features.category,
+                _phoneState.value,
+                System.currentTimeMillis(),
+            )
             // DELIVER: If in Mode A (DND on) and user is in focus, send bypass alert
             if (_isModeA.value && _phoneState.value != PhoneState.FREE) {
                 val ping = AlertPing.post(
@@ -424,10 +449,10 @@ object TwinRouter {
             reason == NotificationListenerService.REASON_CLICK -> sbn.tag
             else -> null
         }
-        if (key != null) {
+        if (key != null && reason == NotificationListenerService.REASON_CLICK) {
+            outcomes.opened(key, System.currentTimeMillis())?.let { startOpenTimer(it) }
+        } else if (key != null) {
             val outcome = when (reason) {
-                NotificationListenerService.REASON_CLICK ->
-                    outcomes.opened(key, System.currentTimeMillis(), OPENED_MINUTES_ESTIMATE)
                 NotificationListenerService.REASON_CANCEL,
                 NotificationListenerService.REASON_CANCEL_ALL -> outcomes.dismissed(key)
                 // Cancelled by the app itself (often because the user opened it some other way)
@@ -439,11 +464,80 @@ object TwinRouter {
             }
             outcome?.let {
                 learn(it)
-                val what = if (it.opened) "opened" else "dismissed unopened"
-                NotificationLog.add("TwinRouter", "Feedback: ${it.category.key} $what in ${it.state}")
+                NotificationLog.add("TwinRouter", "Feedback: ${it.category.key} dismissed unopened in ${it.state}")
             }
         }
         sweepOutcomes()
+    }
+
+    // An open during focus is timed from usage events until the user leaves the app; any other
+    // open is learned at once with the estimate.
+    private fun startOpenTimer(open: OpenedNotification) {
+        val app = appContext
+        val timed = open.inWindow && open.state != PhoneState.FREE && app != null && UsageReader.hasAccess(app)
+        if (timed) {
+            openTimers += open
+            NotificationLog.add("TwinRouter", "Feedback: ${open.category.key} opened, timing until you leave it")
+            return
+        }
+        val outcome = open.outcome(OPENED_MINUTES_ESTIMATE)
+        learn(outcome)
+        val what = if (outcome.opened) "opened (estimated ${OPENED_MINUTES_ESTIMATE.toInt()} min)" else "opened too late, counted as not opened"
+        NotificationLog.add("TwinRouter", "Feedback: ${open.category.key} $what in ${open.state}")
+    }
+
+    private fun settleOpenTimers(context: Context, nowMillis: Long, sessionOver: Boolean) {
+        if (openTimers.isEmpty()) return
+        val from = openTimers.minOf { it.openedAtMillis } - ForegroundRules.TAP_GRACE_MILLIS
+        val events = UsageReader.events(context, from, nowMillis)
+        val ignored = UsageReader.systemPackages()
+        val settled = mutableListOf<FeedbackEvent>()
+        for (open in openTimers) {
+            val visit = ForegroundRules.visitAfter(events, open.packageName, open.openedAtMillis, ignored)
+            val minutes = ForegroundRules.minutesLost(
+                visit = visit,
+                openedAtMillis = open.openedAtMillis,
+                nowMillis = nowMillis,
+                capMinutes = minutesLostCapMin,
+                estimateMinutes = OPENED_MINUTES_ESTIMATE,
+                sessionOver = sessionOver,
+            ) ?: continue
+            openTimers.remove(open)
+            settled += open.outcome(minutes)
+            NotificationLog.add(
+                "TwinRouter",
+                "Feedback: ${open.category.key} opened, %.1f min lost in ${open.state}".format(minutes),
+            )
+        }
+        learnAll(settled)
+    }
+
+    // FOCUS_STEADY or FOCUS_RESTLESS from app switches since the session (re)started, over the
+    // last ten minutes. Nothing is read in FREE.
+    private fun detectPhoneState(context: Context, nowMillis: Long) {
+        if (_phoneState.value == PhoneState.FREE || sessionStartMillis == 0L) {
+            lastDetectedState = null
+            return
+        }
+        if (!UsageReader.hasAccess(context)) {
+            if (!usageAccessWarned) {
+                usageAccessWarned = true
+                NotificationLog.add("TwinRouter", "No usage access: phone state stays as set, opens use the estimate")
+            }
+            return
+        }
+        usageAccessWarned = false
+        val from = maxOf(nowMillis - ForegroundRules.SWITCH_WINDOW_MILLIS, sessionStartMillis)
+        val events = UsageReader.events(context, from, nowMillis)
+        val passThrough = UsageReader.systemPackages() + UsageReader.launcherPackages(context)
+        val switches = ForegroundRules.countSwitches(events, passThrough)
+        val detected = if (ForegroundRules.isRestless(switches)) PhoneState.FOCUS_RESTLESS else PhoneState.FOCUS_STEADY
+        if (detected == lastDetectedState) return
+        lastDetectedState = detected
+        if (_phoneState.value != detected) {
+            _phoneState.value = detected
+            NotificationLog.add("TwinRouter", "Phone state $detected: $switches app switches in the last 10 min")
+        }
     }
 
     // Delivered notifications nobody opened within the open window are learned as not opened.
@@ -454,11 +548,15 @@ object TwinRouter {
         NotificationLog.add("TwinRouter", "Feedback: ${expired.size} delivered, not opened in time")
     }
 
-    // Called every few seconds while focus runs: settles pull outcomes and releases anything
-    // that has waited for the hold cap.
-    fun tick(context: Context) {
+    // Called every few seconds while focus runs, and once more with sessionOver when it ends:
+    // updates the phone state, settles pull outcomes and releases anything that has waited for
+    // the hold cap.
+    fun tick(context: Context, sessionOver: Boolean = false) {
+        val now = System.currentTimeMillis()
+        if (!sessionOver) detectPhoneState(context, now)
         sweepOutcomes()
-        releaseExpiredHolds(context, System.currentTimeMillis())
+        settleOpenTimers(context, now, sessionOver)
+        releaseExpiredHolds(context, now)
     }
 
     private fun releaseExpiredHolds(context: Context, nowMillis: Long) {
@@ -704,6 +802,7 @@ object TwinRouter {
         FeatureBuilder.reset()
         seenByKey.clear()
         outcomes.clear()
+        openTimers.clear()
         alwaysDeliverSenders = emptySet()
         alwaysDeliverPackages = emptySet()
         editSettings {

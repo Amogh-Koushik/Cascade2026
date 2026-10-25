@@ -7,6 +7,14 @@
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" tools:ignore="ProtectedPermissions" />
 
+    <!-- Lets the app see which package is the launcher, so going home is not counted as an app switch. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.HOME" />
+        </intent>
+    </queries>
+
     <application
         android:allowBackup="false"
         android:icon="@android:drawable/sym_def_app_icon"

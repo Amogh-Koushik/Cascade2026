@@ -287,6 +287,8 @@ class PratibimbViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
     fun stopFocus() {
+        // Opens still being timed are settled with what the usage events show so far.
+        TwinRouter.tick(getApplication(), sessionOver = true)
         _isFocusActive.value = false
         _breakSecondsLeft.value = 0
         TwinRouter.setPhoneState(PhoneState.FREE)
