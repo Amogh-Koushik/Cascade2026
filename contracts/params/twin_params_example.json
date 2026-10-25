@@ -126,6 +126,13 @@
   "repeat_ping": {
    "count": 3,
    "window_min": 3
+  },
+  "cap_by_kind": {
+   "direct": 15,
+   "group": 30,
+   "email": 30,
+   "social": 45,
+   "promo": 45
   }
  },
  "demo_learning": {
@@ -161,6 +168,29 @@
    "net.one97.paytm"
   ]
  },
+ "contexts": [
+  {
+   "id": "placements",
+   "label": "Placements",
+   "active": true,
+   "phrases": [
+    "placement",
+    "placements",
+    "placement drive",
+    "campus drive",
+    "drive",
+    "registration",
+    "register by",
+    "last date",
+    "shortlist",
+    "shortlisted",
+    "interview",
+    "aptitude test",
+    "pre-placement talk",
+    "offer letter"
+   ]
+  }
+ ],
  "lexicons": {
   "urgency": [
    "urgent",

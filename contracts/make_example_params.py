@@ -7,6 +7,7 @@
 import json
 from typing import Any
 
+from contracts.contexts import CONTEXTS
 from contracts.lexicons import LEXICONS
 from contracts.params import PARAMS_DIR, load_draw_bank, validate_params
 
@@ -106,6 +107,8 @@ def build_example_params() -> dict[str, Any]:
             "low_confidence_width": 0.4,
             # Three separate pings in three minutes: someone trying to reach you, not chatting.
             "repeat_ping": {"count": 3, "window_min": 3},
+            # How long a held item may wait, by kind; tighter than cap_min for people.
+            "cap_by_kind": {"direct": 15, "group": 30, "email": 30, "social": 45, "promo": 45},
         },
         "demo_learning": {
             "k_app": 4,
@@ -129,6 +132,7 @@ def build_example_params() -> dict[str, Any]:
                 "net.one97.paytm",
             ],
         },
+        "contexts": [dict(context) for context in CONTEXTS],
         "lexicons": {name: list(words) for name, words in LEXICONS.items()},
         "draw_bank": load_draw_bank(),
     }

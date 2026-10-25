@@ -106,6 +106,8 @@ object TrayStore {
             .put("senderHash", item.senderHash ?: JSONObject.NULL)
             .put("heldAtMillis", item.heldAtMillis)
             .put("flag", item.flag ?: JSONObject.NULL)
+            .put("capMinutes", item.capMinutes ?: JSONObject.NULL)
+            .put("deadlineAtMillis", item.deadlineAtMillis ?: JSONObject.NULL)
 
     private fun fromJson(json: JSONObject): HeldTrayItem =
         HeldTrayItem(
@@ -124,6 +126,12 @@ object TrayStore {
             heldAtMillis = json.getLong("heldAtMillis"),
             // Files saved before flags existed have no key.
             flag = if (json.has("flag")) json.optStringOrNull("flag") else null,
+            capMinutes = if (json.has("capMinutes") && !json.isNull("capMinutes")) json.getDouble("capMinutes") else null,
+            deadlineAtMillis = if (json.has("deadlineAtMillis") && !json.isNull("deadlineAtMillis")) {
+                json.getLong("deadlineAtMillis")
+            } else {
+                null
+            },
         )
 
     private fun JSONObject.optStringOrNull(key: String): String? = if (isNull(key)) null else getString(key)

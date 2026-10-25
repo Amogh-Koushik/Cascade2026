@@ -103,6 +103,13 @@
   "repeat_ping": {
    "count": 3,
    "window_min": 3
+  },
+  "cap_by_kind": {
+   "direct": 15,
+   "group": 30,
+   "email": 30,
+   "social": 45,
+   "promo": 45
   }
  },
  "demo_learning": {
@@ -140,6 +147,29 @@
    "net.one97.paytm"
   ]
  },
+ "contexts": [
+  {
+   "id": "placements",
+   "label": "Placements",
+   "active": true,
+   "phrases": [
+    "placement",
+    "placements",
+    "placement drive",
+    "campus drive",
+    "drive",
+    "registration",
+    "register by",
+    "last date",
+    "shortlist",
+    "shortlisted",
+    "interview",
+    "aptitude test",
+    "pre-placement talk",
+    "offer letter"
+   ]
+  }
+ ],
  "lexicons": {
   "urgency": [
    "urgent",
@@ -248,7 +278,7 @@
   "mu_c0": "real (public): LSApp empirical session distributions",
   "r_c": "assumed starter: persona profile",
   "worth_weights": "hand-set starter: sanity checked",
-  "conversion": "converted from fit/twin_params_night_shift_nurse.json by fit/convert_params.py: 9 keys filled from the example params, lexicons from contracts/lexicons.py, draw bank replaced with contracts/draw_bank.json"
+  "conversion": "converted from fit/twin_params_night_shift_nurse.json by fit/convert_params.py: 11 keys filled from the example params, lexicons from contracts/lexicons.py, draw bank replaced with contracts/draw_bank.json"
  },
  "draw_bank": [
   [

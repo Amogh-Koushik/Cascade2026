@@ -79,6 +79,10 @@ data class HeldTrayItem(
     val heldAtMillis: Long = System.currentTimeMillis(),
     // Set by a content rule, e.g. "New sender with a link"; shown on the tray row.
     val flag: String? = null,
+    // This item's own cap (policy.cap_by_kind); null means the params' cap_min.
+    val capMinutes: Double? = null,
+    // A deadline named in the text; the item is released once it is two hours away.
+    val deadlineAtMillis: Long? = null,
 )
 
 class PratibimbViewModel(application: Application) : AndroidViewModel(application) {

@@ -98,6 +98,14 @@ object TwinRouter {
     @Volatile
     private var minutesLostCapMin = 60.0
 
+    // policy.cap_by_kind: a shorter wait for people than for feeds.
+    @Volatile
+    private var holdCaps = HoldCaps(45.0, emptyMap())
+
+    // The params' active topics (Placements is preloaded).
+    @Volatile
+    private var contexts: List<TopicContext> = emptyList()
+
     @Volatile
     var activeListener: PratibimbListener? = null
 
@@ -237,10 +245,14 @@ object TwinRouter {
             val capMin = (policy["cap_min"] as Number).toDouble()
             val openWindowMin = (policy["open_window_min"] as Number).toDouble()
             val lostCapMin = (policy["minutes_lost_cap_min"] as Number).toDouble()
+            val caps = HoldCaps.fromParams(params)
+            val topics = Contexts.fromParams(params)
             engine.loadParams(paramsJson)
             featureRules = rules
             holdCapMin = capMin
             minutesLostCapMin = lostCapMin
+            holdCaps = caps
+            contexts = topics
             outcomes.openWindowMillis = (openWindowMin * 60_000).toLong()
         } catch (e: IOException) {
             NotificationLog.add("TwinRouter", "Could not load ${persona.asset}: ${e.message}")
@@ -280,7 +292,9 @@ object TwinRouter {
 
     // D (minutes until a held item would be released) and time in focus come from the running
     // session, because the engine charges the cost of holding by how long the item will wait.
-    private fun currentContext(): TwinContext {
+    // capMin is the cap for this notification's kind, so D charges a 1:1 message for at most
+    // the 15 minutes it could wait.
+    private fun currentContext(capMin: Double = holdCapMin): TwinContext {
         val now = System.currentTimeMillis()
         val inSession = sessionEndMillis > now
         val remainingMin = if (inSession) (sessionEndMillis - now) / 60_000.0 else 0.0
@@ -288,7 +302,7 @@ object TwinRouter {
         return TwinContext(
             state = _phoneState.value,
             autonomy = _autonomy.value,
-            minutesUntilRelease = min(remainingMin, holdCapMin),
+            minutesUntilRelease = min(remainingMin, capMin),
             focusMinutesElapsed = elapsedMin,
             fatigueRisk = _fatigueRisk.value,
             // A fresh draw per decision lets Auto explore with probability epsilon; with research
@@ -376,11 +390,16 @@ object TwinRouter {
         val countsAsPing = !(flags.textOnlyRepeatPings && content.kind != ContentKind.TEXT)
         val features = demo?.features?.copy(key = sbn.key, postedAtMillis = sbn.postTime)
             ?: FeatureBuilder.build(sbn, rankingMap, rules, senderSalt, countsAsPing)
-        val newSender = features.senderHash?.let { TwinSettings.firstTimeSeen(it) } ?: false
+        // A demo post only checks, so the same sample stays "new" every time it is fired.
+        val newSender = features.senderHash?.let {
+            if (demo != null) !TwinSettings.isKnownSender(it) else TwinSettings.firstTimeSeen(it)
+        } ?: false
+        val capMin = holdCaps.capFor(features)
+        val topic = Contexts.match(rawTitle, text, features.category, contexts)
 
         // 2. Engine evaluates features against the current focus session, then the content
         // rules the user switched on get their say.
-        val context = currentContext()
+        val context = currentContext(capMin)
         val ruled = ContentPolicy.apply(
             decision = engine.decide(features, context),
             features = features,
@@ -388,6 +407,8 @@ object TwinRouter {
             flags = flags,
             mentionsYou = ContentRules.mentionsYou(text, TwinSettings.mentionNames.value),
             newSender = newSender,
+            contextLabel = topic?.label,
+            nowMillis = System.currentTimeMillis(),
         )
         val decision = ruled.decision
         // In Suggest mode the decision is only a recommendation: the notification is delivered
@@ -443,6 +464,8 @@ object TwinRouter {
                 contentIntent = contentIntent,
                 senderHash = features.senderHash,
                 flag = ruled.flag,
+                capMinutes = capMin,
+                deadlineAtMillis = content.deadlineAtMillis,
             )
             updateTray { listOf(trayItem) + it }
             _heldTodayCount.value += 1
@@ -694,9 +717,16 @@ object TwinRouter {
         releaseExpiredHolds(context, now)
     }
 
+    // Each item waits at most its own cap. An item whose deadline is now within two hours is
+    // released too, unless a content rule flagged it (a new sender's link stays held).
     private fun releaseExpiredHolds(context: Context, nowMillis: Long) {
-        val capMillis = (holdCapMin * 60_000).toLong()
-        val expired = _heldTray.value.filter { nowMillis - it.heldAtMillis >= capMillis }
+        val expired = _heldTray.value.filter { item ->
+            val capMillis = ((item.capMinutes ?: holdCapMin) * 60_000).toLong()
+            val deadlineSoon = item.flag == null && item.deadlineAtMillis?.let {
+                it - nowMillis <= ContentPolicy.DEADLINE_SOON_MILLIS
+            } == true
+            nowMillis - item.heldAtMillis >= capMillis || deadlineSoon
+        }
         if (expired.isEmpty()) return
         val ids = expired.map { it.id }.toSet()
         updateTray { tray -> tray.filterNot { it.id in ids } }
@@ -713,11 +743,14 @@ object TwinRouter {
         } else {
             DigestNotifier.postBatchDigest(
                 context = context,
-                title = "Held for ${holdCapMin.toInt()} minutes",
+                title = "Held long enough",
                 summaryLines = expired.map { "${it.app}: ${it.title}" },
             )
         }
-        NotificationLog.add("TwinRouter", "Hold cap: released ${expired.size} after ${holdCapMin.toInt()} min")
+        NotificationLog.add(
+            "TwinRouter",
+            "Released ${expired.size} at their cap or a near deadline: " + expired.joinToString { it.title },
+        )
     }
 
     // ── User Interactive Controls ──────────────────────────────────────────
@@ -851,6 +884,7 @@ object TwinRouter {
             decision = item.decision,
             contentIntent = item.contentIntent,
             senderHash = item.senderHash,
+            capMinutes = item.features?.let { holdCaps.capFor(it) },
         )
         updateTray { listOf(trayItem) + it }
         _heldTodayCount.value += 1

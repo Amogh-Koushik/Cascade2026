@@ -97,7 +97,7 @@ class StubEngine : TwinEngine {
 
     companion object {
         // The 10 canonical scenarios from sample_decisions.json
-        val SCENARIOS: List<MockScenario> = listOf(
+        private val CANONICAL: List<MockScenario> = listOf(
             MockScenario(
                 id = "instagram_like_steady",
                 display = ScenarioDisplay(
@@ -809,5 +809,8 @@ class StubEngine : TwinEngine {
                 )
             )
         )
+
+        // Plus the placement pair (see DemoScenarios), built from the first one.
+        val SCENARIOS: List<MockScenario> = CANONICAL + DemoScenarios.placement(CANONICAL.first())
     }
 }

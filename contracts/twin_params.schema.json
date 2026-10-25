@@ -124,6 +124,18 @@
             "count": {"type": "integer", "minimum": 2},
             "window_min": {"$ref": "#/$defs/positive"}
           }
+        },
+        "cap_by_kind": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["direct", "group", "email", "social", "promo"],
+          "properties": {
+            "direct": {"$ref": "#/$defs/positive"},
+            "group": {"$ref": "#/$defs/positive"},
+            "email": {"$ref": "#/$defs/positive"},
+            "social": {"$ref": "#/$defs/positive"},
+            "promo": {"$ref": "#/$defs/positive"}
+          }
         }
       }
     },
@@ -158,6 +170,20 @@
         "android_categories": {"$ref": "#/$defs/string_list"},
         "packages": {"$ref": "#/$defs/string_list"},
         "otp_source_packages": {"$ref": "#/$defs/string_list"}
+      }
+    },
+    "contexts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "label", "active", "phrases"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "label": {"type": "string", "minLength": 1},
+          "active": {"type": "boolean"},
+          "phrases": {"$ref": "#/$defs/string_list"}
+        }
       }
     },
     "lexicons": {

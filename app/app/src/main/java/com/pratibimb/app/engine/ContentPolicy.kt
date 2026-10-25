@@ -5,8 +5,12 @@ import com.pratibimb.twin.Decision
 import com.pratibimb.twin.DecisionRule
 import com.pratibimb.twin.NotificationFeatures
 
-// Content rules the user can switch on one at a time, applied after the engine decides. They
-// never touch a safety override, the free state, Observe mode or a Suggest-mode recommendation.
+// Content rules applied after the engine decides. They never touch a safety override, the free
+// state, Observe mode or a Suggest-mode recommendation. In order: a new sender's link is held
+// and flagged (safety before urgency, which is how a fake "register by 6 pm" link is caught);
+// a new sender's plain text is delivered once; a deadline within two hours, or a match with an
+// active context, is delivered; a group message that doesn't mention you is held. The three
+// switchable rules are off until the user turns them on; deadline and context always apply.
 // The repeat-ping rule (text messages only) acts earlier, in the feature builder.
 data class ContentRuleFlags(
     val textOnlyRepeatPings: Boolean = false,
@@ -32,6 +36,9 @@ object ContentPolicy {
         flags: ContentRuleFlags,
         mentionsYou: Boolean,
         newSender: Boolean,
+        // The active context the text matches, if any (see Contexts).
+        contextLabel: String? = null,
+        nowMillis: Long = 0L,
     ): RuledDecision {
         if (decision.rule in UNTOUCHABLE || decision.suggestOnly) return RuledDecision(decision, null, null)
         if (flags.newSenderLinks && newSender && content.hasUrl) {
@@ -52,6 +59,13 @@ object ContentPolicy {
                 null,
             )
         }
+        val deadline = content.deadlineAtMillis
+        if (deadline != null && deadline >= nowMillis && deadline - nowMillis <= DEADLINE_SOON_MILLIS) {
+            return deliverIfHeld(decision, "Delivered: deadline within 2 hours (${content.deadlinePhrase})", "deadline soon")
+        }
+        if (contextLabel != null) {
+            return deliverIfHeld(decision, "Delivered: matches your $contextLabel context", "context $contextLabel")
+        }
         if (flags.holdUnmentionedGroups && features.groupChat && !mentionsYou && decision.action == Action.DELIVER) {
             return RuledDecision(
                 hold(decision, "Held: group message that doesn't mention you"),
@@ -61,6 +75,16 @@ object ContentPolicy {
         }
         return RuledDecision(decision, null, null)
     }
+
+    // Already delivered stays as it is, but the rules after this one no longer apply to it.
+    private fun deliverIfHeld(decision: Decision, reason: String, rule: String): RuledDecision =
+        if (decision.action == Action.HOLD) {
+            RuledDecision(decision.copy(action = Action.DELIVER, reason = reason, explanation = "$reason."), rule, null)
+        } else {
+            RuledDecision(decision, null, null)
+        }
+
+    const val DEADLINE_SOON_MILLIS = 2 * 3_600_000L
 
     private fun hold(decision: Decision, reason: String): Decision =
         decision.copy(action = Action.HOLD, explored = false, reason = reason, explanation = "$reason.")

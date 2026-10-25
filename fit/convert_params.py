@@ -21,6 +21,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from contracts.contexts import CONTEXTS
 from contracts.lexicons import LEXICONS
 from contracts.params import PARAMS_DIR, ParamsError, load_draw_bank, load_params, validate_params
 
@@ -168,6 +169,8 @@ def convert(
             f"policy.repeat_ping: {converted['policy']['repeat_ping']!r} -> {contract_ping!r}"
         )
     converted["policy"]["repeat_ping"] = copy.deepcopy(contract_ping)
+    # Contexts are the contract's too: the demo's placement scenarios depend on them.
+    converted["contexts"] = copy.deepcopy(CONTEXTS)
 
     provenance = {k: str(v) for k, v in open_maps["provenance"].items()}
     provenance["conversion"] = (

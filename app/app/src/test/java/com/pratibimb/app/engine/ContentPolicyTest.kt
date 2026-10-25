@@ -85,6 +85,56 @@ class ContentPolicyTest {
         assertEquals(engine.decide(group, context).action, mentioned.decision.action)
     }
 
+    private val like = NotificationFeatures(
+        key = "like", postedAtMillis = 0L, packageName = "com.google.android.gm", category = Category.WORK_EMAIL,
+        androidCategory = null, channelImportance = 3, isOngoing = false, isConversation = false,
+        priorityConversation = false, groupChat = false, senderHash = null, senderDisplayName = null,
+        sameSenderRecentPings = 0, baitHit = true, urgencyHit = false, otpPattern = false,
+    )
+
+    private fun heldByEngine(): Decision = engine.decide(like, context).copy(action = Action.HOLD, rule = DecisionRule.HOLD_BETTER)
+
+    @Test
+    fun aDeadlineWithinTwoHoursIsDelivered() {
+        val hour = 3_600_000L
+        val soon = ContentFeatures.PLAIN.copy(deadlinePhrase = "by 6 pm", deadlineAtMillis = 90 * 60_000L)
+        val later = ContentFeatures.PLAIN.copy(deadlinePhrase = "by 9 pm", deadlineAtMillis = 3 * hour)
+
+        val delivered = ContentPolicy.apply(heldByEngine(), like, soon, ContentRuleFlags(), false, false, nowMillis = 0L)
+        val stillHeld = ContentPolicy.apply(heldByEngine(), like, later, ContentRuleFlags(), false, false, nowMillis = 0L)
+
+        assertEquals(Action.DELIVER, delivered.decision.action)
+        assertEquals("Delivered: deadline within 2 hours (by 6 pm)", delivered.decision.reason)
+        assertEquals(Action.HOLD, stillHeld.decision.action)
+    }
+
+    @Test
+    fun aContextMatchIsDelivered() {
+        val result = ContentPolicy.apply(heldByEngine(), like, ContentFeatures.PLAIN, ContentRuleFlags(), false, false, contextLabel = "Placements")
+
+        assertEquals(Action.DELIVER, result.decision.action)
+        assertEquals("Delivered: matches your Placements context", result.decision.reason)
+    }
+
+    @Test
+    fun aNewSendersLinkIsHeldEvenWithADeadlineAndAContext() {
+        val bait = ContentFeatures.PLAIN.copy(hasUrl = true, deadlinePhrase = "in 30 min", deadlineAtMillis = 30 * 60_000L)
+
+        val result = ContentPolicy.apply(engine.decide(message(), context), message(), bait, allOn, false, true, "Placements", 0L)
+
+        assertEquals(Action.HOLD, result.decision.action)
+        assertEquals("New sender with a link", result.flag)
+    }
+
+    @Test
+    fun aContextMatchKeepsAGroupMessageFromTheMentionRule() {
+        val group = message(group = true)
+        val decision = engine.decide(group, context)
+        val result = ContentPolicy.apply(decision, group, ContentFeatures.PLAIN, ContentRuleFlags(holdUnmentionedGroups = true), false, false, "Placements")
+
+        assertEquals(decision.action, result.decision.action)
+    }
+
     @Test
     fun safetyOverridesAreNeverChanged() {
         val otp = message(otp = true, sender = null)

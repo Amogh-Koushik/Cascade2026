@@ -82,6 +82,8 @@ object TwinSettings {
         prefs?.edit()?.putStringSet(MENTION_NAMES_KEY, names)?.apply()
     }
 
+    fun isKnownSender(senderHash: String): Boolean = senderHash in knownSenders
+
     // True the first time a sender is seen; the sender is known from then on.
     @Synchronized
     fun firstTimeSeen(senderHash: String): Boolean {
