@@ -1,0 +1,230 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pratibimb.local/twin_params.schema.json",
+  "title": "Pratibimb twin parameters",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version", "persona", "provenance", "app_category_map", "pull", "worth",
+    "policy", "demo_learning", "never_hold", "lexicons", "draw_bank"
+  ],
+  "properties": {
+    "version": {"type": "string"},
+    "persona": {"type": "string", "pattern": "^[a-z][a-z0-9_]{0,40}$"},
+    "placeholder": {"type": "boolean"},
+    "provenance": {
+      "type": "object",
+      "additionalProperties": {"type": "string"}
+    },
+    "app_category_map": {
+      "type": "object",
+      "additionalProperties": {"$ref": "#/$defs/category"}
+    },
+    "pull": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["global", "category", "state", "prior_weights"],
+      "properties": {
+        "global": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["m_g", "n_g"],
+          "properties": {
+            "m_g": {"$ref": "#/$defs/probability"},
+            "n_g": {"$ref": "#/$defs/positive"}
+          }
+        },
+        "category": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["short_video", "social", "messaging", "shopping_promo", "news", "work_email", "other"],
+          "properties": {
+            "short_video": {"$ref": "#/$defs/category_pull"},
+            "social": {"$ref": "#/$defs/category_pull"},
+            "messaging": {"$ref": "#/$defs/category_pull"},
+            "shopping_promo": {"$ref": "#/$defs/category_pull"},
+            "news": {"$ref": "#/$defs/category_pull"},
+            "work_email": {"$ref": "#/$defs/category_pull"},
+            "other": {"$ref": "#/$defs/category_pull"}
+          }
+        },
+        "state": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["FREE", "FOCUS_STEADY", "FOCUS_RESTLESS"],
+          "properties": {
+            "FREE": {"$ref": "#/$defs/state_pull"},
+            "FOCUS_STEADY": {"$ref": "#/$defs/state_pull"},
+            "FOCUS_RESTLESS": {"$ref": "#/$defs/state_pull"}
+          }
+        },
+        "prior_weights": {"$ref": "#/$defs/prior_weights"}
+      }
+    },
+    "worth": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bias", "weights", "k_app", "k_sender"],
+      "properties": {
+        "bias": {"type": "number"},
+        "weights": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "is_conversation", "cat_messaging", "cat_work_email", "priority_conversation",
+            "group_chat", "cat_shopping_promo", "cat_social_nonconversation", "cat_short_video",
+            "bait_hit", "urgency_hit_in_conversation", "same_sender_repeat"
+          ],
+          "properties": {
+            "is_conversation": {"type": "number"},
+            "cat_messaging": {"type": "number"},
+            "cat_work_email": {"type": "number"},
+            "priority_conversation": {"type": "number"},
+            "group_chat": {"type": "number"},
+            "cat_shopping_promo": {"type": "number"},
+            "cat_social_nonconversation": {"type": "number"},
+            "cat_short_video": {"type": "number"},
+            "bait_hit": {"type": "number"},
+            "urgency_hit_in_conversation": {"type": "number"},
+            "same_sender_repeat": {"type": "number"}
+          }
+        },
+        "k_app": {"$ref": "#/$defs/positive"},
+        "k_sender": {"$ref": "#/$defs/positive"}
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "lambda", "w", "pi_star", "epsilon", "cap_min", "c_glance", "open_window_min",
+        "idle_min", "minutes_lost_cap_min", "minutes_floor_min", "might_matter_upper80",
+        "explore_upper80", "upper80_z", "low_confidence_width", "repeat_ping"
+      ],
+      "properties": {
+        "lambda": {"$ref": "#/$defs/positive"},
+        "w": {"$ref": "#/$defs/positive"},
+        "pi_star": {"$ref": "#/$defs/probability"},
+        "epsilon": {"$ref": "#/$defs/probability"},
+        "cap_min": {"$ref": "#/$defs/positive"},
+        "c_glance": {"type": "number", "minimum": 0},
+        "open_window_min": {"$ref": "#/$defs/positive"},
+        "idle_min": {"$ref": "#/$defs/positive"},
+        "minutes_lost_cap_min": {"$ref": "#/$defs/positive"},
+        "minutes_floor_min": {"$ref": "#/$defs/positive"},
+        "might_matter_upper80": {"$ref": "#/$defs/probability"},
+        "explore_upper80": {"$ref": "#/$defs/probability"},
+        "upper80_z": {"$ref": "#/$defs/positive"},
+        "low_confidence_width": {"$ref": "#/$defs/probability"},
+        "repeat_ping": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["count", "window_min"],
+          "properties": {
+            "count": {"type": "integer", "minimum": 2},
+            "window_min": {"$ref": "#/$defs/positive"}
+          }
+        }
+      }
+    },
+    "demo_learning": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["k_app", "k_sender", "prior_weights"],
+      "properties": {
+        "k_app": {"$ref": "#/$defs/positive"},
+        "k_sender": {"$ref": "#/$defs/positive"},
+        "prior_weights": {
+          "type": "object",
+          "additionalProperties": false,
+          "minProperties": 1,
+          "properties": {
+            "category": {"$ref": "#/$defs/positive"},
+            "cell_base": {"$ref": "#/$defs/positive"},
+            "cell_pool": {"type": "number", "minimum": 0},
+            "cell_pool_cap": {"type": "integer", "minimum": 0},
+            "mu_category": {"$ref": "#/$defs/positive"},
+            "mu_cell": {"$ref": "#/$defs/positive"},
+            "sigma": {"$ref": "#/$defs/positive"}
+          }
+        }
+      }
+    },
+    "never_hold": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["android_categories", "packages", "otp_source_packages"],
+      "properties": {
+        "android_categories": {"$ref": "#/$defs/string_list"},
+        "packages": {"$ref": "#/$defs/string_list"},
+        "otp_source_packages": {"$ref": "#/$defs/string_list"}
+      }
+    },
+    "lexicons": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["urgency", "bait", "otp_keywords"],
+      "properties": {
+        "urgency": {"$ref": "#/$defs/string_list"},
+        "bait": {"$ref": "#/$defs/string_list"},
+        "otp_keywords": {"$ref": "#/$defs/string_list"}
+      }
+    },
+    "draw_bank": {
+      "type": "array",
+      "minItems": 400,
+      "maxItems": 400,
+      "items": {
+        "type": "array",
+        "minItems": 3,
+        "maxItems": 3,
+        "items": {"type": "number"}
+      }
+    }
+  },
+  "$defs": {
+    "category": {
+      "enum": ["short_video", "social", "messaging", "shopping_promo", "news", "work_email", "other"]
+    },
+    "probability": {"type": "number", "minimum": 0, "maximum": 1},
+    "positive": {"type": "number", "exclusiveMinimum": 0},
+    "string_list": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "category_pull": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["r_c", "mu_c0", "sigma_c"],
+      "properties": {
+        "r_c": {"$ref": "#/$defs/positive"},
+        "mu_c0": {"type": "number"},
+        "sigma_c": {"$ref": "#/$defs/positive"}
+      }
+    },
+    "state_pull": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["r_s", "delta_s"],
+      "properties": {
+        "r_s": {"$ref": "#/$defs/positive"},
+        "delta_s": {"type": "number"}
+      }
+    },
+    "prior_weights": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["category", "cell_base", "cell_pool", "cell_pool_cap", "mu_category", "mu_cell", "sigma"],
+      "properties": {
+        "category": {"$ref": "#/$defs/positive"},
+        "cell_base": {"$ref": "#/$defs/positive"},
+        "cell_pool": {"type": "number", "minimum": 0},
+        "cell_pool_cap": {"type": "integer", "minimum": 0},
+        "mu_category": {"$ref": "#/$defs/positive"},
+        "mu_cell": {"$ref": "#/$defs/positive"},
+        "sigma": {"$ref": "#/$defs/positive"}
+      }
+    }
+  }
+}

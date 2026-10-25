@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Secrets
+.env
+
+# Raw public datasets are downloaded locally, never committed
+data/raw/
+
+# Android / Gradle
+.gradle/
+build/
+local.properties
+*.iml
+.idea/
+captures/
+.cxx/
+.externalNativeBuild/
+*.apk
+*.aab
+
+# Editors and OS
+.vscode/
+.DS_Store
+Thumbs.db

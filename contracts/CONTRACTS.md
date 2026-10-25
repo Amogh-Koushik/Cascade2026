@@ -1,0 +1,176 @@
+# Contracts
+
+These files are the agreement between the phone app, the Kotlin engine and the Python
+reference engine. Only Amogh and Safal edit them, and every change is announced in the group.
+After the H8 handoff, the `FutureCard` fields do not change.
+
+| File | What it is |
+|---|---|
+| `kotlin/com/pratibimb/twin/TwinEngine.kt` | Engine interface and every type it passes; compiled into the app |
+| `twin_params.schema.json` | JSON schema every `twin_params_<persona>.json` must pass |
+| `params/twin_params_example.json` | Complete placeholder params file (generated) |
+| `draw_bank.json` | The 400 shared standard-normal triples (generated, seed 2026) |
+| `sample_decisions.json` | Ten scenarios with inputs and full decisions (generated, placeholders) |
+| `params.py` | `validate_params`, `load_params`; `python -m contracts.params <file>` checks a file |
+
+Regenerate the generated files with:
+
+```bash
+uv run python -m contracts.make_draw_bank
+uv run python -m contracts.make_example_params
+uv run python -m contracts.make_sample_decisions
+```
+
+## 1. JSON naming
+
+- JSON keys are snake_case. A Kotlin property maps to its key by putting an underscore before
+  every uppercase letter and lowercasing: `lP10` → `l_p10`, `holdBetterPerHundred` →
+  `hold_better_per_hundred`. Digits never get an underscore of their own.
+- Categories are written as their lowercase key (`short_video`). Every other enum is written as
+  its constant name (`FOCUS_STEADY`, `HOLD`, `MIGHT_MATTER`).
+- `FeedbackEvent` in JSON has a `type` of `pull_outcome` or `worth_label`.
+- Sets (`always_deliver_senders`) are JSON arrays.
+
+## 2. Number rules (Python and Kotlin must do exactly this)
+
+- `sigmoid(x) = 1 / (1 + e^-x)`, `logit(p) = ln(p / (1 - p))`.
+- Before any `logit`, clamp the probability to `[1e-6, 1 - 1e-6]`.
+- `clip(x, a, b) = min(max(x, a), b)`.
+- Minutes are natural logs: `x = ln(max(minutes_lost, minutes_floor_min))`, so a 0-minute open
+  never becomes `ln 0`. `minutes_lost` is already capped at `minutes_lost_cap_min` (60).
+- Draw `i` (0 to 399) uses triple `i` for all three quantities: `z1` for pull, `z2` for minutes,
+  `z3` for worth. No other randomness enters the sampling.
+- **Percentiles** use linear interpolation on the sorted 400 values (numpy's default):
+  `h = (N - 1) · p`, `lo = floor(h)`, `value = x[lo] + (h - lo) · (x[lo + 1] - x[lo])`
+  (with `x[lo + 1] = x[lo]` when `lo = N - 1`). Ranges on the card are p10 to p90; `l_p50` and
+  `h_p50` are p50.
+- `π = (count of i with L_i > λ · H_i) / 400`. The comparison is strict.
+- `hold_better_per_hundred = floor(100 · π + 0.5)`. Not Python's `round`, which rounds halves
+  to even.
+- `upper80(q) = sigmoid(logit(q) + upper80_z · s_q)` with `upper80_z` from params (0.84).
+- `low_confidence = (pull_hi - pull_lo) > low_confidence_width or (q_hi - q_lo) > low_confidence_width`.
+- `net_minutes_protected = l_mean - h_mean`, labelled "estimated (model)" wherever shown.
+- Tolerance in the test vectors: 1e-6 absolute, 1e-3 for anything that passes through `exp`.
+
+The model formulas themselves (pull, worth, sampling) are in `pratibimb_final_plan.md` §6.
+Prior weights there map to `pull.prior_weights`: global 20 = `pull.global.n_g`, category 10 =
+`category`, cell 5 = `cell_base`, 0.25 = `cell_pool`, 40 = `cell_pool_cap`, μ category 8 =
+`mu_category`, μ cell 4 = `mu_cell`, σ² prior 8 = `sigma`. With `context.demo_learning` true,
+every key present in `demo_learning` replaces the default, and `k_app` / `k_sender` come from
+`demo_learning` too.
+
+## 3. Inputs the phone computes
+
+- `minutes_until_release` (D) = `min(remaining session minutes, cap_min)`.
+- `exploration_draw` (u) = a fresh `Uniform[0, 1)` per decision, logged in the feature row.
+- `same_sender_recent_pings` = earlier **conversation** notifications with the same
+  `sender_hash` in the last `repeat_ping.window_min` minutes, not counting this one. Always 0
+  when the notification is not a conversation or has no sender.
+- Lexicon hits: lowercase the title and text joined by a space (`Locale.ROOT` in Kotlin,
+  `str.lower()` in Python) and look for each lexicon entry, also lowercased, as a substring.
+  `bait_hit` / `urgency_hit` are true when any entry matches.
+- `otp_pattern` = any `otp_keywords` entry matches as above **and** the text contains a run of
+  4 to 8 digits (`\d{4,8}` with no digit directly before or after).
+
+## 4. Worth features
+
+The structural score is `s = sigmoid(bias + Σ weight_k · x_k)`, with each `x_k` 0 or 1:
+
+| Weight key | x = 1 when |
+|---|---|
+| `is_conversation` | `is_conversation` |
+| `cat_messaging` | category is `messaging` |
+| `cat_work_email` | category is `work_email` |
+| `priority_conversation` | `priority_conversation` |
+| `group_chat` | `group_chat` |
+| `cat_shopping_promo` | category is `shopping_promo` |
+| `cat_social_nonconversation` | category is `social` and not `is_conversation` |
+| `cat_short_video` | category is `short_video` |
+| `bait_hit` | `bait_hit` |
+| `urgency_hit_in_conversation` | `urgency_hit` and `is_conversation` |
+| `same_sender_repeat` | `same_sender_recent_pings ≥ 1` |
+
+The personal layers use the sender path when `is_conversation` is true and the sender has at
+least one label; otherwise the app path.
+
+## 5. Never-hold overrides, checked in this order
+
+The first match wins and sets `reason`:
+
+1. `package_name` in `always_deliver_packages` → "Always delivered: you chose this app"
+2. `sender_hash` in `always_deliver_senders` → "Always delivered: you chose this sender"
+3. `android_category` in `never_hold.android_categories` → "Always delivered: calls, alarms and navigation"
+4. `is_ongoing` → "Always delivered: ongoing activity"
+5. `package_name` in `never_hold.packages` → "Always delivered: rides, deliveries and maps"
+6. `otp_pattern` and `package_name` in `never_hold.otp_source_packages` → "Always delivered: one-time password"
+7. `is_conversation`, `sender_hash` not null, and `same_sender_recent_pings + 1 ≥ repeat_ping.count` → "Always delivered: repeated ping"
+
+An OTP-looking text from any other app gets no override. Coach rules can never add to or
+remove from this list.
+
+## 6. Decision rule
+
+The card is always computed, even for overrides, so the UI never handles a missing card.
+
+1. An override matches → `DELIVER`, rule `OVERRIDE`.
+2. `state` is `FREE` → `DELIVER`, rule `FREE_STATE`.
+3. Work out the recommendation:
+   - `upper80(q) ≥ might_matter_upper80` → `DELIVER`, `MIGHT_MATTER`.
+   - else `π ≥ pi_star` → `HOLD`, `HOLD_BETTER`.
+   - else → `DELIVER`, `DELIVER_BETTER`.
+4. Exploration, Auto mode only: if the recommendation is `HOLD`, `upper80(q) < explore_upper80`
+   and `u < epsilon` → `DELIVER`, rule `EXPLORATION`, `explored = true`.
+5. Autonomy:
+   - `OBSERVE` → `action = DELIVER`, rule `OBSERVE_MODE`, `would_be_action` = the recommendation.
+   - `SUGGEST` → `action` = the recommendation, `suggest_only = true`.
+   - `AUTO` → `action` = the result of steps 3 and 4.
+
+`would_be_action` is the Auto-mode recommendation before exploration (in rules 1 and 2 it is
+`DELIVER`). `propensity`: `epsilon` when explored; `1 - epsilon` for an Auto-mode `HOLD` that was
+eligible for exploration; `1.0` otherwise.
+
+## 7. Learned counts (`exportCounts` / `importCounts`)
+
+```json
+{
+  "pull": {
+    "global": {"shown": 0, "opens": 0},
+    "category": {"social": {"shown": 0, "opens": 0, "n_min": 0, "sum_x": 0.0}},
+    "cell": {"social|FOCUS_STEADY": {"shown": 0, "opens": 0, "n_min": 0, "sum_x": 0.0, "sum_x2": 0.0}}
+  },
+  "worth": {
+    "app": {"com.instagram.android": {"labels": 0, "positives": 0}},
+    "sender": {"s_7c41e2a9": {"labels": 0, "positives": 0}}
+  }
+}
+```
+
+Missing entries mean zero. `x` is log minutes (section 2). `Σ(x - μ_cs)²` for the σ² formula is
+`sum_x2 - 2 · μ_cs · sum_x + n_min · μ_cs²`.
+
+| Event | Updates |
+|---|---|
+| `pull_outcome`, opened, not from tray | `shown` and `opens` +1 at global, category and cell; `n_min`, `sum_x`, `sum_x2` with its minutes at category and cell |
+| `pull_outcome`, not opened, not from tray | `shown` +1 at global, category and cell |
+| `pull_outcome` with `released_from_tray` | the same, but only in the cell `<category>|FREE` |
+| `worth_label` | `labels` +1, and `positives` +1 if the label is positive, for the app and (when `sender_hash` is set) the sender |
+| A held notification | nothing |
+
+## 8. Feature row (one per notification, stored on the phone)
+
+`ts, pkg, category, state, channel_importance, is_conversation, priority_conversation,
+group_chat, sender_hash, same_sender_recent_pings, bait_hit, urgency_hit, otp_pattern,
+fatigue_risk, minutes_until_release, exploration_draw, p_cs, q, l_p10, l_p50, l_p90, h_mean,
+pi, action, rule, explored, propensity`
+
+Outcome columns, filled in later: `opened, open_latency_s, minutes_lost, worth_label`.
+
+`ts` is epoch milliseconds, minutes are minutes, `pi` is a share in [0, 1]. No title, text or
+sender name is ever stored.
+
+## 9. `sample_decisions.json`
+
+`{"version", "placeholder", "note", "scenarios": [...]}`. Each scenario has `id`, `placeholder`,
+`display` (app, title, text for the screen only), `features` (a `NotificationFeatures`),
+`context` (a `TwinContext`) and `decision` (a `Decision`). While `placeholder` is true, the
+numbers are hand-set; once engine.py writes the file they are real engine outputs.
