@@ -1,6 +1,8 @@
 package com.pratibimb.app.service
 
 import android.app.Notification
+import android.content.ComponentName
+import android.util.Log
 import android.service.notification.NotificationListenerService
 import android.service.notification.NotificationListenerService.Ranking
 import android.service.notification.NotificationListenerService.RankingMap
@@ -22,10 +24,13 @@ class PratibimbListener : NotificationListenerService() {
         NotificationLog.add(SOURCE, "Listener connected")
     }
 
+    // Android can unbind a listener (memory pressure, an update); ask it to bind again, or no
+    // notification reaches the twin until access is toggled in Settings.
     override fun onListenerDisconnected() {
         TwinRouter.onListenerDisconnected()
         NotificationLog.setListenerConnected(false)
-        NotificationLog.add(SOURCE, "Listener disconnected")
+        NotificationLog.add(SOURCE, "Listener disconnected, asking Android to reconnect")
+        requestRebind(ComponentName(this, PratibimbListener::class.java))
     }
 
     override fun onNotificationPosted(sbn: StatusBarNotification, rankingMap: RankingMap) {
@@ -49,8 +54,13 @@ class PratibimbListener : NotificationListenerService() {
             timeMillis = sbn.postTime,
         )
 
-        // Route live notification into the Twin engine
-        TwinRouter.onNotificationPosted(sbn, rankingMap)
+        // Route live notification into the Twin engine. An error with one notification must
+        // not take the listener down for every notification after it, so it is logged instead.
+        try {
+            TwinRouter.onNotificationPosted(sbn, rankingMap)
+        } catch (e: RuntimeException) {
+            report("deciding", sbn, e)
+        }
 
         // Optional debug spike ping:
         if (SpikeSettings.pingOnPost.value && sbn.packageName != packageName && !sbn.isOngoing) {
@@ -70,11 +80,22 @@ class PratibimbListener : NotificationListenerService() {
         reason: Int,
     ) {
         NotificationLog.add(sbn.packageName, "removed: ${removalReasonName(reason)}")
-        TwinRouter.onNotificationRemoved(sbn, rankingMap, reason)
+        try {
+            TwinRouter.onNotificationRemoved(sbn, rankingMap, reason)
+        } catch (e: RuntimeException) {
+            report("handling the removal of", sbn, e)
+        }
+    }
+
+    private fun report(what: String, sbn: StatusBarNotification, e: RuntimeException) {
+        Log.e(TAG, "Error $what ${sbn.packageName}", e)
+        val at = e.stackTrace.firstOrNull { it.className.startsWith("com.pratibimb") }?.let { " at ${it.fileName}:${it.lineNumber}" } ?: ""
+        NotificationLog.add(SOURCE, "ERROR $what ${sbn.packageName}: ${e::class.simpleName}: ${e.message}$at")
     }
 
     private companion object {
         const val SOURCE = "listener"
+        const val TAG = "PratibimbTwin"
 
         // OTPs and banking codes are never written to the log, here or in Logcat.
         val CODE = Regex("\\d{4,8}")
