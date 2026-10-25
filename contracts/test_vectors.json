@@ -1,0 +1,6640 @@
+{
+ "version": "1.0",
+ "params_file": "twin_params_example.json",
+ "tolerance": {
+  "absolute": 1e-06,
+  "exp_fields": 0.001,
+  "exp_field_names": [
+   "l_mean",
+   "l_p10",
+   "l_p50",
+   "l_p90",
+   "mins_if_opened_hi",
+   "mins_if_opened_lo",
+   "net_minutes_protected"
+  ],
+  "not_compared": [
+   "explanation"
+  ]
+ },
+ "vectors": [
+  {
+   "id": "fresh_social",
+   "description": "Instagram like, fresh twin, steady focus",
+   "param_patches": [],
+   "events": [],
+   "features": {
+    "key": "fresh_social",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.instagram.android",
+    "category": "social",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": true,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.2816000000000001,
+     "n_p": 5.0,
+     "mu_cs": 2.1,
+     "sigma_pred": 0.894427190999916,
+     "structural_score": 0.016302499371440946,
+     "q": 0.016302499371440946,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 361,
+     "pi": 0.9025
+    },
+    "decision": {
+     "action": "HOLD",
+     "rule": "HOLD_BETTER",
+     "would_be_action": "HOLD",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 0.9,
+     "reason": "Held: costs more to show than to hold",
+     "explanation": "Held: 34 min into steady focus. Social updates can pull you in for 2-28 min. Back at your break in 16 min.",
+     "card": {
+      "pull_mean": 0.2816000000000001,
+      "pull_lo": 0.10264166722225325,
+      "pull_hi": 0.5636445019286274,
+      "mins_if_opened_lo": 2.358038848446369,
+      "mins_if_opened_hi": 28.435741930765,
+      "l_p10": 0.879909488618578,
+      "l_p50": 2.409584413064066,
+      "l_p90": 8.63089559549987,
+      "l_mean": 4.409134123882728,
+      "h_p10": 0.017869256442079207,
+      "h_p50": 0.1474934872418494,
+      "h_p90": 1.0977648811291443,
+      "h_mean": 0.4160443954539142,
+      "q_mean": 0.016302499371440946,
+      "q_lo": 0.002233657055259901,
+      "q_hi": 0.13722061014114303,
+      "q_upper80": 0.06806644572074518,
+      "hold_better_per_hundred": 90,
+      "net_minutes_protected": 3.9930897284288136,
+      "minutes_until_release": 16.0,
+      "low_confidence": true,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "fresh_short_video",
+   "description": "YouTube upload, fresh twin",
+   "param_patches": [],
+   "events": [],
+   "features": {
+    "key": "fresh_short_video",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.google.android.youtube",
+    "category": "short_video",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": true,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.3168000000000001,
+     "n_p": 5.0,
+     "mu_cs": 2.5,
+     "sigma_pred": 1.0062305898749055,
+     "structural_score": 0.013386917827664779,
+     "q": 0.013386917827664779,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 377,
+     "pi": 0.9425
+    },
+    "decision": {
+     "action": "HOLD",
+     "rule": "HOLD_BETTER",
+     "would_be_action": "HOLD",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 0.9,
+     "reason": "Held: costs more to show than to hold",
+     "explanation": "Held: 34 min into steady focus. Short videos can pull you in for 3-50 min. Back at your break in 16 min.",
+     "card": {
+      "pull_mean": 0.3168000000000001,
+      "pull_lo": 0.12354380076041427,
+      "pull_hi": 0.594930718331681,
+      "mins_if_opened_lo": 3.0118701690438408,
+      "mins_if_opened_hi": 49.5807539314777,
+      "l_p10": 1.0998023534506838,
+      "l_p50": 3.942936844739104,
+      "l_p90": 15.770350644145823,
+      "l_mean": 7.809371955553166,
+      "h_p10": 0.011939266907219536,
+      "h_p50": 0.1226943068899381,
+      "h_p90": 1.126925865357989,
+      "h_mean": 0.4184013803555363,
+      "q_mean": 0.013386917827664779,
+      "q_lo": 0.001492408363402442,
+      "q_hi": 0.14086573316974862,
+      "q_upper80": 0.06503221264755049,
+      "hold_better_per_hundred": 94,
+      "net_minutes_protected": 7.390970575197629,
+      "minutes_until_release": 16.0,
+      "low_confidence": true,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "fresh_messaging",
+   "description": "Direct message from a friend",
+   "param_patches": [],
+   "events": [],
+   "features": {
+    "key": "fresh_messaging",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.whatsapp",
+    "category": "messaging",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": true,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": "s_friend",
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": false,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.2464,
+     "n_p": 5.0,
+     "mu_cs": 1.2,
+     "sigma_pred": 0.7826237921249264,
+     "structural_score": 0.710949502625004,
+     "q": 0.710949502625004,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 3,
+     "pi": 0.0075
+    },
+    "decision": {
+     "action": "DELIVER",
+     "rule": "MIGHT_MATTER",
+     "would_be_action": "DELIVER",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 1.0,
+     "reason": "Delivered: might matter",
+     "explanation": "Delivered: might matter, so it is not worth the risk of holding.",
+     "card": {
+      "pull_mean": 0.2464,
+      "pull_lo": 0.08290651318236567,
+      "pull_hi": 0.5316595031493442,
+      "mins_if_opened_lo": 1.1197437045958771,
+      "mins_if_opened_hi": 9.891650451807305,
+      "l_p10": 0.6001733836175178,
+      "l_p50": 1.1175782445276958,
+      "l_p90": 3.1151007636114594,
+      "l_mean": 1.7063888094628334,
+      "h_p10": 4.674973493425068,
+      "h_p50": 5.744663116246458,
+      "h_p90": 6.578080216281295,
+      "h_mean": 5.638873139964378,
+      "q_mean": 0.710949502625004,
+      "q_lo": 0.5843716866781336,
+      "q_hi": 0.8222600270351619,
+      "q_upper80": 0.7882386779994783,
+      "hold_better_per_hundred": 1,
+      "net_minutes_protected": -3.932484330501545,
+      "minutes_until_release": 16.0,
+      "low_confidence": true,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "fresh_shopping_promo",
+   "description": "Swiggy promo",
+   "param_patches": [],
+   "events": [],
+   "features": {
+    "key": "fresh_shopping_promo",
+    "posted_at_millis": 1792918800000,
+    "package_name": "in.swiggy.android",
+    "category": "shopping_promo",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": true,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.1056,
+     "n_p": 5.0,
+     "mu_cs": 1.0,
+     "sigma_pred": 0.7826237921249264,
+     "structural_score": 0.01098694263059318,
+     "q": 0.01098694263059318,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 309,
+     "pi": 0.7725
+    },
+    "decision": {
+     "action": "HOLD",
+     "rule": "HOLD_BETTER",
+     "would_be_action": "HOLD",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 0.9,
+     "reason": "Held: costs more to show than to hold",
+     "explanation": "Held: 34 min into steady focus. Promos can pull you in for 1-8 min. Back at your break in 16 min.",
+     "card": {
+      "pull_mean": 0.1056,
+      "pull_lo": 0.019095162835167857,
+      "pull_hi": 0.40342350039591757,
+      "mins_if_opened_lo": 0.9167686065181117,
+      "mins_if_opened_hi": 8.098598423592353,
+      "l_p10": 0.5180891335021526,
+      "l_p50": 0.6910927441406827,
+      "l_p90": 1.7988164528043336,
+      "l_mean": 1.1061935440682351,
+      "h_p10": 0.007801256946240277,
+      "h_p50": 0.10214979515704917,
+      "h_p90": 1.181628230543363,
+      "h_mean": 0.43017100896073124,
+      "q_mean": 0.01098694263059318,
+      "q_lo": 0.0009751571182800346,
+      "q_hi": 0.14770352881792037,
+      "q_upper80": 0.06308413217655555,
+      "hold_better_per_hundred": 77,
+      "net_minutes_protected": 0.6760225351075039,
+      "minutes_until_release": 16.0,
+      "low_confidence": false,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "fresh_news",
+   "description": "News alert",
+   "param_patches": [],
+   "events": [],
+   "features": {
+    "key": "fresh_news",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.nis.app",
+    "category": "news",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": false,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.14080000000000004,
+     "n_p": 5.0,
+     "mu_cs": 1.3,
+     "sigma_pred": 0.7826237921249264,
+     "structural_score": 0.18242552380635635,
+     "q": 0.18242552380635635,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 46,
+     "pi": 0.115
+    },
+    "decision": {
+     "action": "DELIVER",
+     "rule": "DELIVER_BETTER",
+     "would_be_action": "DELIVER",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 1.0,
+     "reason": "Delivered: cheap to show",
+     "explanation": "Delivered: showing it now costs about 1.5 focus minutes (estimated).",
+     "card": {
+      "pull_mean": 0.14080000000000004,
+      "pull_lo": 0.032252365737132443,
+      "pull_hi": 0.4337515342836884,
+      "mins_if_opened_lo": 1.2375081780176522,
+      "mins_if_opened_hi": 10.93196441110727,
+      "l_p10": 0.5499119644229589,
+      "l_p50": 0.8838736471824192,
+      "l_p90": 2.5939382995694276,
+      "l_mean": 1.4647582640820733,
+      "h_p10": 0.8298385967289776,
+      "h_p50": 1.5090252607911512,
+      "h_p90": 2.5518461257751497,
+      "h_mean": 1.5994928616656496,
+      "q_mean": 0.18242552380635635,
+      "q_lo": 0.1037298245911222,
+      "q_hi": 0.3189807657218937,
+      "q_upper80": 0.26626809593478784,
+      "hold_better_per_hundred": 12,
+      "net_minutes_protected": -0.1347345975835763,
+      "minutes_until_release": 16.0,
+      "low_confidence": true,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "fresh_work_email",
+   "description": "Work email",
+   "param_patches": [],
+   "events": [],
+   "features": {
+    "key": "fresh_work_email",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.google.android.gm",
+    "category": "work_email",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": false,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.19360000000000005,
+     "n_p": 5.0,
+     "mu_cs": 1.5,
+     "sigma_pred": 0.6708203932499369,
+     "structural_score": 0.425557483188341,
+     "q": 0.425557483188341,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 9,
+     "pi": 0.0225
+    },
+    "decision": {
+     "action": "DELIVER",
+     "rule": "MIGHT_MATTER",
+     "would_be_action": "DELIVER",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 1.0,
+     "reason": "Delivered: might matter",
+     "explanation": "Delivered: might matter, so it is not worth the risk of holding.",
+     "card": {
+      "pull_mean": 0.19360000000000005,
+      "pull_lo": 0.05578577550639444,
+      "pull_hi": 0.4826798249038502,
+      "mins_if_opened_lo": 1.7653868515085436,
+      "mins_if_opened_hi": 11.424214170557903,
+      "l_p10": 0.6304323746336772,
+      "l_p50": 1.1813388779243716,
+      "l_p90": 3.2124881772606555,
+      "l_mean": 1.7866604003338005,
+      "h_p10": 2.458429148599042,
+      "h_p50": 3.4673122656303326,
+      "h_p90": 4.554827439109833,
+      "h_mean": 3.4610805750083746,
+      "q_mean": 0.425557483188341,
+      "q_lo": 0.30730364357488027,
+      "q_hi": 0.5693534298887292,
+      "q_upper80": 0.519962762323355,
+      "hold_better_per_hundred": 2,
+      "net_minutes_protected": -1.6744201746745742,
+      "minutes_until_release": 16.0,
+      "low_confidence": true,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "fresh_other",
+   "description": "App with no category",
+   "param_patches": [],
+   "events": [],
+   "features": {
+    "key": "fresh_other",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.example.app",
+    "category": "other",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": false,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.1232,
+     "n_p": 5.0,
+     "mu_cs": 1.0,
+     "sigma_pred": 0.894427190999916,
+     "structural_score": 0.18242552380635635,
+     "q": 0.18242552380635635,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 33,
+     "pi": 0.0825
+    },
+    "decision": {
+     "action": "DELIVER",
+     "rule": "DELIVER_BETTER",
+     "would_be_action": "DELIVER",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 1.0,
+     "reason": "Delivered: cheap to show",
+     "explanation": "Delivered: showing it now costs about 1.2 focus minutes (estimated).",
+     "card": {
+      "pull_mean": 0.1232,
+      "pull_lo": 0.025382722476310147,
+      "pull_hi": 0.41811303377633546,
+      "mins_if_opened_lo": 0.7849229468845144,
+      "mins_if_opened_hi": 9.465436232252666,
+      "l_p10": 0.5156965622267368,
+      "l_p50": 0.7303611613882727,
+      "l_p90": 2.024622382738738,
+      "l_mean": 1.2425170292618255,
+      "h_p10": 0.8298385967289776,
+      "h_p50": 1.5090252607911512,
+      "h_p90": 2.5518461257751497,
+      "h_mean": 1.5994928616656496,
+      "q_mean": 0.18242552380635635,
+      "q_lo": 0.1037298245911222,
+      "q_hi": 0.3189807657218937,
+      "q_upper80": 0.26626809593478784,
+      "hold_better_per_hundred": 8,
+      "net_minutes_protected": -0.35697583240382413,
+      "minutes_until_release": 16.0,
+      "low_confidence": false,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "unknown_category_key",
+   "description": "A category key the contract does not know falls back to other",
+   "param_patches": [],
+   "events": [],
+   "features": {
+    "key": "unknown_category_key",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.example.app",
+    "category": "games",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": false,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.1232,
+     "n_p": 5.0,
+     "mu_cs": 1.0,
+     "sigma_pred": 0.894427190999916,
+     "structural_score": 0.18242552380635635,
+     "q": 0.18242552380635635,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 33,
+     "pi": 0.0825
+    },
+    "decision": {
+     "action": "DELIVER",
+     "rule": "DELIVER_BETTER",
+     "would_be_action": "DELIVER",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 1.0,
+     "reason": "Delivered: cheap to show",
+     "explanation": "Delivered: showing it now costs about 1.2 focus minutes (estimated).",
+     "card": {
+      "pull_mean": 0.1232,
+      "pull_lo": 0.025382722476310147,
+      "pull_hi": 0.41811303377633546,
+      "mins_if_opened_lo": 0.7849229468845144,
+      "mins_if_opened_hi": 9.465436232252666,
+      "l_p10": 0.5156965622267368,
+      "l_p50": 0.7303611613882727,
+      "l_p90": 2.024622382738738,
+      "l_mean": 1.2425170292618255,
+      "h_p10": 0.8298385967289776,
+      "h_p50": 1.5090252607911512,
+      "h_p90": 2.5518461257751497,
+      "h_mean": 1.5994928616656496,
+      "q_mean": 0.18242552380635635,
+      "q_lo": 0.1037298245911222,
+      "q_hi": 0.3189807657218937,
+      "q_upper80": 0.26626809593478784,
+      "hold_better_per_hundred": 8,
+      "net_minutes_protected": -0.35697583240382413,
+      "minutes_until_release": 16.0,
+      "low_confidence": false,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "state_free",
+   "description": "Like with no focus session",
+   "param_patches": [],
+   "events": [],
+   "features": {
+    "key": "state_free",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.instagram.android",
+    "category": "social",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": true,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FREE",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.3520000000000001,
+     "n_p": 5.0,
+     "mu_cs": 2.1,
+     "sigma_pred": 0.894427190999916,
+     "structural_score": 0.016302499371440946,
+     "q": 0.016302499371440946,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 372,
+     "pi": 0.93
+    },
+    "decision": {
+     "action": "DELIVER",
+     "rule": "FREE_STATE",
+     "would_be_action": "DELIVER",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 1.0,
+     "reason": "Delivered: no focus session",
+     "explanation": "Delivered: no focus session is running.",
+     "card": {
+      "pull_mean": 0.3520000000000001,
+      "pull_lo": 0.1455166744421808,
+      "pull_hi": 0.6254612790845816,
+      "mins_if_opened_lo": 2.358038848446369,
+      "mins_if_opened_hi": 28.435741930765,
+      "l_p10": 1.0018838529377467,
+      "l_p50": 3.0085398796268867,
+      "l_p90": 10.143112427943361,
+      "l_mean": 5.103664404114722,
+      "h_p10": 0.017869256442079207,
+      "h_p50": 0.1474934872418494,
+      "h_p90": 1.0977648811291443,
+      "h_mean": 0.4160443954539142,
+      "q_mean": 0.016302499371440946,
+      "q_lo": 0.002233657055259901,
+      "q_hi": 0.13722061014114303,
+      "q_upper80": 0.06806644572074518,
+      "hold_better_per_hundred": 93,
+      "net_minutes_protected": 4.687620008660808,
+      "minutes_until_release": 16.0,
+      "low_confidence": true,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "state_restless",
+   "description": "Like in restless focus",
+   "param_patches": [],
+   "events": [],
+   "features": {
+    "key": "state_restless",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.instagram.android",
+    "category": "social",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": true,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_RESTLESS",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.4576000000000001,
+     "n_p": 5.0,
+     "mu_cs": 2.3000000000000003,
+     "sigma_pred": 0.894427190999916,
+     "structural_score": 0.016302499371440946,
+     "q": 0.016302499371440946,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 381,
+     "pi": 0.9525
+    },
+    "decision": {
+     "action": "HOLD",
+     "rule": "HOLD_BETTER",
+     "would_be_action": "HOLD",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 0.9,
+     "reason": "Held: costs more to show than to hold",
+     "explanation": "Held: 34 min into restless focus. Social updates can pull you in for 3-35 min. Back at your break in 16 min.",
+     "card": {
+      "pull_mean": 0.4576000000000001,
+      "pull_lo": 0.21721204670129116,
+      "pull_hi": 0.712303002285432,
+      "mins_if_opened_lo": 2.8801151533412264,
+      "mins_if_opened_hi": 34.73149362456717,
+      "l_p10": 1.3703739733940792,
+      "l_p50": 4.577181254869148,
+      "l_p90": 15.789001919822365,
+      "l_mean": 7.455241964466933,
+      "h_p10": 0.017869256442079207,
+      "h_p50": 0.1474934872418494,
+      "h_p90": 1.0977648811291443,
+      "h_mean": 0.4160443954539142,
+      "q_mean": 0.016302499371440946,
+      "q_lo": 0.002233657055259901,
+      "q_hi": 0.13722061014114303,
+      "q_upper80": 0.06806644572074518,
+      "hold_better_per_hundred": 95,
+      "net_minutes_protected": 7.039197569013019,
+      "minutes_until_release": 16.0,
+      "low_confidence": true,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "override_always_app",
+   "description": "User always delivers Instagram",
+   "param_patches": [],
+   "events": [],
+   "features": {
+    "key": "override_always_app",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.instagram.android",
+    "category": "social",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": true,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [
+     "com.instagram.android"
+    ],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.2816000000000001,
+     "n_p": 5.0,
+     "mu_cs": 2.1,
+     "sigma_pred": 0.894427190999916,
+     "structural_score": 0.016302499371440946,
+     "q": 0.016302499371440946,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 361,
+     "pi": 0.9025
+    },
+    "decision": {
+     "action": "DELIVER",
+     "rule": "OVERRIDE",
+     "would_be_action": "DELIVER",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 1.0,
+     "reason": "Always delivered: you chose this app",
+     "explanation": "Delivered: you always let this app through.",
+     "card": {
+      "pull_mean": 0.2816000000000001,
+      "pull_lo": 0.10264166722225325,
+      "pull_hi": 0.5636445019286274,
+      "mins_if_opened_lo": 2.358038848446369,
+      "mins_if_opened_hi": 28.435741930765,
+      "l_p10": 0.879909488618578,
+      "l_p50": 2.409584413064066,
+      "l_p90": 8.63089559549987,
+      "l_mean": 4.409134123882728,
+      "h_p10": 0.017869256442079207,
+      "h_p50": 0.1474934872418494,
+      "h_p90": 1.0977648811291443,
+      "h_mean": 0.4160443954539142,
+      "q_mean": 0.016302499371440946,
+      "q_lo": 0.002233657055259901,
+      "q_hi": 0.13722061014114303,
+      "q_upper80": 0.06806644572074518,
+      "hold_better_per_hundred": 90,
+      "net_minutes_protected": 3.9930897284288136,
+      "minutes_until_release": 16.0,
+      "low_confidence": true,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "override_always_sender",
+   "description": "User always delivers Mom",
+   "param_patches": [],
+   "events": [],
+   "features": {
+    "key": "override_always_sender",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.whatsapp",
+    "category": "messaging",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": true,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": "s_mom",
+    "sender_display_name": "Mom",
+    "same_sender_recent_pings": 0,
+    "bait_hit": false,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [
+     "s_mom"
+    ],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.2464,
+     "n_p": 5.0,
+     "mu_cs": 1.2,
+     "sigma_pred": 0.7826237921249264,
+     "structural_score": 0.710949502625004,
+     "q": 0.710949502625004,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 3,
+     "pi": 0.0075
+    },
+    "decision": {
+     "action": "DELIVER",
+     "rule": "OVERRIDE",
+     "would_be_action": "DELIVER",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 1.0,
+     "reason": "Always delivered: you chose this sender",
+     "explanation": "Delivered: you always let this sender through.",
+     "card": {
+      "pull_mean": 0.2464,
+      "pull_lo": 0.08290651318236567,
+      "pull_hi": 0.5316595031493442,
+      "mins_if_opened_lo": 1.1197437045958771,
+      "mins_if_opened_hi": 9.891650451807305,
+      "l_p10": 0.6001733836175178,
+      "l_p50": 1.1175782445276958,
+      "l_p90": 3.1151007636114594,
+      "l_mean": 1.7063888094628334,
+      "h_p10": 4.674973493425068,
+      "h_p50": 5.744663116246458,
+      "h_p90": 6.578080216281295,
+      "h_mean": 5.638873139964378,
+      "q_mean": 0.710949502625004,
+      "q_lo": 0.5843716866781336,
+      "q_hi": 0.8222600270351619,
+      "q_upper80": 0.7882386779994783,
+      "hold_better_per_hundred": 1,
+      "net_minutes_protected": -3.932484330501545,
+      "minutes_until_release": 16.0,
+      "low_confidence": true,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "override_navigation",
+   "description": "Navigation category",
+   "param_patches": [],
+   "events": [],
+   "features": {
+    "key": "override_navigation",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.instagram.android",
+    "category": "social",
+    "android_category": "navigation",
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": true,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.2816000000000001,
+     "n_p": 5.0,
+     "mu_cs": 2.1,
+     "sigma_pred": 0.894427190999916,
+     "structural_score": 0.016302499371440946,
+     "q": 0.016302499371440946,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 361,
+     "pi": 0.9025
+    },
+    "decision": {
+     "action": "DELIVER",
+     "rule": "OVERRIDE",
+     "would_be_action": "DELIVER",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 1.0,
+     "reason": "Always delivered: calls, alarms and navigation",
+     "explanation": "Delivered: calls, alarms and navigation always come through.",
+     "card": {
+      "pull_mean": 0.2816000000000001,
+      "pull_lo": 0.10264166722225325,
+      "pull_hi": 0.5636445019286274,
+      "mins_if_opened_lo": 2.358038848446369,
+      "mins_if_opened_hi": 28.435741930765,
+      "l_p10": 0.879909488618578,
+      "l_p50": 2.409584413064066,
+      "l_p90": 8.63089559549987,
+      "l_mean": 4.409134123882728,
+      "h_p10": 0.017869256442079207,
+      "h_p50": 0.1474934872418494,
+      "h_p90": 1.0977648811291443,
+      "h_mean": 0.4160443954539142,
+      "q_mean": 0.016302499371440946,
+      "q_lo": 0.002233657055259901,
+      "q_hi": 0.13722061014114303,
+      "q_upper80": 0.06806644572074518,
+      "hold_better_per_hundred": 90,
+      "net_minutes_protected": 3.9930897284288136,
+      "minutes_until_release": 16.0,
+      "low_confidence": true,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "override_ongoing",
+   "description": "Ongoing notification",
+   "param_patches": [],
+   "events": [],
+   "features": {
+    "key": "override_ongoing",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.instagram.android",
+    "category": "social",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": true,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": true,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.2816000000000001,
+     "n_p": 5.0,
+     "mu_cs": 2.1,
+     "sigma_pred": 0.894427190999916,
+     "structural_score": 0.016302499371440946,
+     "q": 0.016302499371440946,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 361,
+     "pi": 0.9025
+    },
+    "decision": {
+     "action": "DELIVER",
+     "rule": "OVERRIDE",
+     "would_be_action": "DELIVER",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 1.0,
+     "reason": "Always delivered: ongoing activity",
+     "explanation": "Delivered: something is in progress, like a timer or a live trip.",
+     "card": {
+      "pull_mean": 0.2816000000000001,
+      "pull_lo": 0.10264166722225325,
+      "pull_hi": 0.5636445019286274,
+      "mins_if_opened_lo": 2.358038848446369,
+      "mins_if_opened_hi": 28.435741930765,
+      "l_p10": 0.879909488618578,
+      "l_p50": 2.409584413064066,
+      "l_p90": 8.63089559549987,
+      "l_mean": 4.409134123882728,
+      "h_p10": 0.017869256442079207,
+      "h_p50": 0.1474934872418494,
+      "h_p90": 1.0977648811291443,
+      "h_mean": 0.4160443954539142,
+      "q_mean": 0.016302499371440946,
+      "q_lo": 0.002233657055259901,
+      "q_hi": 0.13722061014114303,
+      "q_upper80": 0.06806644572074518,
+      "hold_better_per_hundred": 90,
+      "net_minutes_protected": 3.9930897284288136,
+      "minutes_until_release": 16.0,
+      "low_confidence": true,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "override_ride_app",
+   "description": "Uber update",
+   "param_patches": [],
+   "events": [],
+   "features": {
+    "key": "override_ride_app",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.ubercab",
+    "category": "other",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": false,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.1232,
+     "n_p": 5.0,
+     "mu_cs": 1.0,
+     "sigma_pred": 0.894427190999916,
+     "structural_score": 0.18242552380635635,
+     "q": 0.18242552380635635,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 33,
+     "pi": 0.0825
+    },
+    "decision": {
+     "action": "DELIVER",
+     "rule": "OVERRIDE",
+     "would_be_action": "DELIVER",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 1.0,
+     "reason": "Always delivered: rides, deliveries and maps",
+     "explanation": "Delivered: rides, deliveries and maps always come through.",
+     "card": {
+      "pull_mean": 0.1232,
+      "pull_lo": 0.025382722476310147,
+      "pull_hi": 0.41811303377633546,
+      "mins_if_opened_lo": 0.7849229468845144,
+      "mins_if_opened_hi": 9.465436232252666,
+      "l_p10": 0.5156965622267368,
+      "l_p50": 0.7303611613882727,
+      "l_p90": 2.024622382738738,
+      "l_mean": 1.2425170292618255,
+      "h_p10": 0.8298385967289776,
+      "h_p50": 1.5090252607911512,
+      "h_p90": 2.5518461257751497,
+      "h_mean": 1.5994928616656496,
+      "q_mean": 0.18242552380635635,
+      "q_lo": 0.1037298245911222,
+      "q_hi": 0.3189807657218937,
+      "q_upper80": 0.26626809593478784,
+      "hold_better_per_hundred": 8,
+      "net_minutes_protected": -0.35697583240382413,
+      "minutes_until_release": 16.0,
+      "low_confidence": false,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "override_sms_otp",
+   "description": "OTP from the SMS app",
+   "param_patches": [],
+   "events": [],
+   "features": {
+    "key": "override_sms_otp",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.google.android.apps.messaging",
+    "category": "messaging",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": false,
+    "urgency_hit": false,
+    "otp_pattern": true
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.2464,
+     "n_p": 5.0,
+     "mu_cs": 1.2,
+     "sigma_pred": 0.7826237921249264,
+     "structural_score": 0.3318122278318339,
+     "q": 0.3318122278318339,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 20,
+     "pi": 0.05
+    },
+    "decision": {
+     "action": "DELIVER",
+     "rule": "OVERRIDE",
+     "would_be_action": "DELIVER",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 1.0,
+     "reason": "Always delivered: one-time password",
+     "explanation": "Delivered: looks like a one-time password from a trusted app.",
+     "card": {
+      "pull_mean": 0.2464,
+      "pull_lo": 0.08290651318236567,
+      "pull_hi": 0.5316595031493442,
+      "mins_if_opened_lo": 1.1197437045958771,
+      "mins_if_opened_hi": 9.891650451807305,
+      "l_p10": 0.6001733836175178,
+      "l_p50": 1.1175782445276958,
+      "l_p90": 3.1151007636114594,
+      "l_mean": 1.7063888094628334,
+      "h_p10": 1.7976975180013204,
+      "h_p50": 2.7145516173027797,
+      "h_p90": 3.8165269378723394,
+      "h_mean": 2.7435346964707845,
+      "q_mean": 0.3318122278318339,
+      "q_lo": 0.22471218975016505,
+      "q_hi": 0.47706586723404243,
+      "q_upper80": 0.42528967797021994,
+      "hold_better_per_hundred": 5,
+      "net_minutes_protected": -1.037145887007951,
+      "minutes_until_release": 16.0,
+      "low_confidence": true,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "override_repeat_ping",
+   "description": "Mom's second message",
+   "param_patches": [],
+   "events": [],
+   "features": {
+    "key": "override_repeat_ping",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.whatsapp",
+    "category": "messaging",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": true,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": "s_mom",
+    "sender_display_name": "Mom",
+    "same_sender_recent_pings": 1,
+    "bait_hit": false,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.2464,
+     "n_p": 5.0,
+     "mu_cs": 1.2,
+     "sigma_pred": 0.7826237921249264,
+     "structural_score": 0.8581489350995123,
+     "q": 0.8581489350995122,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 1,
+     "pi": 0.0025
+    },
+    "decision": {
+     "action": "DELIVER",
+     "rule": "OVERRIDE",
+     "would_be_action": "DELIVER",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 1.0,
+     "reason": "Always delivered: repeated ping",
+     "explanation": "Delivered: Mom messaged twice in 3 minutes.",
+     "card": {
+      "pull_mean": 0.2464,
+      "pull_lo": 0.08290651318236567,
+      "pull_hi": 0.5316595031493442,
+      "mins_if_opened_lo": 1.1197437045958771,
+      "mins_if_opened_hi": 9.891650451807305,
+      "l_p10": 0.6001733836175178,
+      "l_p50": 1.1175782445276958,
+      "l_p90": 3.1151007636114594,
+      "l_mean": 1.7063888094628334,
+      "h_p10": 5.961880329104769,
+      "h_p50": 6.908725229570326,
+      "h_p90": 7.457512291102885,
+      "h_mean": 6.7527657242852435,
+      "q_mean": 0.8581489350995122,
+      "q_lo": 0.7452350411380961,
+      "q_hi": 0.9321890363878607,
+      "q_upper80": 0.9120039505284366,
+      "hold_better_per_hundred": 0,
+      "net_minutes_protected": -5.04637691482241,
+      "minutes_until_release": 16.0,
+      "low_confidence": true,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "override_order",
+   "description": "Several overrides match; the always-deliver app wins",
+   "param_patches": [],
+   "events": [],
+   "features": {
+    "key": "override_order",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.instagram.android",
+    "category": "social",
+    "android_category": "call",
+    "channel_importance": 3,
+    "is_ongoing": true,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": true,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [
+     "com.instagram.android"
+    ],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.2816000000000001,
+     "n_p": 5.0,
+     "mu_cs": 2.1,
+     "sigma_pred": 0.894427190999916,
+     "structural_score": 0.016302499371440946,
+     "q": 0.016302499371440946,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 361,
+     "pi": 0.9025
+    },
+    "decision": {
+     "action": "DELIVER",
+     "rule": "OVERRIDE",
+     "would_be_action": "DELIVER",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 1.0,
+     "reason": "Always delivered: you chose this app",
+     "explanation": "Delivered: you always let this app through.",
+     "card": {
+      "pull_mean": 0.2816000000000001,
+      "pull_lo": 0.10264166722225325,
+      "pull_hi": 0.5636445019286274,
+      "mins_if_opened_lo": 2.358038848446369,
+      "mins_if_opened_hi": 28.435741930765,
+      "l_p10": 0.879909488618578,
+      "l_p50": 2.409584413064066,
+      "l_p90": 8.63089559549987,
+      "l_mean": 4.409134123882728,
+      "h_p10": 0.017869256442079207,
+      "h_p50": 0.1474934872418494,
+      "h_p90": 1.0977648811291443,
+      "h_mean": 0.4160443954539142,
+      "q_mean": 0.016302499371440946,
+      "q_lo": 0.002233657055259901,
+      "q_hi": 0.13722061014114303,
+      "q_upper80": 0.06806644572074518,
+      "hold_better_per_hundred": 90,
+      "net_minutes_protected": 3.9930897284288136,
+      "minutes_until_release": 16.0,
+      "low_confidence": true,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "no_override_otp_bait",
+   "description": "OTP-looking promo from a shopping app is not trusted",
+   "param_patches": [],
+   "events": [],
+   "features": {
+    "key": "no_override_otp_bait",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.flipkart.android",
+    "category": "shopping_promo",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": true,
+    "urgency_hit": false,
+    "otp_pattern": true
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.1056,
+     "n_p": 5.0,
+     "mu_cs": 1.0,
+     "sigma_pred": 0.7826237921249264,
+     "structural_score": 0.01098694263059318,
+     "q": 0.01098694263059318,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 309,
+     "pi": 0.7725
+    },
+    "decision": {
+     "action": "HOLD",
+     "rule": "HOLD_BETTER",
+     "would_be_action": "HOLD",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 0.9,
+     "reason": "Held: costs more to show than to hold",
+     "explanation": "Held: 34 min into steady focus. Promos can pull you in for 1-8 min. Back at your break in 16 min.",
+     "card": {
+      "pull_mean": 0.1056,
+      "pull_lo": 0.019095162835167857,
+      "pull_hi": 0.40342350039591757,
+      "mins_if_opened_lo": 0.9167686065181117,
+      "mins_if_opened_hi": 8.098598423592353,
+      "l_p10": 0.5180891335021526,
+      "l_p50": 0.6910927441406827,
+      "l_p90": 1.7988164528043336,
+      "l_mean": 1.1061935440682351,
+      "h_p10": 0.007801256946240277,
+      "h_p50": 0.10214979515704917,
+      "h_p90": 1.181628230543363,
+      "h_mean": 0.43017100896073124,
+      "q_mean": 0.01098694263059318,
+      "q_lo": 0.0009751571182800346,
+      "q_hi": 0.14770352881792037,
+      "q_upper80": 0.06308413217655555,
+      "hold_better_per_hundred": 77,
+      "net_minutes_protected": 0.6760225351075039,
+      "minutes_until_release": 16.0,
+      "low_confidence": false,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "no_override_group_without_sender",
+   "description": "Repeats without a sender are not a repeated ping",
+   "param_patches": [],
+   "events": [],
+   "features": {
+    "key": "no_override_group_without_sender",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.whatsapp",
+    "category": "messaging",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": true,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": "Mom",
+    "same_sender_recent_pings": 3,
+    "bait_hit": false,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.2464,
+     "n_p": 5.0,
+     "mu_cs": 1.2,
+     "sigma_pred": 0.7826237921249264,
+     "structural_score": 0.8581489350995123,
+     "q": 0.8581489350995122,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 1,
+     "pi": 0.0025
+    },
+    "decision": {
+     "action": "DELIVER",
+     "rule": "MIGHT_MATTER",
+     "would_be_action": "DELIVER",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 1.0,
+     "reason": "Delivered: might matter",
+     "explanation": "Delivered: might matter, so it is not worth the risk of holding.",
+     "card": {
+      "pull_mean": 0.2464,
+      "pull_lo": 0.08290651318236567,
+      "pull_hi": 0.5316595031493442,
+      "mins_if_opened_lo": 1.1197437045958771,
+      "mins_if_opened_hi": 9.891650451807305,
+      "l_p10": 0.6001733836175178,
+      "l_p50": 1.1175782445276958,
+      "l_p90": 3.1151007636114594,
+      "l_mean": 1.7063888094628334,
+      "h_p10": 5.961880329104769,
+      "h_p50": 6.908725229570326,
+      "h_p90": 7.457512291102885,
+      "h_mean": 6.7527657242852435,
+      "q_mean": 0.8581489350995122,
+      "q_lo": 0.7452350411380961,
+      "q_hi": 0.9321890363878607,
+      "q_upper80": 0.9120039505284366,
+      "hold_better_per_hundred": 0,
+      "net_minutes_protected": -5.04637691482241,
+      "minutes_until_release": 16.0,
+      "low_confidence": true,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "observe_mode",
+   "description": "Observe mode logs a would-be hold",
+   "param_patches": [],
+   "events": [],
+   "features": {
+    "key": "observe_mode",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.instagram.android",
+    "category": "social",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": true,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "OBSERVE",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.2816000000000001,
+     "n_p": 5.0,
+     "mu_cs": 2.1,
+     "sigma_pred": 0.894427190999916,
+     "structural_score": 0.016302499371440946,
+     "q": 0.016302499371440946,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 361,
+     "pi": 0.9025
+    },
+    "decision": {
+     "action": "DELIVER",
+     "rule": "OBSERVE_MODE",
+     "would_be_action": "HOLD",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 1.0,
+     "reason": "Observe mode",
+     "explanation": "Observe mode: delivered. In Auto it would have been held.",
+     "card": {
+      "pull_mean": 0.2816000000000001,
+      "pull_lo": 0.10264166722225325,
+      "pull_hi": 0.5636445019286274,
+      "mins_if_opened_lo": 2.358038848446369,
+      "mins_if_opened_hi": 28.435741930765,
+      "l_p10": 0.879909488618578,
+      "l_p50": 2.409584413064066,
+      "l_p90": 8.63089559549987,
+      "l_mean": 4.409134123882728,
+      "h_p10": 0.017869256442079207,
+      "h_p50": 0.1474934872418494,
+      "h_p90": 1.0977648811291443,
+      "h_mean": 0.4160443954539142,
+      "q_mean": 0.016302499371440946,
+      "q_lo": 0.002233657055259901,
+      "q_hi": 0.13722061014114303,
+      "q_upper80": 0.06806644572074518,
+      "hold_better_per_hundred": 90,
+      "net_minutes_protected": 3.9930897284288136,
+      "minutes_until_release": 16.0,
+      "low_confidence": true,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "suggest_mode",
+   "description": "Suggest mode recommends a hold",
+   "param_patches": [],
+   "events": [],
+   "features": {
+    "key": "suggest_mode",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.instagram.android",
+    "category": "social",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": true,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "SUGGEST",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.2816000000000001,
+     "n_p": 5.0,
+     "mu_cs": 2.1,
+     "sigma_pred": 0.894427190999916,
+     "structural_score": 0.016302499371440946,
+     "q": 0.016302499371440946,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 361,
+     "pi": 0.9025
+    },
+    "decision": {
+     "action": "HOLD",
+     "rule": "HOLD_BETTER",
+     "would_be_action": "HOLD",
+     "suggest_only": true,
+     "explored": false,
+     "propensity": 1.0,
+     "reason": "Held: costs more to show than to hold",
+     "explanation": "Suggest holding: 34 min into steady focus. Social updates can pull you in for 2-28 min. Back at your break in 16 min.",
+     "card": {
+      "pull_mean": 0.2816000000000001,
+      "pull_lo": 0.10264166722225325,
+      "pull_hi": 0.5636445019286274,
+      "mins_if_opened_lo": 2.358038848446369,
+      "mins_if_opened_hi": 28.435741930765,
+      "l_p10": 0.879909488618578,
+      "l_p50": 2.409584413064066,
+      "l_p90": 8.63089559549987,
+      "l_mean": 4.409134123882728,
+      "h_p10": 0.017869256442079207,
+      "h_p50": 0.1474934872418494,
+      "h_p90": 1.0977648811291443,
+      "h_mean": 0.4160443954539142,
+      "q_mean": 0.016302499371440946,
+      "q_lo": 0.002233657055259901,
+      "q_hi": 0.13722061014114303,
+      "q_upper80": 0.06806644572074518,
+      "hold_better_per_hundred": 90,
+      "net_minutes_protected": 3.9930897284288136,
+      "minutes_until_release": 16.0,
+      "low_confidence": true,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "explore_below_epsilon",
+   "description": "u below epsilon flips the hold",
+   "param_patches": [],
+   "events": [],
+   "features": {
+    "key": "explore_below_epsilon",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.instagram.android",
+    "category": "social",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": true,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.05,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.2816000000000001,
+     "n_p": 5.0,
+     "mu_cs": 2.1,
+     "sigma_pred": 0.894427190999916,
+     "structural_score": 0.016302499371440946,
+     "q": 0.016302499371440946,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 361,
+     "pi": 0.9025
+    },
+    "decision": {
+     "action": "DELIVER",
+     "rule": "EXPLORATION",
+     "would_be_action": "HOLD",
+     "suggest_only": false,
+     "explored": true,
+     "propensity": 0.1,
+     "reason": "Delivered: exploration",
+     "explanation": "Delivered to keep learning: now and then the twin checks a hold was right.",
+     "card": {
+      "pull_mean": 0.2816000000000001,
+      "pull_lo": 0.10264166722225325,
+      "pull_hi": 0.5636445019286274,
+      "mins_if_opened_lo": 2.358038848446369,
+      "mins_if_opened_hi": 28.435741930765,
+      "l_p10": 0.879909488618578,
+      "l_p50": 2.409584413064066,
+      "l_p90": 8.63089559549987,
+      "l_mean": 4.409134123882728,
+      "h_p10": 0.017869256442079207,
+      "h_p50": 0.1474934872418494,
+      "h_p90": 1.0977648811291443,
+      "h_mean": 0.4160443954539142,
+      "q_mean": 0.016302499371440946,
+      "q_lo": 0.002233657055259901,
+      "q_hi": 0.13722061014114303,
+      "q_upper80": 0.06806644572074518,
+      "hold_better_per_hundred": 90,
+      "net_minutes_protected": 3.9930897284288136,
+      "minutes_until_release": 16.0,
+      "low_confidence": true,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "explore_at_epsilon",
+   "description": "u equal to epsilon does not explore",
+   "param_patches": [],
+   "events": [],
+   "features": {
+    "key": "explore_at_epsilon",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.instagram.android",
+    "category": "social",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": true,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.1,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.2816000000000001,
+     "n_p": 5.0,
+     "mu_cs": 2.1,
+     "sigma_pred": 0.894427190999916,
+     "structural_score": 0.016302499371440946,
+     "q": 0.016302499371440946,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 361,
+     "pi": 0.9025
+    },
+    "decision": {
+     "action": "HOLD",
+     "rule": "HOLD_BETTER",
+     "would_be_action": "HOLD",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 0.9,
+     "reason": "Held: costs more to show than to hold",
+     "explanation": "Held: 34 min into steady focus. Social updates can pull you in for 2-28 min. Back at your break in 16 min.",
+     "card": {
+      "pull_mean": 0.2816000000000001,
+      "pull_lo": 0.10264166722225325,
+      "pull_hi": 0.5636445019286274,
+      "mins_if_opened_lo": 2.358038848446369,
+      "mins_if_opened_hi": 28.435741930765,
+      "l_p10": 0.879909488618578,
+      "l_p50": 2.409584413064066,
+      "l_p90": 8.63089559549987,
+      "l_mean": 4.409134123882728,
+      "h_p10": 0.017869256442079207,
+      "h_p50": 0.1474934872418494,
+      "h_p90": 1.0977648811291443,
+      "h_mean": 0.4160443954539142,
+      "q_mean": 0.016302499371440946,
+      "q_lo": 0.002233657055259901,
+      "q_hi": 0.13722061014114303,
+      "q_upper80": 0.06806644572074518,
+      "hold_better_per_hundred": 90,
+      "net_minutes_protected": 3.9930897284288136,
+      "minutes_until_release": 16.0,
+      "low_confidence": true,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "explore_not_in_suggest",
+   "description": "No exploration outside Auto",
+   "param_patches": [],
+   "events": [],
+   "features": {
+    "key": "explore_not_in_suggest",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.instagram.android",
+    "category": "social",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": true,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "SUGGEST",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.0,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.2816000000000001,
+     "n_p": 5.0,
+     "mu_cs": 2.1,
+     "sigma_pred": 0.894427190999916,
+     "structural_score": 0.016302499371440946,
+     "q": 0.016302499371440946,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 361,
+     "pi": 0.9025
+    },
+    "decision": {
+     "action": "HOLD",
+     "rule": "HOLD_BETTER",
+     "would_be_action": "HOLD",
+     "suggest_only": true,
+     "explored": false,
+     "propensity": 1.0,
+     "reason": "Held: costs more to show than to hold",
+     "explanation": "Suggest holding: 34 min into steady focus. Social updates can pull you in for 2-28 min. Back at your break in 16 min.",
+     "card": {
+      "pull_mean": 0.2816000000000001,
+      "pull_lo": 0.10264166722225325,
+      "pull_hi": 0.5636445019286274,
+      "mins_if_opened_lo": 2.358038848446369,
+      "mins_if_opened_hi": 28.435741930765,
+      "l_p10": 0.879909488618578,
+      "l_p50": 2.409584413064066,
+      "l_p90": 8.63089559549987,
+      "l_mean": 4.409134123882728,
+      "h_p10": 0.017869256442079207,
+      "h_p50": 0.1474934872418494,
+      "h_p90": 1.0977648811291443,
+      "h_mean": 0.4160443954539142,
+      "q_mean": 0.016302499371440946,
+      "q_lo": 0.002233657055259901,
+      "q_hi": 0.13722061014114303,
+      "q_upper80": 0.06806644572074518,
+      "hold_better_per_hundred": 90,
+      "net_minutes_protected": 3.9930897284288136,
+      "minutes_until_release": 16.0,
+      "low_confidence": true,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "might_matter_never_explored",
+   "description": "An urgent message from Mom with u = 0",
+   "param_patches": [],
+   "events": [],
+   "features": {
+    "key": "might_matter_never_explored",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.whatsapp",
+    "category": "messaging",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": true,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": "s_mom",
+    "sender_display_name": "Mom",
+    "same_sender_recent_pings": 0,
+    "bait_hit": false,
+    "urgency_hit": true,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.0,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.2464,
+     "n_p": 5.0,
+     "mu_cs": 1.2,
+     "sigma_pred": 0.7826237921249264,
+     "structural_score": 0.9168273035060777,
+     "q": 0.9168273035060777,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 1,
+     "pi": 0.0025
+    },
+    "decision": {
+     "action": "DELIVER",
+     "rule": "MIGHT_MATTER",
+     "would_be_action": "DELIVER",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 1.0,
+     "reason": "Delivered: might matter",
+     "explanation": "Delivered: might matter, so it is not worth the risk of holding.",
+     "card": {
+      "pull_mean": 0.2464,
+      "pull_lo": 0.08290651318236567,
+      "pull_hi": 0.5316595031493442,
+      "mins_if_opened_lo": 1.1197437045958771,
+      "mins_if_opened_hi": 9.891650451807305,
+      "l_p10": 0.6001733836175178,
+      "l_p50": 1.1175782445276958,
+      "l_p90": 3.1151007636114594,
+      "l_mean": 1.7063888094628334,
+      "h_p10": 6.518885465471664,
+      "h_p50": 7.368813031096424,
+      "h_p90": 7.750744936293718,
+      "h_mean": 7.188591285833462,
+      "q_mean": 0.9168273035060777,
+      "q_lo": 0.814860683183958,
+      "q_hi": 0.9688431170367148,
+      "q_upper80": 0.9560681581093046,
+      "hold_better_per_hundred": 0,
+      "net_minutes_protected": -5.482202476370629,
+      "minutes_until_release": 16.0,
+      "low_confidence": true,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "deliver_better",
+   "description": "Heavy delay penalty makes holding the costlier choice",
+   "param_patches": [
+    {
+     "path": [
+      "policy",
+      "w"
+     ],
+     "value": 20.0
+    }
+   ],
+   "events": [],
+   "features": {
+    "key": "deliver_better",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.instagram.android",
+    "category": "social",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": true,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.2816000000000001,
+     "n_p": 5.0,
+     "mu_cs": 2.1,
+     "sigma_pred": 0.894427190999916,
+     "structural_score": 0.016302499371440946,
+     "q": 0.016302499371440946,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 87,
+     "pi": 0.2175
+    },
+    "decision": {
+     "action": "DELIVER",
+     "rule": "DELIVER_BETTER",
+     "would_be_action": "DELIVER",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 1.0,
+     "reason": "Delivered: cheap to show",
+     "explanation": "Delivered: showing it now costs about 4.4 focus minutes (estimated).",
+     "card": {
+      "pull_mean": 0.2816000000000001,
+      "pull_lo": 0.10264166722225325,
+      "pull_hi": 0.5636445019286274,
+      "mins_if_opened_lo": 2.358038848446369,
+      "mins_if_opened_hi": 28.435741930765,
+      "l_p10": 0.879909488618578,
+      "l_p50": 2.409584413064066,
+      "l_p90": 8.63089559549987,
+      "l_mean": 4.409134123882728,
+      "h_p10": 0.7147702576831683,
+      "h_p50": 5.899739489673977,
+      "h_p90": 43.91059524516577,
+      "h_mean": 16.641775818156567,
+      "q_mean": 0.016302499371440946,
+      "q_lo": 0.002233657055259901,
+      "q_hi": 0.13722061014114303,
+      "q_upper80": 0.06806644572074518,
+      "hold_better_per_hundred": 22,
+      "net_minutes_protected": -12.23264169427384,
+      "minutes_until_release": 16.0,
+      "low_confidence": true,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "pi_star_high",
+   "description": "A stricter confidence bar turns the hold into a delivery",
+   "param_patches": [
+    {
+     "path": [
+      "policy",
+      "pi_star"
+     ],
+     "value": 0.95
+    }
+   ],
+   "events": [],
+   "features": {
+    "key": "pi_star_high",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.instagram.android",
+    "category": "social",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": true,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.2816000000000001,
+     "n_p": 5.0,
+     "mu_cs": 2.1,
+     "sigma_pred": 0.894427190999916,
+     "structural_score": 0.016302499371440946,
+     "q": 0.016302499371440946,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 361,
+     "pi": 0.9025
+    },
+    "decision": {
+     "action": "DELIVER",
+     "rule": "DELIVER_BETTER",
+     "would_be_action": "DELIVER",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 1.0,
+     "reason": "Delivered: cheap to show",
+     "explanation": "Delivered: showing it now costs about 4.4 focus minutes (estimated).",
+     "card": {
+      "pull_mean": 0.2816000000000001,
+      "pull_lo": 0.10264166722225325,
+      "pull_hi": 0.5636445019286274,
+      "mins_if_opened_lo": 2.358038848446369,
+      "mins_if_opened_hi": 28.435741930765,
+      "l_p10": 0.879909488618578,
+      "l_p50": 2.409584413064066,
+      "l_p90": 8.63089559549987,
+      "l_mean": 4.409134123882728,
+      "h_p10": 0.017869256442079207,
+      "h_p50": 0.1474934872418494,
+      "h_p90": 1.0977648811291443,
+      "h_mean": 0.4160443954539142,
+      "q_mean": 0.016302499371440946,
+      "q_lo": 0.002233657055259901,
+      "q_hi": 0.13722061014114303,
+      "q_upper80": 0.06806644572074518,
+      "hold_better_per_hundred": 90,
+      "net_minutes_protected": 3.9930897284288136,
+      "minutes_until_release": 16.0,
+      "low_confidence": true,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "lambda_one",
+   "description": "No asymmetry between showing and holding costs",
+   "param_patches": [
+    {
+     "path": [
+      "policy",
+      "lambda"
+     ],
+     "value": 1.0
+    }
+   ],
+   "events": [],
+   "features": {
+    "key": "lambda_one",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.nis.app",
+    "category": "news",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": false,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.14080000000000004,
+     "n_p": 5.0,
+     "mu_cs": 1.3,
+     "sigma_pred": 0.7826237921249264,
+     "structural_score": 0.18242552380635635,
+     "q": 0.18242552380635635,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 126,
+     "pi": 0.315
+    },
+    "decision": {
+     "action": "DELIVER",
+     "rule": "DELIVER_BETTER",
+     "would_be_action": "DELIVER",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 1.0,
+     "reason": "Delivered: cheap to show",
+     "explanation": "Delivered: showing it now costs about 1.5 focus minutes (estimated).",
+     "card": {
+      "pull_mean": 0.14080000000000004,
+      "pull_lo": 0.032252365737132443,
+      "pull_hi": 0.4337515342836884,
+      "mins_if_opened_lo": 1.2375081780176522,
+      "mins_if_opened_hi": 10.93196441110727,
+      "l_p10": 0.5499119644229589,
+      "l_p50": 0.8838736471824192,
+      "l_p90": 2.5939382995694276,
+      "l_mean": 1.4647582640820733,
+      "h_p10": 0.8298385967289776,
+      "h_p50": 1.5090252607911512,
+      "h_p90": 2.5518461257751497,
+      "h_mean": 1.5994928616656496,
+      "q_mean": 0.18242552380635635,
+      "q_lo": 0.1037298245911222,
+      "q_hi": 0.3189807657218937,
+      "q_upper80": 0.26626809593478784,
+      "hold_better_per_hundred": 32,
+      "net_minutes_protected": -0.1347345975835763,
+      "minutes_until_release": 16.0,
+      "low_confidence": true,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "category_prior_clipped",
+   "description": "A huge category multiplier is clipped to 0.95",
+   "param_patches": [
+    {
+     "path": [
+      "pull",
+      "category",
+      "social",
+      "r_c"
+     ],
+     "value": 50.0
+    }
+   ],
+   "events": [],
+   "features": {
+    "key": "category_prior_clipped",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.instagram.android",
+    "category": "social",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": true,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FREE",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.95,
+     "n_p": 5.0,
+     "mu_cs": 2.1,
+     "sigma_pred": 0.894427190999916,
+     "structural_score": 0.016302499371440946,
+     "q": 0.016302499371440946,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 391,
+     "pi": 0.9775
+    },
+    "decision": {
+     "action": "DELIVER",
+     "rule": "FREE_STATE",
+     "would_be_action": "DELIVER",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 1.0,
+     "reason": "Delivered: no focus session",
+     "explanation": "Delivered: no focus session is running.",
+     "card": {
+      "pull_mean": 0.95,
+      "pull_lo": 0.5992830823387015,
+      "pull_hi": 0.9955278447427255,
+      "mins_if_opened_lo": 2.358038848446369,
+      "mins_if_opened_hi": 28.435741930765,
+      "l_p10": 1.854751513091408,
+      "l_p50": 7.153709046861017,
+      "l_p90": 23.310038114547805,
+      "l_mean": 10.829013754754017,
+      "h_p10": 0.017869256442079207,
+      "h_p50": 0.1474934872418494,
+      "h_p90": 1.0977648811291443,
+      "h_mean": 0.4160443954539142,
+      "q_mean": 0.016302499371440946,
+      "q_lo": 0.002233657055259901,
+      "q_hi": 0.13722061014114303,
+      "q_upper80": 0.06806644572074518,
+      "hold_better_per_hundred": 98,
+      "net_minutes_protected": 10.412969359300103,
+      "minutes_until_release": 16.0,
+      "low_confidence": false,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "epsilon_zero",
+   "description": "With epsilon 0 nothing is explored, even at u = 0",
+   "param_patches": [
+    {
+     "path": [
+      "policy",
+      "epsilon"
+     ],
+     "value": 0.0
+    }
+   ],
+   "events": [],
+   "features": {
+    "key": "epsilon_zero",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.instagram.android",
+    "category": "social",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": true,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.0,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.2816000000000001,
+     "n_p": 5.0,
+     "mu_cs": 2.1,
+     "sigma_pred": 0.894427190999916,
+     "structural_score": 0.016302499371440946,
+     "q": 0.016302499371440946,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 361,
+     "pi": 0.9025
+    },
+    "decision": {
+     "action": "HOLD",
+     "rule": "HOLD_BETTER",
+     "would_be_action": "HOLD",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 1.0,
+     "reason": "Held: costs more to show than to hold",
+     "explanation": "Held: 34 min into steady focus. Social updates can pull you in for 2-28 min. Back at your break in 16 min.",
+     "card": {
+      "pull_mean": 0.2816000000000001,
+      "pull_lo": 0.10264166722225325,
+      "pull_hi": 0.5636445019286274,
+      "mins_if_opened_lo": 2.358038848446369,
+      "mins_if_opened_hi": 28.435741930765,
+      "l_p10": 0.879909488618578,
+      "l_p50": 2.409584413064066,
+      "l_p90": 8.63089559549987,
+      "l_mean": 4.409134123882728,
+      "h_p10": 0.017869256442079207,
+      "h_p50": 0.1474934872418494,
+      "h_p90": 1.0977648811291443,
+      "h_mean": 0.4160443954539142,
+      "q_mean": 0.016302499371440946,
+      "q_lo": 0.002233657055259901,
+      "q_hi": 0.13722061014114303,
+      "q_upper80": 0.06806644572074518,
+      "hold_better_per_hundred": 90,
+      "net_minutes_protected": 3.9930897284288136,
+      "minutes_until_release": 16.0,
+      "low_confidence": true,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "learn_ten_opens",
+   "description": "Ten 5-minute opens of social in steady focus",
+   "param_patches": [],
+   "events": [
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 5.0,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 5.0,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 5.0,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 5.0,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 5.0,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 5.0,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 5.0,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 5.0,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 5.0,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 5.0,
+     "released_from_tray": false
+    }
+   ],
+   "features": {
+    "key": "learn_ten_opens",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.instagram.android",
+    "category": "social",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": true,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.8745142857142857,
+     "n_p": 17.5,
+     "mu_cs": 1.6717315108551667,
+     "sigma_pred": 0.5541405252002364,
+     "structural_score": 0.016302499371440946,
+     "q": 0.016302499371440946,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 387,
+     "pi": 0.9675
+    },
+    "decision": {
+     "action": "HOLD",
+     "rule": "HOLD_BETTER",
+     "would_be_action": "HOLD",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 0.9,
+     "reason": "Held: costs more to show than to hold",
+     "explanation": "Held: 34 min into steady focus. Social updates can pull you in for 2-12 min. Back at your break in 16 min.",
+     "card": {
+      "pull_mean": 0.8745142857142857,
+      "pull_lo": 0.7403048597824572,
+      "pull_hi": 0.9430491038145377,
+      "mins_if_opened_lo": 2.4648826883188084,
+      "mins_if_opened_hi": 11.527189633761147,
+      "l_p10": 2.0810990541508043,
+      "l_p50": 4.6125610000569885,
+      "l_p90": 9.530664872284124,
+      "l_mean": 5.408425483381032,
+      "h_p10": 0.017869256442079207,
+      "h_p50": 0.1474934872418494,
+      "h_p90": 1.0977648811291443,
+      "h_mean": 0.4160443954539142,
+      "q_mean": 0.016302499371440946,
+      "q_lo": 0.002233657055259901,
+      "q_hi": 0.13722061014114303,
+      "q_upper80": 0.06806644572074518,
+      "hold_better_per_hundred": 97,
+      "net_minutes_protected": 4.992381087927118,
+      "minutes_until_release": 16.0,
+      "low_confidence": false,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 10,
+       "opens": 10
+      },
+      "category": {
+       "social": {
+        "shown": 10,
+        "opens": 10,
+        "n_min": 10,
+        "sum_x": 16.094379124341
+       }
+      },
+      "cell": {
+       "social|FOCUS_STEADY": {
+        "shown": 10,
+        "opens": 10,
+        "n_min": 10,
+        "sum_x": 16.094379124341,
+        "sum_x2": 25.902903939802343
+       }
+      }
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "learn_ten_ignores",
+   "description": "Ten ignored social notifications",
+   "param_patches": [],
+   "events": [
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    }
+   ],
+   "features": {
+    "key": "learn_ten_ignores",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.instagram.android",
+    "category": "social",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": true,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.040228571428571426,
+     "n_p": 17.5,
+     "mu_cs": 2.1,
+     "sigma_pred": 0.894427190999916,
+     "structural_score": 0.016302499371440946,
+     "q": 0.016302499371440946,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 307,
+     "pi": 0.7675
+    },
+    "decision": {
+     "action": "HOLD",
+     "rule": "HOLD_BETTER",
+     "would_be_action": "HOLD",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 0.9,
+     "reason": "Held: costs more to show than to hold",
+     "explanation": "Held: 34 min into steady focus. Social updates can pull you in for 2-28 min. Back at your break in 16 min.",
+     "card": {
+      "pull_mean": 0.040228571428571426,
+      "pull_lo": 0.009202087499123627,
+      "pull_hi": 0.15276992144873444,
+      "mins_if_opened_lo": 2.358038848446369,
+      "mins_if_opened_hi": 28.435741930765,
+      "l_p10": 0.5392609062277492,
+      "l_p50": 0.7745164447927222,
+      "l_p90": 2.287473995241431,
+      "l_mean": 1.482299710837779,
+      "h_p10": 0.017869256442079207,
+      "h_p50": 0.1474934872418494,
+      "h_p90": 1.0977648811291443,
+      "h_mean": 0.4160443954539142,
+      "q_mean": 0.016302499371440946,
+      "q_lo": 0.002233657055259901,
+      "q_hi": 0.13722061014114303,
+      "q_upper80": 0.06806644572074518,
+      "hold_better_per_hundred": 77,
+      "net_minutes_protected": 1.0662553153838648,
+      "minutes_until_release": 16.0,
+      "low_confidence": false,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 10,
+       "opens": 0
+      },
+      "category": {
+       "social": {
+        "shown": 10,
+        "opens": 0,
+        "n_min": 0,
+        "sum_x": 0.0
+       }
+      },
+      "cell": {
+       "social|FOCUS_STEADY": {
+        "shown": 10,
+        "opens": 0,
+        "n_min": 0,
+        "sum_x": 0.0,
+        "sum_x2": 0.0
+       }
+      }
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "learn_varied_minutes",
+   "description": "Opens of 1, 3, 8, 20 and 45 minutes update the spread",
+   "param_patches": [],
+   "events": [
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 1.0,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 3.0,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 8.0,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 20.0,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 45.0,
+     "released_from_tray": false
+    }
+   ],
+   "features": {
+    "key": "learn_varied_minutes",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.instagram.android",
+    "category": "social",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": true,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.7708444444444444,
+     "n_p": 11.25,
+     "mu_cs": 2.0245096247216097,
+     "sigma_pred": 1.1016027515889804,
+     "structural_score": 0.016302499371440946,
+     "q": 0.016302499371440946,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 385,
+     "pi": 0.9625
+    },
+    "decision": {
+     "action": "HOLD",
+     "rule": "HOLD_BETTER",
+     "would_be_action": "HOLD",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 0.9,
+     "reason": "Held: costs more to show than to hold",
+     "explanation": "Held: 34 min into steady focus. Social updates can pull you in for 2-35 min. Back at your break in 16 min.",
+     "card": {
+      "pull_mean": 0.7708444444444444,
+      "pull_lo": 0.5828111991296989,
+      "pull_hi": 0.8873413676051234,
+      "mins_if_opened_lo": 1.6398771329449853,
+      "mins_if_opened_hi": 35.20359099855998,
+      "l_p10": 1.3169474422372693,
+      "l_p50": 5.684318838686526,
+      "l_p90": 24.441111432634713,
+      "l_mean": 10.96018103259487,
+      "h_p10": 0.017869256442079207,
+      "h_p50": 0.1474934872418494,
+      "h_p90": 1.0977648811291443,
+      "h_mean": 0.4160443954539142,
+      "q_mean": 0.016302499371440946,
+      "q_lo": 0.002233657055259901,
+      "q_hi": 0.13722061014114303,
+      "q_upper80": 0.06806644572074518,
+      "hold_better_per_hundred": 96,
+      "net_minutes_protected": 10.544136637140955,
+      "minutes_until_release": 16.0,
+      "low_confidence": false,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 5,
+       "opens": 5
+      },
+      "category": {
+       "social": {
+        "shown": 5,
+        "opens": 5,
+        "n_min": 5,
+        "sum_x": 9.980448593672255
+       }
+      },
+      "cell": {
+       "social|FOCUS_STEADY": {
+        "shown": 5,
+        "opens": 5,
+        "n_min": 5,
+        "sum_x": 9.980448593672255,
+        "sum_x2": 28.996117251913727
+       }
+      }
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "learn_tray_release",
+   "description": "Tray releases teach only the FREE cell",
+   "param_patches": [],
+   "events": [
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 4.0,
+     "released_from_tray": true
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 6.0,
+     "released_from_tray": true
+    }
+   ],
+   "features": {
+    "key": "learn_tray_release",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.instagram.android",
+    "category": "social",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": true,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FREE",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.5371428571428573,
+     "n_p": 7.0,
+     "mu_cs": 1.9296756383913243,
+     "sigma_pred": 0.7962410499281469,
+     "structural_score": 0.016302499371440946,
+     "q": 0.016302499371440946,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 380,
+     "pi": 0.95
+    },
+    "decision": {
+     "action": "DELIVER",
+     "rule": "FREE_STATE",
+     "would_be_action": "DELIVER",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 1.0,
+     "reason": "Delivered: no focus session",
+     "explanation": "Delivered: no focus session is running.",
+     "card": {
+      "pull_mean": 0.5371428571428573,
+      "pull_lo": 0.31213294507050554,
+      "pull_hi": 0.7423036713881611,
+      "mins_if_opened_lo": 2.2792903769684862,
+      "mins_if_opened_hi": 20.912802308238827,
+      "l_p10": 1.3180472558445062,
+      "l_p50": 3.7530607432382137,
+      "l_p90": 10.992072840225603,
+      "l_mean": 5.402726220490754,
+      "h_p10": 0.017869256442079207,
+      "h_p50": 0.1474934872418494,
+      "h_p90": 1.0977648811291443,
+      "h_mean": 0.4160443954539142,
+      "q_mean": 0.016302499371440946,
+      "q_lo": 0.002233657055259901,
+      "q_hi": 0.13722061014114303,
+      "q_upper80": 0.06806644572074518,
+      "hold_better_per_hundred": 95,
+      "net_minutes_protected": 4.98668182503684,
+      "minutes_until_release": 16.0,
+      "low_confidence": true,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {
+       "social|FREE": {
+        "shown": 2,
+        "opens": 2,
+        "n_min": 2,
+        "sum_x": 3.1780538303479453,
+        "sum_x2": 5.132214051241206
+       }
+      }
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "learn_zero_minutes",
+   "description": "A 0-minute open is floored before the log",
+   "param_patches": [],
+   "events": [
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 0.0,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 0.0,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 0.0,
+     "released_from_tray": false
+    }
+   ],
+   "features": {
+    "key": "learn_zero_minutes",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.instagram.android",
+    "category": "social",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": true,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.6723516483516485,
+     "n_p": 8.75,
+     "mu_cs": -0.4729393400614552,
+     "sigma_pred": 1.2551322481641483,
+     "structural_score": 0.016302499371440946,
+     "q": 0.016302499371440946,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 279,
+     "pi": 0.6975
+    },
+    "decision": {
+     "action": "DELIVER",
+     "rule": "DELIVER_BETTER",
+     "would_be_action": "DELIVER",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 1.0,
+     "reason": "Delivered: cheap to show",
+     "explanation": "Delivered: showing it now costs about 1.1 focus minutes (estimated).",
+     "card": {
+      "pull_mean": 0.6723516483516485,
+      "pull_lo": 0.4567561196360794,
+      "pull_hi": 0.8295848913284957,
+      "mins_if_opened_lo": 0.10903969418562948,
+      "mins_if_opened_hi": 3.5889483080706985,
+      "l_p10": 0.24724017319846522,
+      "l_p50": 0.5934931954556133,
+      "l_p90": 2.292448652067311,
+      "l_mean": 1.1323652159969955,
+      "h_p10": 0.017869256442079207,
+      "h_p50": 0.1474934872418494,
+      "h_p90": 1.0977648811291443,
+      "h_mean": 0.4160443954539142,
+      "q_mean": 0.016302499371440946,
+      "q_lo": 0.002233657055259901,
+      "q_hi": 0.13722061014114303,
+      "q_upper80": 0.06806644572074518,
+      "hold_better_per_hundred": 70,
+      "net_minutes_protected": 0.7163208205430813,
+      "minutes_until_release": 16.0,
+      "low_confidence": false,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 3,
+       "opens": 3
+      },
+      "category": {
+       "social": {
+        "shown": 3,
+        "opens": 3,
+        "n_min": 3,
+        "sum_x": -6.907755278982137
+       }
+      },
+      "cell": {
+       "social|FOCUS_STEADY": {
+        "shown": 3,
+        "opens": 3,
+        "n_min": 3,
+        "sum_x": -6.907755278982137,
+        "sum_x2": 15.905694331435189
+       }
+      }
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "learn_capped_minutes",
+   "description": "A 75-minute open counts as 60",
+   "param_patches": [],
+   "events": [
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 75.0,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 75.0,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 75.0,
+     "released_from_tray": false
+    }
+   ],
+   "features": {
+    "key": "learn_capped_minutes",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.instagram.android",
+    "category": "social",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": true,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.6723516483516485,
+     "n_p": 8.75,
+     "mu_cs": 3.2655260428570716,
+     "sigma_pred": 0.8637472221694472,
+     "structural_score": 0.016302499371440946,
+     "q": 0.016302499371440946,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 396,
+     "pi": 0.99
+    },
+    "decision": {
+     "action": "HOLD",
+     "rule": "HOLD_BETTER",
+     "would_be_action": "HOLD",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 0.9,
+     "reason": "Held: costs more to show than to hold",
+     "explanation": "Held: 34 min into steady focus. Social updates can pull you in for 8-87 min. Back at your break in 16 min.",
+     "card": {
+      "pull_mean": 0.6723516483516485,
+      "pull_lo": 0.4567561196360794,
+      "pull_hi": 0.8295848913284957,
+      "mins_if_opened_lo": 7.892901304987742,
+      "mins_if_opened_hi": 87.38966886420245,
+      "l_p10": 4.95567053730927,
+      "l_p50": 17.02836549847928,
+      "l_p90": 54.022422364379814,
+      "l_mean": 25.757968240662947,
+      "h_p10": 0.017869256442079207,
+      "h_p50": 0.1474934872418494,
+      "h_p90": 1.0977648811291443,
+      "h_mean": 0.4160443954539142,
+      "q_mean": 0.016302499371440946,
+      "q_lo": 0.002233657055259901,
+      "q_hi": 0.13722061014114303,
+      "q_upper80": 0.06806644572074518,
+      "hold_better_per_hundred": 99,
+      "net_minutes_protected": 25.341923845209035,
+      "minutes_until_release": 16.0,
+      "low_confidence": false,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 3,
+       "opens": 3
+      },
+      "category": {
+       "social": {
+        "shown": 3,
+        "opens": 3,
+        "n_min": 3,
+        "sum_x": 12.2830336866663
+       }
+      },
+      "cell": {
+       "social|FOCUS_STEADY": {
+        "shown": 3,
+        "opens": 3,
+        "n_min": 3,
+        "sum_x": 12.2830336866663,
+        "sum_x2": 50.29097218259305
+       }
+      }
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "learn_cell_pool_cap",
+   "description": "Fifty restless social events strengthen the steady cell prior up to the cap",
+   "param_patches": [],
+   "events": [
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    }
+   ],
+   "features": {
+    "key": "learn_cell_pool_cap",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.instagram.android",
+    "category": "social",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": true,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.01340952380952381,
+     "n_p": 15.0,
+     "mu_cs": 2.1,
+     "sigma_pred": 0.894427190999916,
+     "structural_score": 0.016302499371440946,
+     "q": 0.016302499371440946,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 293,
+     "pi": 0.7325
+    },
+    "decision": {
+     "action": "HOLD",
+     "rule": "HOLD_BETTER",
+     "would_be_action": "HOLD",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 0.9,
+     "reason": "Held: costs more to show than to hold",
+     "explanation": "Held: 34 min into steady focus. Social updates can pull you in for 2-28 min. Back at your break in 16 min.",
+     "card": {
+      "pull_mean": 0.01340952380952381,
+      "pull_lo": 0.000842023190703285,
+      "pull_hi": 0.16715245503936882,
+      "mins_if_opened_lo": 2.358038848446369,
+      "mins_if_opened_hi": 28.435741930765,
+      "l_p10": 0.5040518863098644,
+      "l_p50": 0.5869938686644955,
+      "l_p90": 2.10676940476739,
+      "l_mean": 1.5599396342204184,
+      "h_p10": 0.017869256442079207,
+      "h_p50": 0.1474934872418494,
+      "h_p90": 1.0977648811291443,
+      "h_mean": 0.4160443954539142,
+      "q_mean": 0.016302499371440946,
+      "q_lo": 0.002233657055259901,
+      "q_hi": 0.13722061014114303,
+      "q_upper80": 0.06806644572074518,
+      "hold_better_per_hundred": 73,
+      "net_minutes_protected": 1.1438952387665042,
+      "minutes_until_release": 16.0,
+      "low_confidence": false,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 50,
+       "opens": 0
+      },
+      "category": {
+       "social": {
+        "shown": 50,
+        "opens": 0,
+        "n_min": 0,
+        "sum_x": 0.0
+       }
+      },
+      "cell": {
+       "social|FOCUS_RESTLESS": {
+        "shown": 50,
+        "opens": 0,
+        "n_min": 0,
+        "sum_x": 0.0,
+        "sum_x2": 0.0
+       }
+      }
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "learn_other_category",
+   "description": "Short-video opens move social only through the global rate",
+   "param_patches": [],
+   "events": [
+    {
+     "type": "pull_outcome",
+     "category": "short_video",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 10.0,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "short_video",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 10.0,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "short_video",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 10.0,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "short_video",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 10.0,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "short_video",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 10.0,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "short_video",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 10.0,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "short_video",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 10.0,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "short_video",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 10.0,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "short_video",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 10.0,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "short_video",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 10.0,
+     "released_from_tray": false
+    }
+   ],
+   "features": {
+    "key": "learn_other_category",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.instagram.android",
+    "category": "social",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": true,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.6144000000000002,
+     "n_p": 5.0,
+     "mu_cs": 2.1,
+     "sigma_pred": 0.894427190999916,
+     "structural_score": 0.016302499371440946,
+     "q": 0.016302499371440946,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 383,
+     "pi": 0.9575
+    },
+    "decision": {
+     "action": "HOLD",
+     "rule": "HOLD_BETTER",
+     "would_be_action": "HOLD",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 0.9,
+     "reason": "Held: costs more to show than to hold",
+     "explanation": "Held: 34 min into steady focus. Social updates can pull you in for 2-28 min. Back at your break in 16 min.",
+     "card": {
+      "pull_mean": 0.6144000000000002,
+      "pull_lo": 0.33797536435329306,
+      "pull_hi": 0.8274698037357566,
+      "mins_if_opened_lo": 2.358038848446369,
+      "mins_if_opened_hi": 28.435741930765,
+      "l_p10": 1.4312517984068638,
+      "l_p50": 4.8200424166294935,
+      "l_p90": 16.12566004247596,
+      "l_mean": 7.713845672126348,
+      "h_p10": 0.017869256442079207,
+      "h_p50": 0.1474934872418494,
+      "h_p90": 1.0977648811291443,
+      "h_mean": 0.4160443954539142,
+      "q_mean": 0.016302499371440946,
+      "q_lo": 0.002233657055259901,
+      "q_hi": 0.13722061014114303,
+      "q_upper80": 0.06806644572074518,
+      "hold_better_per_hundred": 96,
+      "net_minutes_protected": 7.297801276672434,
+      "minutes_until_release": 16.0,
+      "low_confidence": true,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 10,
+       "opens": 10
+      },
+      "category": {
+       "short_video": {
+        "shown": 10,
+        "opens": 10,
+        "n_min": 10,
+        "sum_x": 23.025850929940464
+       }
+      },
+      "cell": {
+       "short_video|FOCUS_STEADY": {
+        "shown": 10,
+        "opens": 10,
+        "n_min": 10,
+        "sum_x": 23.025850929940464,
+        "sum_x2": 53.01898110478398
+       }
+      }
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "learn_mixed_history",
+   "description": "Opens and ignores in two states",
+   "param_patches": [],
+   "events": [
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 3.0,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": true,
+     "minutes_lost": 12.0,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_RESTLESS",
+     "opened": false,
+     "minutes_lost": null,
+     "released_from_tray": false
+    }
+   ],
+   "features": {
+    "key": "learn_mixed_history",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.instagram.android",
+    "category": "social",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": true,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_RESTLESS",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.5614285714285714,
+     "n_p": 8.0,
+     "mu_cs": 2.287662845034089,
+     "sigma_pred": 0.8293696496748841,
+     "structural_score": 0.016302499371440946,
+     "q": 0.016302499371440946,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 388,
+     "pi": 0.97
+    },
+    "decision": {
+     "action": "HOLD",
+     "rule": "HOLD_BETTER",
+     "would_be_action": "HOLD",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 0.9,
+     "reason": "Held: costs more to show than to hold",
+     "explanation": "Held: 34 min into restless focus. Social updates can pull you in for 3-31 min. Back at your break in 16 min.",
+     "card": {
+      "pull_mean": 0.5614285714285714,
+      "pull_lo": 0.3462270562408457,
+      "pull_hi": 0.7505410603513569,
+      "mins_if_opened_lo": 3.1137980663352245,
+      "mins_if_opened_hi": 31.32950161889623,
+      "l_p10": 1.7973132402442795,
+      "l_p50": 5.4719815677056864,
+      "l_p90": 16.662404089707255,
+      "l_mean": 8.146087093043695,
+      "h_p10": 0.017869256442079207,
+      "h_p50": 0.1474934872418494,
+      "h_p90": 1.0977648811291443,
+      "h_mean": 0.4160443954539142,
+      "q_mean": 0.016302499371440946,
+      "q_lo": 0.002233657055259901,
+      "q_hi": 0.13722061014114303,
+      "q_upper80": 0.06806644572074518,
+      "hold_better_per_hundred": 97,
+      "net_minutes_protected": 7.730042697589781,
+      "minutes_until_release": 16.0,
+      "low_confidence": true,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 4,
+       "opens": 2
+      },
+      "category": {
+       "social": {
+        "shown": 4,
+        "opens": 2,
+        "n_min": 2,
+        "sum_x": 3.58351893845611
+       }
+      },
+      "cell": {
+       "social|FOCUS_RESTLESS": {
+        "shown": 2,
+        "opens": 1,
+        "n_min": 1,
+        "sum_x": 2.4849066497880004,
+        "sum_x2": 6.174761058160624
+       },
+       "social|FOCUS_STEADY": {
+        "shown": 2,
+        "opens": 1,
+        "n_min": 1,
+        "sum_x": 1.0986122886681098,
+        "sum_x2": 1.206948960812582
+       }
+      }
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "worth_not_worth_it",
+   "description": "Five Not worth it taps on Instagram",
+   "param_patches": [],
+   "events": [
+    {
+     "type": "worth_label",
+     "package_name": "com.instagram.android",
+     "sender_hash": null,
+     "label": "NOT_WORTH_IT"
+    },
+    {
+     "type": "worth_label",
+     "package_name": "com.instagram.android",
+     "sender_hash": null,
+     "label": "NOT_WORTH_IT"
+    },
+    {
+     "type": "worth_label",
+     "package_name": "com.instagram.android",
+     "sender_hash": null,
+     "label": "NOT_WORTH_IT"
+    },
+    {
+     "type": "worth_label",
+     "package_name": "com.instagram.android",
+     "sender_hash": null,
+     "label": "NOT_WORTH_IT"
+    },
+    {
+     "type": "worth_label",
+     "package_name": "com.instagram.android",
+     "sender_hash": null,
+     "label": "NOT_WORTH_IT"
+    }
+   ],
+   "features": {
+    "key": "worth_not_worth_it",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.instagram.android",
+    "category": "social",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": true,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.2816000000000001,
+     "n_p": 5.0,
+     "mu_cs": 2.1,
+     "sigma_pred": 0.894427190999916,
+     "structural_score": 0.016302499371440946,
+     "q": 0.013041999497152757,
+     "n_q": 25,
+     "used_sender": false,
+     "holding_wins": 374,
+     "pi": 0.935
+    },
+    "decision": {
+     "action": "HOLD",
+     "rule": "HOLD_BETTER",
+     "would_be_action": "HOLD",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 0.9,
+     "reason": "Held: costs more to show than to hold",
+     "explanation": "Held: 34 min into steady focus. Social updates can pull you in for 2-28 min. Back at your break in 16 min.",
+     "card": {
+      "pull_mean": 0.2816000000000001,
+      "pull_lo": 0.10264166722225325,
+      "pull_hi": 0.5636445019286274,
+      "mins_if_opened_lo": 2.358038848446369,
+      "mins_if_opened_hi": 28.435741930765,
+      "l_p10": 0.879909488618578,
+      "l_p50": 2.409584413064066,
+      "l_p90": 8.63089559549987,
+      "l_mean": 4.409134123882728,
+      "h_p10": 0.014301798557652349,
+      "h_p50": 0.11802194636389463,
+      "h_p90": 0.8973635808181303,
+      "h_mean": 0.34720169516107197,
+      "q_mean": 0.013041999497152757,
+      "q_lo": 0.0017877248197065436,
+      "q_hi": 0.11217044760226628,
+      "q_upper80": 0.05490496244754302,
+      "hold_better_per_hundred": 94,
+      "net_minutes_protected": 4.061932428721656,
+      "minutes_until_release": 16.0,
+      "low_confidence": true,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {
+       "com.instagram.android": {
+        "labels": 5,
+        "positives": 0
+       }
+      },
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "worth_worth_it",
+   "description": "Five Worth it taps on Instagram",
+   "param_patches": [],
+   "events": [
+    {
+     "type": "worth_label",
+     "package_name": "com.instagram.android",
+     "sender_hash": null,
+     "label": "WORTH_IT"
+    },
+    {
+     "type": "worth_label",
+     "package_name": "com.instagram.android",
+     "sender_hash": null,
+     "label": "WORTH_IT"
+    },
+    {
+     "type": "worth_label",
+     "package_name": "com.instagram.android",
+     "sender_hash": null,
+     "label": "WORTH_IT"
+    },
+    {
+     "type": "worth_label",
+     "package_name": "com.instagram.android",
+     "sender_hash": null,
+     "label": "WORTH_IT"
+    },
+    {
+     "type": "worth_label",
+     "package_name": "com.instagram.android",
+     "sender_hash": null,
+     "label": "WORTH_IT"
+    }
+   ],
+   "features": {
+    "key": "worth_worth_it",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.instagram.android",
+    "category": "social",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": true,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.2816000000000001,
+     "n_p": 5.0,
+     "mu_cs": 2.1,
+     "sigma_pred": 0.894427190999916,
+     "structural_score": 0.016302499371440946,
+     "q": 0.21304199949715275,
+     "n_q": 25,
+     "used_sender": false,
+     "holding_wins": 152,
+     "pi": 0.38
+    },
+    "decision": {
+     "action": "DELIVER",
+     "rule": "DELIVER_BETTER",
+     "would_be_action": "DELIVER",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 1.0,
+     "reason": "Delivered: cheap to show",
+     "explanation": "Delivered: showing it now costs about 4.4 focus minutes (estimated).",
+     "card": {
+      "pull_mean": 0.2816000000000001,
+      "pull_lo": 0.10264166722225325,
+      "pull_hi": 0.5636445019286274,
+      "mins_if_opened_lo": 2.358038848446369,
+      "mins_if_opened_hi": 28.435741930765,
+      "l_p10": 0.879909488618578,
+      "l_p50": 2.409584413064066,
+      "l_p90": 8.63089559549987,
+      "l_mean": 4.409134123882728,
+      "h_p10": 1.0771784629768557,
+      "h_p50": 1.7512463189937881,
+      "h_p90": 2.68810378675922,
+      "h_mean": 1.8115087475806146,
+      "q_mean": 0.21304199949715275,
+      "q_lo": 0.13464730787210696,
+      "q_hi": 0.3360129733449025,
+      "q_upper80": 0.28979371121565,
+      "hold_better_per_hundred": 38,
+      "net_minutes_protected": 2.5976253763021133,
+      "minutes_until_release": 16.0,
+      "low_confidence": true,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {
+       "com.instagram.android": {
+        "labels": 5,
+        "positives": 5
+       }
+      },
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "worth_sender_negative",
+   "description": "Three Correct hold taps on Mom use the sender path",
+   "param_patches": [],
+   "events": [
+    {
+     "type": "worth_label",
+     "package_name": "com.whatsapp",
+     "sender_hash": "s_mom",
+     "label": "CORRECT_HOLD"
+    },
+    {
+     "type": "worth_label",
+     "package_name": "com.whatsapp",
+     "sender_hash": "s_mom",
+     "label": "CORRECT_HOLD"
+    },
+    {
+     "type": "worth_label",
+     "package_name": "com.whatsapp",
+     "sender_hash": "s_mom",
+     "label": "CORRECT_HOLD"
+    }
+   ],
+   "features": {
+    "key": "worth_sender_negative",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.whatsapp",
+    "category": "messaging",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": true,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": "s_mom",
+    "sender_display_name": "Mom",
+    "same_sender_recent_pings": 0,
+    "bait_hit": false,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.2464,
+     "n_p": 5.0,
+     "mu_cs": 1.2,
+     "sigma_pred": 0.7826237921249264,
+     "structural_score": 0.710949502625004,
+     "q": 0.4121446392029009,
+     "n_q": 9,
+     "used_sender": true,
+     "holding_wins": 13,
+     "pi": 0.0325
+    },
+    "decision": {
+     "action": "DELIVER",
+     "rule": "MIGHT_MATTER",
+     "would_be_action": "DELIVER",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 1.0,
+     "reason": "Delivered: might matter",
+     "explanation": "Delivered: might matter. You have marked this sender before.",
+     "card": {
+      "pull_mean": 0.2464,
+      "pull_lo": 0.08290651318236567,
+      "pull_hi": 0.5316595031493442,
+      "mins_if_opened_lo": 1.1197437045958771,
+      "mins_if_opened_hi": 9.891650451807305,
+      "l_p10": 0.6001733836175178,
+      "l_p50": 1.1175782445276958,
+      "l_p90": 3.1151007636114594,
+      "l_mean": 1.7063888094628334,
+      "h_p10": 1.9637898148357977,
+      "h_p50": 3.3905954824371367,
+      "h_p90": 5.002584847807379,
+      "h_mean": 3.4049766778102986,
+      "q_mean": 0.4121446392029009,
+      "q_lo": 0.24547372685447472,
+      "q_hi": 0.6253231059759223,
+      "q_upper80": 0.5532334048100892,
+      "hold_better_per_hundred": 3,
+      "net_minutes_protected": -1.6985878683474651,
+      "minutes_until_release": 16.0,
+      "low_confidence": true,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {
+       "com.whatsapp": {
+        "labels": 3,
+        "positives": 0
+       }
+      },
+      "sender": {
+       "s_mom": {
+        "labels": 3,
+        "positives": 0
+       }
+      }
+     }
+    }
+   }
+  },
+  {
+   "id": "worth_other_sender",
+   "description": "Labels on Mom move a friend only through the app layer",
+   "param_patches": [],
+   "events": [
+    {
+     "type": "worth_label",
+     "package_name": "com.whatsapp",
+     "sender_hash": "s_mom",
+     "label": "CORRECT_HOLD"
+    },
+    {
+     "type": "worth_label",
+     "package_name": "com.whatsapp",
+     "sender_hash": "s_mom",
+     "label": "CORRECT_HOLD"
+    },
+    {
+     "type": "worth_label",
+     "package_name": "com.whatsapp",
+     "sender_hash": "s_mom",
+     "label": "CORRECT_HOLD"
+    }
+   ],
+   "features": {
+    "key": "worth_other_sender",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.whatsapp",
+    "category": "messaging",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": true,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": "s_friend",
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": false,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.2464,
+     "n_p": 5.0,
+     "mu_cs": 1.2,
+     "sigma_pred": 0.7826237921249264,
+     "structural_score": 0.710949502625004,
+     "q": 0.6182169588043513,
+     "n_q": 23,
+     "used_sender": false,
+     "holding_wins": 3,
+     "pi": 0.0075
+    },
+    "decision": {
+     "action": "DELIVER",
+     "rule": "MIGHT_MATTER",
+     "would_be_action": "DELIVER",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 1.0,
+     "reason": "Delivered: might matter",
+     "explanation": "Delivered: might matter, so it is not worth the risk of holding.",
+     "card": {
+      "pull_mean": 0.2464,
+      "pull_lo": 0.08290651318236567,
+      "pull_hi": 0.5316595031493442,
+      "mins_if_opened_lo": 1.1197437045958771,
+      "mins_if_opened_hi": 9.891650451807305,
+      "l_p10": 0.6001733836175178,
+      "l_p50": 1.1175782445276958,
+      "l_p90": 3.1151007636114594,
+      "l_mean": 1.7063888094628334,
+      "h_p10": 3.9907409157346545,
+      "h_p50": 5.002982819764823,
+      "h_p90": 5.8979185505955805,
+      "h_mean": 4.935818918285825,
+      "q_mean": 0.6182169588043513,
+      "q_lo": 0.4988426144668318,
+      "q_hi": 0.7372398188244476,
+      "q_upper80": 0.6989942130655346,
+      "hold_better_per_hundred": 1,
+      "net_minutes_protected": -3.229430108822992,
+      "minutes_until_release": 16.0,
+      "low_confidence": true,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {
+       "com.whatsapp": {
+        "labels": 3,
+        "positives": 0
+       }
+      },
+      "sender": {
+       "s_mom": {
+        "labels": 3,
+        "positives": 0
+       }
+      }
+     }
+    }
+   }
+  },
+  {
+   "id": "worth_mixed_labels",
+   "description": "Release now, Always deliver and Not worth it on one sender",
+   "param_patches": [],
+   "events": [
+    {
+     "type": "worth_label",
+     "package_name": "com.whatsapp",
+     "sender_hash": "s_mom",
+     "label": "RELEASE_NOW"
+    },
+    {
+     "type": "worth_label",
+     "package_name": "com.whatsapp",
+     "sender_hash": "s_mom",
+     "label": "ALWAYS_DELIVER"
+    },
+    {
+     "type": "worth_label",
+     "package_name": "com.whatsapp",
+     "sender_hash": "s_mom",
+     "label": "NOT_WORTH_IT"
+    }
+   ],
+   "features": {
+    "key": "worth_mixed_labels",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.whatsapp",
+    "category": "messaging",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": true,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": "s_mom",
+    "sender_display_name": "Mom",
+    "same_sender_recent_pings": 0,
+    "bait_hit": false,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.2464,
+     "n_p": 5.0,
+     "mu_cs": 1.2,
+     "sigma_pred": 0.7826237921249264,
+     "structural_score": 0.710949502625004,
+     "q": 0.6923378759178768,
+     "n_q": 9,
+     "used_sender": true,
+     "holding_wins": 3,
+     "pi": 0.0075
+    },
+    "decision": {
+     "action": "DELIVER",
+     "rule": "MIGHT_MATTER",
+     "would_be_action": "DELIVER",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 1.0,
+     "reason": "Delivered: might matter",
+     "explanation": "Delivered: might matter. You have marked this sender before.",
+     "card": {
+      "pull_mean": 0.2464,
+      "pull_lo": 0.08290651318236567,
+      "pull_hi": 0.5316595031493442,
+      "mins_if_opened_lo": 1.1197437045958771,
+      "mins_if_opened_hi": 9.891650451807305,
+      "l_p10": 0.6001733836175178,
+      "l_p50": 1.1175782445276958,
+      "l_p90": 3.1151007636114594,
+      "l_mean": 1.7063888094628334,
+      "h_p10": 3.9844143544485755,
+      "h_p50": 5.6250911556607734,
+      "h_p90": 6.801493296704715,
+      "h_mean": 5.4405991511931395,
+      "q_mean": 0.6923378759178768,
+      "q_lo": 0.49805179430607194,
+      "q_hi": 0.8501866620880894,
+      "q_upper80": 0.8049862480354829,
+      "hold_better_per_hundred": 1,
+      "net_minutes_protected": -3.7342103417303063,
+      "minutes_until_release": 16.0,
+      "low_confidence": true,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {
+       "com.whatsapp": {
+        "labels": 3,
+        "positives": 2
+       }
+      },
+      "sender": {
+       "s_mom": {
+        "labels": 3,
+        "positives": 2
+       }
+      }
+     }
+    }
+   }
+  },
+  {
+   "id": "worth_unchanged_by_fast_opens",
+   "description": "Ten fast opens leave worth exactly where it was",
+   "param_patches": [],
+   "events": [
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 0.2,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 0.2,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 0.2,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 0.2,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 0.2,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 0.2,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 0.2,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 0.2,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 0.2,
+     "released_from_tray": false
+    },
+    {
+     "type": "pull_outcome",
+     "category": "social",
+     "state": "FOCUS_STEADY",
+     "opened": true,
+     "minutes_lost": 0.2,
+     "released_from_tray": false
+    }
+   ],
+   "features": {
+    "key": "worth_unchanged_by_fast_opens",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.instagram.android",
+    "category": "social",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": true,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.8745142857142857,
+     "n_p": 17.5,
+     "mu_cs": -1.1383981775218333,
+     "sigma_pred": 0.6609329768746366,
+     "structural_score": 0.016302499371440946,
+     "q": 0.016302499371440946,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 218,
+     "pi": 0.545
+    },
+    "decision": {
+     "action": "DELIVER",
+     "rule": "DELIVER_BETTER",
+     "would_be_action": "DELIVER",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 1.0,
+     "reason": "Delivered: cheap to show",
+     "explanation": "Delivered: showing it now costs about 0.4 focus minutes (estimated).",
+     "card": {
+      "pull_mean": 0.8745142857142857,
+      "pull_lo": 0.7403048597824572,
+      "pull_hi": 0.9430491038145377,
+      "mins_if_opened_lo": 0.12792682098834302,
+      "mins_if_opened_hi": 0.805368697892694,
+      "l_p10": 0.18109029521508432,
+      "l_p50": 0.362049119975683,
+      "l_p90": 0.7413919967682221,
+      "l_mean": 0.41828122602804174,
+      "h_p10": 0.017869256442079207,
+      "h_p50": 0.1474934872418494,
+      "h_p90": 1.0977648811291443,
+      "h_mean": 0.4160443954539142,
+      "q_mean": 0.016302499371440946,
+      "q_lo": 0.002233657055259901,
+      "q_hi": 0.13722061014114303,
+      "q_upper80": 0.06806644572074518,
+      "hold_better_per_hundred": 55,
+      "net_minutes_protected": 0.0022368305741275463,
+      "minutes_until_release": 16.0,
+      "low_confidence": false,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 10,
+       "opens": 10
+      },
+      "category": {
+       "social": {
+        "shown": 10,
+        "opens": 10,
+        "n_min": 10,
+        "sum_x": -16.094379124341
+       }
+      },
+      "cell": {
+       "social|FOCUS_STEADY": {
+        "shown": 10,
+        "opens": 10,
+        "n_min": 10,
+        "sum_x": -16.094379124341,
+        "sum_x2": 25.902903939802343
+       }
+      }
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "demo_fresh",
+   "description": "Beat 1 like with demo learning weights",
+   "param_patches": [],
+   "events": [],
+   "features": {
+    "key": "demo_fresh",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.instagram.android",
+    "category": "social",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": true,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": true
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.2816000000000001,
+     "n_p": 2.0,
+     "mu_cs": 2.1,
+     "sigma_pred": 0.9797958971132712,
+     "structural_score": 0.016302499371440946,
+     "q": 0.016302499371440946,
+     "n_q": 4,
+     "used_sender": false,
+     "holding_wins": 291,
+     "pi": 0.7275
+    },
+    "decision": {
+     "action": "HOLD",
+     "rule": "HOLD_BETTER",
+     "would_be_action": "HOLD",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 1.0,
+     "reason": "Held: costs more to show than to hold",
+     "explanation": "Held: 34 min into steady focus. Social updates can pull you in for 2-32 min. Back at your break in 16 min.",
+     "card": {
+      "pull_mean": 0.2816000000000001,
+      "pull_lo": 0.05295340130106407,
+      "pull_hi": 0.7209074689702333,
+      "mins_if_opened_lo": 2.0944119846317393,
+      "mins_if_opened_hi": 32.03178441216387,
+      "l_p10": 0.6958700211715568,
+      "l_p50": 2.2847579527453417,
+      "l_p90": 10.848596294752838,
+      "l_mean": 5.2196937385528415,
+      "h_p10": 0.0015081846208788018,
+      "h_p50": 0.17165200964607227,
+      "h_p90": 5.779705713767488,
+      "h_mean": 1.4145801795306283,
+      "q_mean": 0.016302499371440946,
+      "q_lo": 0.00018852307760985023,
+      "q_hi": 0.722463214220936,
+      "q_upper80": 0.3135847997185859,
+      "hold_better_per_hundred": 73,
+      "net_minutes_protected": 3.805113559022213,
+      "minutes_until_release": 16.0,
+      "low_confidence": true,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "demo_four_correct_holds",
+   "description": "Beat 1 after four Correct hold taps",
+   "param_patches": [],
+   "events": [
+    {
+     "type": "worth_label",
+     "package_name": "com.instagram.android",
+     "sender_hash": null,
+     "label": "CORRECT_HOLD"
+    },
+    {
+     "type": "worth_label",
+     "package_name": "com.instagram.android",
+     "sender_hash": null,
+     "label": "CORRECT_HOLD"
+    },
+    {
+     "type": "worth_label",
+     "package_name": "com.instagram.android",
+     "sender_hash": null,
+     "label": "CORRECT_HOLD"
+    },
+    {
+     "type": "worth_label",
+     "package_name": "com.instagram.android",
+     "sender_hash": null,
+     "label": "CORRECT_HOLD"
+    }
+   ],
+   "features": {
+    "key": "demo_four_correct_holds",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.instagram.android",
+    "category": "social",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": true,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": true
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.2816000000000001,
+     "n_p": 2.0,
+     "mu_cs": 2.1,
+     "sigma_pred": 0.9797958971132712,
+     "structural_score": 0.016302499371440946,
+     "q": 0.008151249685720473,
+     "n_q": 8,
+     "used_sender": false,
+     "holding_wins": 314,
+     "pi": 0.785
+    },
+    "decision": {
+     "action": "HOLD",
+     "rule": "HOLD_BETTER",
+     "would_be_action": "HOLD",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 0.9,
+     "reason": "Held: costs more to show than to hold",
+     "explanation": "Held: 34 min into steady focus. Social updates can pull you in for 2-32 min. Back at your break in 16 min.",
+     "card": {
+      "pull_mean": 0.2816000000000001,
+      "pull_lo": 0.05295340130106407,
+      "pull_hi": 0.7209074689702333,
+      "mins_if_opened_lo": 2.0944119846317393,
+      "mins_if_opened_hi": 32.03178441216387,
+      "l_p10": 0.6958700211715568,
+      "l_p50": 2.2847579527453417,
+      "l_p90": 10.848596294752838,
+      "l_mean": 5.2196937385528415,
+      "h_p10": 0.0007618769299818503,
+      "h_p50": 0.08595340326296755,
+      "h_p90": 4.466847205397313,
+      "h_mean": 1.0814823404475056,
+      "q_mean": 0.008151249685720473,
+      "q_lo": 9.523461624773129e-05,
+      "q_hi": 0.5583559006746641,
+      "q_upper80": 0.18265403497112828,
+      "hold_better_per_hundred": 79,
+      "net_minutes_protected": 4.1382113981053354,
+      "minutes_until_release": 16.0,
+      "low_confidence": true,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {
+       "com.instagram.android": {
+        "labels": 4,
+        "positives": 0
+       }
+      },
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "demo_four_worth_it",
+   "description": "Beat 1 after four Worth it taps",
+   "param_patches": [],
+   "events": [
+    {
+     "type": "worth_label",
+     "package_name": "com.instagram.android",
+     "sender_hash": null,
+     "label": "WORTH_IT"
+    },
+    {
+     "type": "worth_label",
+     "package_name": "com.instagram.android",
+     "sender_hash": null,
+     "label": "WORTH_IT"
+    },
+    {
+     "type": "worth_label",
+     "package_name": "com.instagram.android",
+     "sender_hash": null,
+     "label": "WORTH_IT"
+    },
+    {
+     "type": "worth_label",
+     "package_name": "com.instagram.android",
+     "sender_hash": null,
+     "label": "WORTH_IT"
+    }
+   ],
+   "features": {
+    "key": "demo_four_worth_it",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.instagram.android",
+    "category": "social",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": true,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": true
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.2816000000000001,
+     "n_p": 2.0,
+     "mu_cs": 2.1,
+     "sigma_pred": 0.9797958971132712,
+     "structural_score": 0.016302499371440946,
+     "q": 0.5081512496857205,
+     "n_q": 8,
+     "used_sender": false,
+     "holding_wins": 68,
+     "pi": 0.17
+    },
+    "decision": {
+     "action": "DELIVER",
+     "rule": "MIGHT_MATTER",
+     "would_be_action": "DELIVER",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 1.0,
+     "reason": "Delivered: might matter",
+     "explanation": "Delivered: might matter, so it is not worth the risk of holding.",
+     "card": {
+      "pull_mean": 0.2816000000000001,
+      "pull_lo": 0.05295340130106407,
+      "pull_hi": 0.7209074689702333,
+      "mins_if_opened_lo": 2.0944119846317393,
+      "mins_if_opened_hi": 32.03178441216387,
+      "l_p10": 0.6958700211715568,
+      "l_p50": 2.2847579527453417,
+      "l_p90": 10.848596294752838,
+      "l_mean": 5.2196937385528415,
+      "h_p10": 2.5332202888103956,
+      "h_p50": 4.165401689152478,
+      "h_p90": 5.750110906588089,
+      "h_mean": 4.106452061760339,
+      "q_mean": 0.5081512496857205,
+      "q_lo": 0.31665253610129945,
+      "q_hi": 0.7187638633235112,
+      "q_upper80": 0.6517309544469848,
+      "hold_better_per_hundred": 17,
+      "net_minutes_protected": 1.1132416767925024,
+      "minutes_until_release": 16.0,
+      "low_confidence": true,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {
+       "com.instagram.android": {
+        "labels": 4,
+        "positives": 4
+       }
+      },
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "release_now",
+   "description": "Break is due now, so holding costs nothing",
+   "param_patches": [],
+   "events": [],
+   "features": {
+    "key": "release_now",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.instagram.android",
+    "category": "social",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": true,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 0.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.2816000000000001,
+     "n_p": 5.0,
+     "mu_cs": 2.1,
+     "sigma_pred": 0.894427190999916,
+     "structural_score": 0.016302499371440946,
+     "q": 0.016302499371440946,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 400,
+     "pi": 1.0
+    },
+    "decision": {
+     "action": "HOLD",
+     "rule": "HOLD_BETTER",
+     "would_be_action": "HOLD",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 0.9,
+     "reason": "Held: costs more to show than to hold",
+     "explanation": "Held: 34 min into steady focus. Social updates can pull you in for 2-28 min. Back at your break in 1 min.",
+     "card": {
+      "pull_mean": 0.2816000000000001,
+      "pull_lo": 0.10264166722225325,
+      "pull_hi": 0.5636445019286274,
+      "mins_if_opened_lo": 2.358038848446369,
+      "mins_if_opened_hi": 28.435741930765,
+      "l_p10": 0.879909488618578,
+      "l_p50": 2.409584413064066,
+      "l_p90": 8.63089559549987,
+      "l_mean": 4.409134123882728,
+      "h_p10": 0.0,
+      "h_p50": 0.0,
+      "h_p90": 0.0,
+      "h_mean": 0.0,
+      "q_mean": 0.016302499371440946,
+      "q_lo": 0.002233657055259901,
+      "q_hi": 0.13722061014114303,
+      "q_upper80": 0.06806644572074518,
+      "hold_better_per_hundred": 100,
+      "net_minutes_protected": 4.409134123882728,
+      "minutes_until_release": 0.0,
+      "low_confidence": true,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "release_at_cap",
+   "description": "Break is 45 minutes away",
+   "param_patches": [],
+   "events": [],
+   "features": {
+    "key": "release_at_cap",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.instagram.android",
+    "category": "social",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": true,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 45.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.2816000000000001,
+     "n_p": 5.0,
+     "mu_cs": 2.1,
+     "sigma_pred": 0.894427190999916,
+     "structural_score": 0.016302499371440946,
+     "q": 0.016302499371440946,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 299,
+     "pi": 0.7475
+    },
+    "decision": {
+     "action": "HOLD",
+     "rule": "HOLD_BETTER",
+     "would_be_action": "HOLD",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 0.9,
+     "reason": "Held: costs more to show than to hold",
+     "explanation": "Held: 34 min into steady focus. Social updates can pull you in for 2-28 min. Back at your break in 45 min.",
+     "card": {
+      "pull_mean": 0.2816000000000001,
+      "pull_lo": 0.10264166722225325,
+      "pull_hi": 0.5636445019286274,
+      "mins_if_opened_lo": 2.358038848446369,
+      "mins_if_opened_hi": 28.435741930765,
+      "l_p10": 0.879909488618578,
+      "l_p50": 2.409584413064066,
+      "l_p90": 8.63089559549987,
+      "l_mean": 4.409134123882728,
+      "h_p10": 0.05025728374334777,
+      "h_p50": 0.41482543286770146,
+      "h_p90": 3.0874637281757185,
+      "h_mean": 1.1701248622141336,
+      "q_mean": 0.016302499371440946,
+      "q_lo": 0.002233657055259901,
+      "q_hi": 0.13722061014114303,
+      "q_upper80": 0.06806644572074518,
+      "hold_better_per_hundred": 75,
+      "net_minutes_protected": 3.2390092616685946,
+      "minutes_until_release": 45.0,
+      "low_confidence": true,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "fatigue_high",
+   "description": "Fatigue risk shows on the card but never changes the decision",
+   "param_patches": [],
+   "events": [],
+   "features": {
+    "key": "fatigue_high",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.instagram.android",
+    "category": "social",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": false,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": null,
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": true,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "HIGH",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.2816000000000001,
+     "n_p": 5.0,
+     "mu_cs": 2.1,
+     "sigma_pred": 0.894427190999916,
+     "structural_score": 0.016302499371440946,
+     "q": 0.016302499371440946,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 361,
+     "pi": 0.9025
+    },
+    "decision": {
+     "action": "HOLD",
+     "rule": "HOLD_BETTER",
+     "would_be_action": "HOLD",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 0.9,
+     "reason": "Held: costs more to show than to hold",
+     "explanation": "Held: 34 min into steady focus. Social updates can pull you in for 2-28 min. Back at your break in 16 min.",
+     "card": {
+      "pull_mean": 0.2816000000000001,
+      "pull_lo": 0.10264166722225325,
+      "pull_hi": 0.5636445019286274,
+      "mins_if_opened_lo": 2.358038848446369,
+      "mins_if_opened_hi": 28.435741930765,
+      "l_p10": 0.879909488618578,
+      "l_p50": 2.409584413064066,
+      "l_p90": 8.63089559549987,
+      "l_mean": 4.409134123882728,
+      "h_p10": 0.017869256442079207,
+      "h_p50": 0.1474934872418494,
+      "h_p90": 1.0977648811291443,
+      "h_mean": 0.4160443954539142,
+      "q_mean": 0.016302499371440946,
+      "q_lo": 0.002233657055259901,
+      "q_hi": 0.13722061014114303,
+      "q_upper80": 0.06806644572074518,
+      "hold_better_per_hundred": 90,
+      "net_minutes_protected": 3.9930897284288136,
+      "minutes_until_release": 16.0,
+      "low_confidence": true,
+      "fatigue_risk": "HIGH"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "group_chat",
+   "description": "WhatsApp group chat",
+   "param_patches": [],
+   "events": [],
+   "features": {
+    "key": "group_chat",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.whatsapp",
+    "category": "messaging",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": true,
+    "priority_conversation": false,
+    "group_chat": true,
+    "sender_hash": "s_group",
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": false,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.2464,
+     "n_p": 5.0,
+     "mu_cs": 1.2,
+     "sigma_pred": 0.7826237921249264,
+     "structural_score": 0.5,
+     "q": 0.5,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 6,
+     "pi": 0.015
+    },
+    "decision": {
+     "action": "DELIVER",
+     "rule": "MIGHT_MATTER",
+     "would_be_action": "DELIVER",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 1.0,
+     "reason": "Delivered: might matter",
+     "explanation": "Delivered: might matter, so it is not worth the risk of holding.",
+     "card": {
+      "pull_mean": 0.2464,
+      "pull_lo": 0.08290651318236567,
+      "pull_hi": 0.5316595031493442,
+      "mins_if_opened_lo": 1.1197437045958771,
+      "mins_if_opened_hi": 9.891650451807305,
+      "l_p10": 0.6001733836175178,
+      "l_p50": 1.1175782445276958,
+      "l_p90": 3.1151007636114594,
+      "l_mean": 1.7063888094628334,
+      "h_p10": 3.007098937217038,
+      "h_p50": 4.063409116182118,
+      "h_p90": 5.1151946652750615,
+      "h_mean": 4.030277738978224,
+      "q_mean": 0.5,
+      "q_lo": 0.3758873671521297,
+      "q_hi": 0.6393993331593827,
+      "q_upper80": 0.5928257827696864,
+      "hold_better_per_hundred": 2,
+      "net_minutes_protected": -2.323888929515391,
+      "minutes_until_release": 16.0,
+      "low_confidence": true,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "priority_conversation",
+   "description": "Message in a conversation the user marked priority",
+   "param_patches": [],
+   "events": [],
+   "features": {
+    "key": "priority_conversation",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.whatsapp",
+    "category": "messaging",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": true,
+    "priority_conversation": true,
+    "group_chat": false,
+    "sender_hash": "s_friend",
+    "sender_display_name": null,
+    "same_sender_recent_pings": 0,
+    "bait_hit": false,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.2464,
+     "n_p": 5.0,
+     "mu_cs": 1.2,
+     "sigma_pred": 0.7826237921249264,
+     "structural_score": 0.9478464369215823,
+     "q": 0.9478464369215823,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 1,
+     "pi": 0.0025
+    },
+    "decision": {
+     "action": "DELIVER",
+     "rule": "MIGHT_MATTER",
+     "would_be_action": "DELIVER",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 1.0,
+     "reason": "Delivered: might matter",
+     "explanation": "Delivered: might matter, so it is not worth the risk of holding.",
+     "card": {
+      "pull_mean": 0.2464,
+      "pull_lo": 0.08290651318236567,
+      "pull_hi": 0.5316595031493442,
+      "mins_if_opened_lo": 1.1197437045958771,
+      "mins_if_opened_hi": 9.891650451807305,
+      "l_p10": 0.6001733836175178,
+      "l_p50": 1.1175782445276958,
+      "l_p90": 3.1151007636114594,
+      "l_mean": 1.7063888094628334,
+      "h_p10": 6.8253972296288925,
+      "h_p50": 7.610085717156743,
+      "h_p90": 7.88040723776945,
+      "h_mean": 7.409794333884279,
+      "q_mean": 0.9478464369215823,
+      "q_lo": 0.8531746537036116,
+      "q_hi": 0.9850509047211813,
+      "q_upper80": 0.9769055767981466,
+      "hold_better_per_hundred": 0,
+      "net_minutes_protected": -5.703405524421446,
+      "minutes_until_release": 16.0,
+      "low_confidence": true,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "urgent_message",
+   "description": "Urgent words in a direct message",
+   "param_patches": [],
+   "events": [],
+   "features": {
+    "key": "urgent_message",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.whatsapp",
+    "category": "messaging",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": true,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": "s_mom",
+    "sender_display_name": "Mom",
+    "same_sender_recent_pings": 0,
+    "bait_hit": false,
+    "urgency_hit": true,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.2464,
+     "n_p": 5.0,
+     "mu_cs": 1.2,
+     "sigma_pred": 0.7826237921249264,
+     "structural_score": 0.9168273035060777,
+     "q": 0.9168273035060777,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 1,
+     "pi": 0.0025
+    },
+    "decision": {
+     "action": "DELIVER",
+     "rule": "MIGHT_MATTER",
+     "would_be_action": "DELIVER",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 1.0,
+     "reason": "Delivered: might matter",
+     "explanation": "Delivered: might matter, so it is not worth the risk of holding.",
+     "card": {
+      "pull_mean": 0.2464,
+      "pull_lo": 0.08290651318236567,
+      "pull_hi": 0.5316595031493442,
+      "mins_if_opened_lo": 1.1197437045958771,
+      "mins_if_opened_hi": 9.891650451807305,
+      "l_p10": 0.6001733836175178,
+      "l_p50": 1.1175782445276958,
+      "l_p90": 3.1151007636114594,
+      "l_mean": 1.7063888094628334,
+      "h_p10": 6.518885465471664,
+      "h_p50": 7.368813031096424,
+      "h_p90": 7.750744936293718,
+      "h_mean": 7.188591285833462,
+      "q_mean": 0.9168273035060777,
+      "q_lo": 0.814860683183958,
+      "q_hi": 0.9688431170367148,
+      "q_upper80": 0.9560681581093046,
+      "hold_better_per_hundred": 0,
+      "net_minutes_protected": -5.482202476370629,
+      "minutes_until_release": 16.0,
+      "low_confidence": true,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  }
+ ]
+}

@@ -7,9 +7,9 @@ import pytest
 
 from contracts.make_example_params import OUTPUT_PATH as EXAMPLE_PARAMS_PATH
 from contracts.make_example_params import build_example_params
-from contracts.make_sample_decisions import OUTPUT_PATH as SAMPLES_PATH
-from contracts.make_sample_decisions import build_scenarios
 from contracts.params import ParamsError, load_draw_bank, load_params, validate_params
+from engine.make_sample_decisions import OUTPUT_PATH as SAMPLES_PATH
+from engine.make_sample_decisions import build_scenarios
 from tests.kotlin_contract import json_key, kotlin_category_keys, kotlin_enum, kotlin_fields
 
 
@@ -87,12 +87,10 @@ def test_sample_decisions_file_is_up_to_date(scenarios: list[dict[str, Any]]) ->
     assert scenarios == json.loads(json.dumps(build_scenarios()))
 
 
-def test_there_are_ten_uniquely_named_placeholder_scenarios(
-    scenarios: list[dict[str, Any]],
-) -> None:
+def test_there_are_ten_uniquely_named_real_scenarios(scenarios: list[dict[str, Any]]) -> None:
     assert len(scenarios) == 10
     assert len({scenario["id"] for scenario in scenarios}) == 10
-    assert all(scenario["placeholder"] for scenario in scenarios)
+    assert not any("placeholder" in scenario for scenario in scenarios)
 
 
 @pytest.mark.parametrize(
@@ -141,7 +139,7 @@ def test_sample_ranges_are_ordered_and_consistent(scenarios: list[dict[str, Any]
         assert card["q_lo"] <= card["q_mean"] <= card["q_hi"], name
         assert card["q_mean"] <= card["q_upper80"], name
         assert 0 <= card["hold_better_per_hundred"] <= 100, name
-        assert card["net_minutes_protected"] == round(card["l_mean"] - card["h_mean"], 2), name
+        assert card["net_minutes_protected"] == pytest.approx(card["l_mean"] - card["h_mean"]), name
         assert card["minutes_until_release"] == context["minutes_until_release"], name
         assert card["fatigue_risk"] == context["fatigue_risk"], name
 
@@ -186,8 +184,8 @@ def test_sample_propensity_follows_the_exploration_rule(
             and decision["action"] == "HOLD"
             and decision["card"]["q_upper80"] < policy["explore_upper80"]
         )
-        expected = round(1 - policy["epsilon"], 2) if eligible else 1.0
-        assert decision["propensity"] == expected, scenario["id"]
+        expected = 1 - policy["epsilon"] if eligible else 1.0
+        assert decision["propensity"] == pytest.approx(expected), scenario["id"]
 
 
 def test_sample_explanations_are_under_25_words(scenarios: list[dict[str, Any]]) -> None:

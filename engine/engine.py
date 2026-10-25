@@ -7,6 +7,7 @@
 #   twin.apply_feedback(PullOutcome(...))
 
 import json
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Self
 
@@ -16,9 +17,19 @@ from engine.counts import Counts, apply_event, counts_from_json, counts_to_json
 from engine.overrides import check_overrides
 from engine.policy import decide
 from engine.priors import prior_weights
-from engine.pull import estimate_pull
-from engine.sampling import build_card, sample_futures
-from engine.worth import estimate_worth
+from engine.pull import PullEstimate, estimate_pull
+from engine.sampling import SampledFutures, build_card, sample_futures
+from engine.worth import WorthEstimate, estimate_worth
+
+
+@dataclass(frozen=True)
+class DecisionTrace:
+    # The decision plus the intermediate numbers behind it, so a Kotlin mismatch can be traced
+    # to the exact step where the two engines part ways.
+    pull: PullEstimate
+    worth: WorthEstimate
+    futures: SampledFutures
+    decision: Decision
 
 
 class TwinEngine:
@@ -44,6 +55,9 @@ class TwinEngine:
         self.set_params(json.loads(params_json))
 
     def decide(self, features: NotificationFeatures, context: TwinContext) -> Decision:
+        return self.trace(features, context).decision
+
+    def trace(self, features: NotificationFeatures, context: TwinContext) -> DecisionTrace:
         params = self._params
         policy = params["policy"]
         category = features.category
@@ -57,7 +71,7 @@ class TwinEngine:
         card = build_card(
             pull, worth, futures, policy, context.minutes_until_release, context.fatigue_risk
         )
-        return decide(
+        decision = decide(
             category,
             card,
             futures,
@@ -66,6 +80,7 @@ class TwinEngine:
             policy,
             worth.used_sender,
         )
+        return DecisionTrace(pull, worth, futures, decision)
 
     def apply_feedback(self, event: FeedbackEvent) -> None:
         apply_event(self._counts, event, self._params["policy"])
