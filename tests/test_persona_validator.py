@@ -9,24 +9,7 @@ from agents import persona_ranges as ranges
 from agents.persona_briefs import PERSONA_BRIEFS, PERSONA_NAMES
 from agents.persona_validator import PersonaError, validate_persona, validate_personas
 from contracts.params import CATEGORIES, PHONE_STATES
-
-
-def valid_persona(name: str = "student_coder") -> dict[str, Any]:
-    return {
-        "persona": name,
-        "description": "Studies late, scrolls reels when stuck.",
-        "pull": {
-            "r_c": dict.fromkeys(CATEGORIES, 1.0),
-            "r_s": {"FREE": 1.0, "FOCUS_STEADY": 0.8, "FOCUS_RESTLESS": 1.3},
-            "delta_s": {"FREE": 0.0, "FOCUS_STEADY": 0.0, "FOCUS_RESTLESS": 0.2},
-        },
-        "notifications_per_hour": {category: [2.0] * 24 for category in CATEGORIES},
-        "important_share": dict.fromkeys(CATEGORIES, 0.05) | {"messaging": 0.2},
-        "focus_schedule": [
-            {"start": "21:00", "duration_min": 50},
-            {"start": "22:00", "duration_min": 90},
-        ],
-    }
+from tests.builders import valid_persona
 
 
 def edited(change: Callable[[dict[str, Any]], None]) -> dict[str, Any]:

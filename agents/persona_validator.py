@@ -9,7 +9,6 @@ import argparse
 import copy
 import itertools
 import json
-import math
 import re
 import sys
 from dataclasses import dataclass
@@ -17,6 +16,7 @@ from pathlib import Path
 from typing import Any
 
 from agents import persona_ranges as ranges
+from agents.checks import is_number, key_problems
 from agents.persona_briefs import PERSONA_NAMES
 from contracts.params import CATEGORIES, PHONE_STATES
 
@@ -90,7 +90,7 @@ def structural_problems(raw: Any) -> list[str]:
     if not isinstance(raw, dict):
         return ["persona must be a JSON object"]
 
-    problems = _key_problems(raw, PERSONA_KEYS, "")
+    problems = key_problems(raw, PERSONA_KEYS, "persona")
     if problems:
         return problems
 
@@ -106,29 +106,15 @@ def structural_problems(raw: Any) -> list[str]:
     return problems
 
 
-def _is_number(value: Any) -> bool:
-    # bool is a subclass of int in Python, and true/false is never a valid rate or multiplier.
-    return isinstance(value, int | float) and not isinstance(value, bool) and math.isfinite(value)
-
-
-def _key_problems(value: Any, expected: tuple[str, ...], path: str) -> list[str]:
-    where = path or "persona"
-    if not isinstance(value, dict):
-        return [f"{where}: must be an object"]
-    problems = [f"{where}: missing {key!r}" for key in expected if key not in value]
-    problems += [f"{where}: unknown key {key!r}" for key in value if key not in expected]
-    return problems
-
-
 def _number_map_problems(value: Any, expected: tuple[str, ...], path: str) -> list[str]:
-    problems = _key_problems(value, expected, path)
+    problems = key_problems(value, expected, path)
     if problems:
         return problems
-    return [f"{path}.{key}: must be a number" for key in expected if not _is_number(value[key])]
+    return [f"{path}.{key}: must be a number" for key in expected if not is_number(value[key])]
 
 
 def _pull_problems(pull: Any) -> list[str]:
-    problems = _key_problems(pull, PULL_KEYS, "pull")
+    problems = key_problems(pull, PULL_KEYS, "pull")
     if problems:
         return problems
     return (
@@ -139,7 +125,7 @@ def _pull_problems(pull: Any) -> list[str]:
 
 
 def _rate_problems(rates: Any) -> list[str]:
-    problems = _key_problems(rates, CATEGORIES, "notifications_per_hour")
+    problems = key_problems(rates, CATEGORIES, "notifications_per_hour")
     if problems:
         return problems
     for category in CATEGORIES:
@@ -147,7 +133,7 @@ def _rate_problems(rates: Any) -> list[str]:
         path = f"notifications_per_hour.{category}"
         if not isinstance(hourly, list) or len(hourly) != ranges.HOURS_PER_DAY:
             problems.append(f"{path}: must be a list of {ranges.HOURS_PER_DAY} numbers")
-        elif not all(_is_number(rate) for rate in hourly):
+        elif not all(is_number(rate) for rate in hourly):
             problems.append(f"{path}: every hour must be a number")
     return problems
 
@@ -165,9 +151,9 @@ def _schedule_problems(schedule: Any) -> list[str]:
     intervals: list[tuple[int, int]] = []
     for index, session in enumerate(schedule):
         path = f"focus_schedule[{index}]"
-        key_problems = _key_problems(session, SESSION_KEYS, path)
-        if key_problems:
-            problems += key_problems
+        session_problems = key_problems(session, SESSION_KEYS, path)
+        if session_problems:
+            problems += session_problems
             continue
         match = START_PATTERN.match(str(session["start"]))
         if not match:

@@ -1,0 +1,248 @@
+{
+ "version": "1.0",
+ "label": "simulated",
+ "description": "30 recorded outcomes of delivered Instagram notifications in steady focus",
+ "seed": 2026,
+ "events": [
+  {
+   "type": "pull_outcome",
+   "category": "social",
+   "state": "FOCUS_STEADY",
+   "opened": true,
+   "minutes_lost": 3.9,
+   "released_from_tray": false
+  },
+  {
+   "type": "pull_outcome",
+   "category": "social",
+   "state": "FOCUS_STEADY",
+   "opened": false,
+   "minutes_lost": null,
+   "released_from_tray": false
+  },
+  {
+   "type": "pull_outcome",
+   "category": "social",
+   "state": "FOCUS_STEADY",
+   "opened": true,
+   "minutes_lost": 6.5,
+   "released_from_tray": false
+  },
+  {
+   "type": "pull_outcome",
+   "category": "social",
+   "state": "FOCUS_STEADY",
+   "opened": false,
+   "minutes_lost": null,
+   "released_from_tray": false
+  },
+  {
+   "type": "pull_outcome",
+   "category": "social",
+   "state": "FOCUS_STEADY",
+   "opened": false,
+   "minutes_lost": null,
+   "released_from_tray": false
+  },
+  {
+   "type": "pull_outcome",
+   "category": "social",
+   "state": "FOCUS_STEADY",
+   "opened": false,
+   "minutes_lost": null,
+   "released_from_tray": false
+  },
+  {
+   "type": "pull_outcome",
+   "category": "social",
+   "state": "FOCUS_STEADY",
+   "opened": false,
+   "minutes_lost": null,
+   "released_from_tray": false
+  },
+  {
+   "type": "pull_outcome",
+   "category": "social",
+   "state": "FOCUS_STEADY",
+   "opened": false,
+   "minutes_lost": null,
+   "released_from_tray": false
+  },
+  {
+   "type": "pull_outcome",
+   "category": "social",
+   "state": "FOCUS_STEADY",
+   "opened": true,
+   "minutes_lost": 7.0,
+   "released_from_tray": false
+  },
+  {
+   "type": "pull_outcome",
+   "category": "social",
+   "state": "FOCUS_STEADY",
+   "opened": false,
+   "minutes_lost": null,
+   "released_from_tray": false
+  },
+  {
+   "type": "pull_outcome",
+   "category": "social",
+   "state": "FOCUS_STEADY",
+   "opened": false,
+   "minutes_lost": null,
+   "released_from_tray": false
+  },
+  {
+   "type": "pull_outcome",
+   "category": "social",
+   "state": "FOCUS_STEADY",
+   "opened": true,
+   "minutes_lost": 4.8,
+   "released_from_tray": false
+  },
+  {
+   "type": "pull_outcome",
+   "category": "social",
+   "state": "FOCUS_STEADY",
+   "opened": false,
+   "minutes_lost": null,
+   "released_from_tray": false
+  },
+  {
+   "type": "pull_outcome",
+   "category": "social",
+   "state": "FOCUS_STEADY",
+   "opened": false,
+   "minutes_lost": null,
+   "released_from_tray": false
+  },
+  {
+   "type": "pull_outcome",
+   "category": "social",
+   "state": "FOCUS_STEADY",
+   "opened": false,
+   "minutes_lost": null,
+   "released_from_tray": false
+  },
+  {
+   "type": "pull_outcome",
+   "category": "social",
+   "state": "FOCUS_STEADY",
+   "opened": false,
+   "minutes_lost": null,
+   "released_from_tray": false
+  },
+  {
+   "type": "pull_outcome",
+   "category": "social",
+   "state": "FOCUS_STEADY",
+   "opened": true,
+   "minutes_lost": 3.0,
+   "released_from_tray": false
+  },
+  {
+   "type": "pull_outcome",
+   "category": "social",
+   "state": "FOCUS_STEADY",
+   "opened": false,
+   "minutes_lost": null,
+   "released_from_tray": false
+  },
+  {
+   "type": "pull_outcome",
+   "category": "social",
+   "state": "FOCUS_STEADY",
+   "opened": false,
+   "minutes_lost": null,
+   "released_from_tray": false
+  },
+  {
+   "type": "pull_outcome",
+   "category": "social",
+   "state": "FOCUS_STEADY",
+   "opened": true,
+   "minutes_lost": 6.5,
+   "released_from_tray": false
+  },
+  {
+   "type": "pull_outcome",
+   "category": "social",
+   "state": "FOCUS_STEADY",
+   "opened": true,
+   "minutes_lost": 4.1,
+   "released_from_tray": false
+  },
+  {
+   "type": "pull_outcome",
+   "category": "social",
+   "state": "FOCUS_STEADY",
+   "opened": false,
+   "minutes_lost": null,
+   "released_from_tray": false
+  },
+  {
+   "type": "pull_outcome",
+   "category": "social",
+   "state": "FOCUS_STEADY",
+   "opened": true,
+   "minutes_lost": 3.4,
+   "released_from_tray": false
+  },
+  {
+   "type": "pull_outcome",
+   "category": "social",
+   "state": "FOCUS_STEADY",
+   "opened": false,
+   "minutes_lost": null,
+   "released_from_tray": false
+  },
+  {
+   "type": "pull_outcome",
+   "category": "social",
+   "state": "FOCUS_STEADY",
+   "opened": false,
+   "minutes_lost": null,
+   "released_from_tray": false
+  },
+  {
+   "type": "pull_outcome",
+   "category": "social",
+   "state": "FOCUS_STEADY",
+   "opened": true,
+   "minutes_lost": 5.2,
+   "released_from_tray": false
+  },
+  {
+   "type": "pull_outcome",
+   "category": "social",
+   "state": "FOCUS_STEADY",
+   "opened": false,
+   "minutes_lost": null,
+   "released_from_tray": false
+  },
+  {
+   "type": "pull_outcome",
+   "category": "social",
+   "state": "FOCUS_STEADY",
+   "opened": true,
+   "minutes_lost": 6.3,
+   "released_from_tray": false
+  },
+  {
+   "type": "pull_outcome",
+   "category": "social",
+   "state": "FOCUS_STEADY",
+   "opened": true,
+   "minutes_lost": 6.5,
+   "released_from_tray": false
+  },
+  {
+   "type": "pull_outcome",
+   "category": "social",
+   "state": "FOCUS_STEADY",
+   "opened": false,
+   "minutes_lost": null,
+   "released_from_tray": false
+  }
+ ]
+}

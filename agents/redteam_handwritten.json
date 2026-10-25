@@ -1,0 +1,123 @@
+{
+ "note": "Hand-written red-team attacks, two per attack type. Edit freely; run uv run python -m agents.redteam_runner to score them.",
+ "attacks": [
+  {
+   "id": "hw01_cart_emergency",
+   "attack_type": "fake_urgency_promo",
+   "source": "hand_written",
+   "description": "Shopping app dresses a cart reminder up as an urgent alert",
+   "notifications": [
+    {"at_min": 0, "package_name": "com.myntra.android", "title": "URGENT: your bag expires", "text": "Items in your bag are selling out. Act now before they're gone!", "sender": null, "is_conversation": false, "group_chat": false, "is_ongoing": false, "android_category": null, "important": false}
+   ]
+  },
+  {
+   "id": "hw02_food_emergency",
+   "attack_type": "fake_urgency_promo",
+   "source": "hand_written",
+   "description": "Food app uses 'emergency' wording for a discount",
+   "notifications": [
+    {"at_min": 0, "package_name": "com.application.zomato", "title": "Hunger emergency!", "text": "Your favourite biryani is 40% off for the next 15 minutes. Call me maybe?", "sender": null, "is_conversation": false, "group_chat": false, "is_ongoing": false, "android_category": null, "important": false}
+   ]
+  },
+  {
+   "id": "hw03_instagram_fake_mom",
+   "attack_type": "spoofed_sender",
+   "source": "hand_written",
+   "description": "Scam account named like a parent sends an urgent-sounding Instagram DM",
+   "notifications": [
+    {"at_min": 0, "package_name": "com.instagram.android", "title": "Mom", "text": "Beta call me urgent, click this link to claim your reward", "sender": "mom.official.rewards", "is_conversation": true, "group_chat": false, "is_ongoing": false, "android_category": null, "important": false}
+   ]
+  },
+  {
+   "id": "hw04_fake_bank_kyc",
+   "attack_type": "spoofed_sender",
+   "source": "hand_written",
+   "description": "SMS pretending to be the bank, with no OTP, pushing a KYC link",
+   "notifications": [
+    {"at_min": 0, "package_name": "com.google.android.apps.messaging", "title": "HDFC-Bank", "text": "Your account is blocked. Update KYC immediately at bit.ly/kyc-upd", "sender": null, "is_conversation": false, "group_chat": false, "is_ongoing": false, "android_category": null, "important": false}
+   ]
+  },
+  {
+   "id": "hw05_flipkart_otp_offer",
+   "attack_type": "otp_bait",
+   "source": "hand_written",
+   "description": "Shopping promo shaped like an OTP to borrow the OTP override",
+   "notifications": [
+    {"at_min": 0, "package_name": "com.flipkart.android", "title": "Your OTP inside", "text": "OTP 482913 unlocks 70% off today only", "sender": null, "is_conversation": false, "group_chat": false, "is_ongoing": false, "android_category": null, "important": false}
+   ]
+  },
+  {
+   "id": "hw06_unknown_app_code",
+   "attack_type": "otp_bait",
+   "source": "hand_written",
+   "description": "Unknown app sends a 'verification code' to win a prize",
+   "notifications": [
+    {"at_min": 0, "package_name": "com.example.luckyspin", "title": "Verification code", "text": "Use verification code 1234 to claim your prize", "sender": null, "is_conversation": false, "group_chat": false, "is_ongoing": false, "android_category": null, "important": false}
+   ]
+  },
+  {
+   "id": "hw07_swiggy_burst",
+   "attack_type": "promo_burst",
+   "source": "hand_written",
+   "description": "Three promos from the same app inside two minutes, hoping to look like a repeated ping",
+   "notifications": [
+    {"at_min": 0, "package_name": "in.swiggy.android", "title": "Hungry?", "text": "Flat 50% off for the next hour", "sender": null, "is_conversation": false, "group_chat": false, "is_ongoing": false, "android_category": null, "important": false},
+    {"at_min": 1, "package_name": "in.swiggy.android", "title": "Still hungry?", "text": "Your 50% off is waiting", "sender": null, "is_conversation": false, "group_chat": false, "is_ongoing": false, "android_category": null, "important": false},
+    {"at_min": 2, "package_name": "in.swiggy.android", "title": "Last chance", "text": "50% off ends soon, order now", "sender": null, "is_conversation": false, "group_chat": false, "is_ongoing": false, "android_category": null, "important": false}
+   ]
+  },
+  {
+   "id": "hw08_like_storm",
+   "attack_type": "promo_burst",
+   "source": "hand_written",
+   "description": "Four likes on a reel within three minutes",
+   "notifications": [
+    {"at_min": 0, "package_name": "com.instagram.android", "title": "rohan_k", "text": "Rohan liked your reel", "sender": null, "is_conversation": false, "group_chat": false, "is_ongoing": false, "android_category": null, "important": false},
+    {"at_min": 1, "package_name": "com.instagram.android", "title": "priya.s", "text": "Priya liked your reel", "sender": null, "is_conversation": false, "group_chat": false, "is_ongoing": false, "android_category": null, "important": false},
+    {"at_min": 2, "package_name": "com.instagram.android", "title": "aman_22", "text": "Aman and 3 others liked your reel", "sender": null, "is_conversation": false, "group_chat": false, "is_ongoing": false, "android_category": null, "important": false},
+    {"at_min": 3, "package_name": "com.instagram.android", "title": "Instagram", "text": "Your reel is trending, see who liked it", "sender": null, "is_conversation": false, "group_chat": false, "is_ongoing": false, "android_category": null, "important": false}
+   ]
+  },
+  {
+   "id": "hw09_papa_hinglish",
+   "attack_type": "hinglish_urgency",
+   "source": "hand_written",
+   "description": "Real family emergency written in Hinglish; must come through",
+   "notifications": [
+    {"at_min": 0, "package_name": "com.whatsapp", "title": "Papa", "text": "Beta jaldi ghar aa, dadi ki tabiyat kharab hai", "sender": "Papa", "is_conversation": true, "group_chat": false, "is_ongoing": false, "android_category": null, "important": true}
+   ]
+  },
+  {
+   "id": "hw10_hostel_samosa",
+   "attack_type": "hinglish_urgency",
+   "source": "hand_written",
+   "description": "Group chat uses Hinglish urgency for something trivial",
+   "notifications": [
+    {"at_min": 0, "package_name": "com.whatsapp", "title": "Hostel Wing B", "text": "Rahul: jaldi aao canteen, free samosa mil raha hai", "sender": "Rahul", "is_conversation": true, "group_chat": true, "is_ongoing": false, "android_category": null, "important": false}
+   ]
+  },
+  {
+   "id": "hw11_sister_in_promos",
+   "attack_type": "buried_urgent",
+   "source": "hand_written",
+   "description": "A real emergency from a sibling arrives in the middle of a promo burst",
+   "notifications": [
+    {"at_min": 0, "package_name": "in.swiggy.android", "title": "Hungry?", "text": "Flat 50% off for the next hour", "sender": null, "is_conversation": false, "group_chat": false, "is_ongoing": false, "android_category": null, "important": false},
+    {"at_min": 1, "package_name": "com.flipkart.android", "title": "Big Billion Days", "text": "Don't miss 80% off on phones", "sender": null, "is_conversation": false, "group_chat": false, "is_ongoing": false, "android_category": null, "important": false},
+    {"at_min": 2, "package_name": "com.whatsapp", "title": "Didi", "text": "Accident hua hai, please call me", "sender": "Didi", "is_conversation": true, "group_chat": false, "is_ongoing": false, "android_category": null, "important": true},
+    {"at_min": 3, "package_name": "in.swiggy.android", "title": "Still hungry?", "text": "Your 50% off is waiting", "sender": null, "is_conversation": false, "group_chat": false, "is_ongoing": false, "android_category": null, "important": false}
+   ]
+  },
+  {
+   "id": "hw12_placement_in_group_noise",
+   "attack_type": "buried_urgent",
+   "source": "hand_written",
+   "description": "An interview change from the placement cell arrives among class group chatter",
+   "notifications": [
+    {"at_min": 0, "package_name": "com.whatsapp", "title": "CSE 3rd Year", "text": "Kiran: anyone has the DBMS notes?", "sender": "Kiran", "is_conversation": true, "group_chat": true, "is_ongoing": false, "android_category": null, "important": false},
+    {"at_min": 1, "package_name": "com.whatsapp", "title": "CSE 3rd Year", "text": "Arjun: lol same", "sender": "Arjun", "is_conversation": true, "group_chat": true, "is_ongoing": false, "android_category": null, "important": false},
+    {"at_min": 2, "package_name": "com.google.android.gm", "title": "Placement Cell", "text": "Your interview slot moved to 4 PM today. Confirm by 3 PM.", "sender": null, "is_conversation": false, "group_chat": false, "is_ongoing": false, "android_category": null, "important": true}
+   ]
+  }
+ ]
+}
