@@ -36,8 +36,8 @@ uv run python -m contracts.make_sample_decisions
 - `sigmoid(x) = 1 / (1 + e^-x)`, `logit(p) = ln(p / (1 - p))`.
 - Before any `logit`, clamp the probability to `[1e-6, 1 - 1e-6]`.
 - `clip(x, a, b) = min(max(x, a), b)`.
-- Minutes are natural logs: `x = ln(max(minutes_lost, minutes_floor_min))`, so a 0-minute open
-  never becomes `ln 0`. `minutes_lost` is already capped at `minutes_lost_cap_min` (60).
+- Minutes are natural logs: `x = ln(clip(minutes_lost, minutes_floor_min, minutes_lost_cap_min))`,
+  so a 0-minute open never becomes `ln 0` and nothing counts for more than 60 minutes.
 - Draw `i` (0 to 399) uses triple `i` for all three quantities: `z1` for pull, `z2` for minutes,
   `z3` for worth. No other randomness enters the sampling.
 - **Percentiles** use linear interpolation on the sorted 400 values (numpy's default):
@@ -45,12 +45,16 @@ uv run python -m contracts.make_sample_decisions
   (with `x[lo + 1] = x[lo]` when `lo = N - 1`). Ranges on the card are p10 to p90; `l_p50` and
   `h_p50` are p50.
 - `π = (count of i with L_i > λ · H_i) / 400`. The comparison is strict.
-- `hold_better_per_hundred = floor(100 · π + 0.5)`. Not Python's `round`, which rounds halves
-  to even.
+- `hold_better_per_hundred = floor(100 · π + 0.5)`, computed in whole numbers as
+  `(200 · wins + 400) div 800` where `wins` is the count above. Not Python's `round`, which
+  rounds halves to even, and not floating point, which can land a hair either side of a half.
+- `pull_mean` is the point estimate `p_cs` and `q_mean` is the point estimate `q`, not the mean
+  of the sampled values. `l_mean` and `h_mean` are the means of the 400 sampled values.
 - `upper80(q) = sigmoid(logit(q) + upper80_z · s_q)` with `upper80_z` from params (0.84).
 - `low_confidence = (pull_hi - pull_lo) > low_confidence_width or (q_hi - q_lo) > low_confidence_width`.
 - `net_minutes_protected = l_mean - h_mean`, labelled "estimated (model)" wherever shown.
 - Tolerance in the test vectors: 1e-6 absolute, 1e-3 for anything that passes through `exp`.
+  `reason` must match exactly. `explanation` is wording for the screen and is not compared.
 
 The model formulas themselves (pull, worth, sampling) are in `pratibimb_final_plan.md` §6.
 Prior weights there map to `pull.prior_weights`: global 20 = `pull.global.n_g`, category 10 =
