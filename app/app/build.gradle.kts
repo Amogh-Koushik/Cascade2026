@@ -62,4 +62,7 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.navigation.compose)
+
+    // Plain JVM tests: TwinEngineVectorTest holds RealTwinEngine to contracts/test_vectors.json.
+    testImplementation(libs.junit)
 }
