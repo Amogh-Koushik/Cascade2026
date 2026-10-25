@@ -51,6 +51,9 @@ object TwinRouter {
     @Volatile
     private var appContext: Context? = null
 
+    val engineStatus: String
+        get() = if (appContext != null) "ready ($PARAMS_ASSET)" else "not loaded"
+
     @Volatile
     private var sessionStartMillis = 0L
 
@@ -207,8 +210,8 @@ object TwinRouter {
         val contentIntent = sbn.notification.contentIntent
 
         NotificationLog.add(
-            source = sbn.packageName,
-            message = "decision: ${decision.action.name} (${decision.reason})\nrule=${decision.rule.name} pings=${features.sameSenderRecentPings}",
+            source = appLabel,
+            message = describeDecision(title, features.category, features.isConversation, decision),
             timeMillis = sbn.postTime,
         )
 
@@ -254,14 +257,29 @@ object TwinRouter {
         } else {
             // DELIVER: If in Mode A (DND on) and user is in focus, send bypass alert
             if (_isModeA.value && _phoneState.value != PhoneState.FREE) {
-                AlertPing.post(
+                val ping = AlertPing.post(
                     context = listener,
                     title = "[$appLabel] $title",
                     text = text,
                     contentIntent = contentIntent,
                 )
+                NotificationLog.add("alert", "Ping for $appLabel: ${ping.label}")
             }
         }
+    }
+
+    // One readable line per decision for the Debug log: what happened, why, and the two
+    // numbers behind it.
+    private fun describeDecision(
+        title: String,
+        category: Category,
+        isConversation: Boolean,
+        decision: Decision,
+    ): String {
+        val card = decision.card
+        val kind = if (isConversation) "${category.key}, conversation" else category.key
+        return "${decision.action.name} \"$title\" [$kind] ${decision.rule.name}: ${decision.reason}" +
+            " · hold wins ${card.holdBetterPerHundred}/100 · worth up to %.2f".format(card.qUpper80)
     }
 
     fun onNotificationRemoved(
@@ -401,6 +419,15 @@ object TwinRouter {
         )
 
         val decision = engine.decide(scenario.features, currentContext)
+        NotificationLog.add(
+            source = "sample: ${scenario.display.app}",
+            message = describeDecision(
+                scenario.display.title,
+                scenario.features.category,
+                scenario.features.isConversation,
+                decision,
+            ),
+        )
 
         val liveItem = LiveNotificationItem(
             id = "sc_${System.currentTimeMillis()}_${scenario.id}",

@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.pratibimb.app.data.LogEntry
 import com.pratibimb.app.engine.MockScenario
 import com.pratibimb.app.engine.StubEngine
 import com.pratibimb.app.ui.theme.ShapePill
@@ -48,6 +49,12 @@ import com.pratibimb.app.ui.theme.labelMd
 import com.pratibimb.twin.Action
 import com.pratibimb.twin.Autonomy
 import com.pratibimb.twin.PhoneState
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+
+private const val MAX_LOG_ROWS = 60
+private val LOG_TIME: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss")
 
 @Composable
 fun DebugScreen(
@@ -55,6 +62,10 @@ fun DebugScreen(
     phoneState: PhoneState,
     autonomy: Autonomy,
     useLivePermissions: Boolean,
+    focusStatus: List<String>,
+    logEntries: List<LogEntry>,
+    onRefreshStatus: () -> Unit,
+    onClearLog: () -> Unit,
     onToggleModeA: (Boolean) -> Unit,
     onSetPhoneState: (PhoneState) -> Unit,
     onSetAutonomy: (Autonomy) -> Unit,
@@ -114,9 +125,50 @@ fun DebugScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Section 1: Scenario Sender (10 canonical scenarios)
+        // Section 0: what is really in force right now, and every real decision as it happens.
+        SectionHeader("FOCUS STATUS", actionLabel = "Refresh", onAction = onRefreshStatus)
+        Spacer(modifier = Modifier.height(10.dp))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .cardSurface()
+                .padding(16.dp),
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                focusStatus.forEach { line ->
+                    Text(text = line, style = bodyMd(color = WarmObsidian.OnSurface), fontSize = 13.sp)
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        SectionHeader("LIVE LOG (${logEntries.size})", actionLabel = "Clear", onAction = onClearLog)
+        Spacer(modifier = Modifier.height(10.dp))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .cardSurface()
+                .padding(16.dp),
+        ) {
+            if (logEntries.isEmpty()) {
+                Text(
+                    text = "Nothing yet. Start focus and send a notification from another phone.",
+                    style = bodyMd(color = WarmObsidian.OnSurfaceVariant),
+                    fontSize = 13.sp,
+                )
+            } else {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    logEntries.take(MAX_LOG_ROWS).forEach { entry -> LogRow(entry) }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(28.dp))
+
+        // Section 1: Scenario Sender (10 sample scenarios, decided live by the real engine)
         Text(
-            text = "TRIGGER TEST SCENARIO",
+            text = "TRIGGER SAMPLE SCENARIO (chip shows the expected result)",
             style = labelMd(color = WarmObsidian.Primary),
             fontWeight = FontWeight.Bold,
             letterSpacing = 0.08.sp,
@@ -366,5 +418,47 @@ fun DebugScreen(
                 Text("Reset learning", fontSize = 12.sp)
             }
         }
+    }
+}
+
+@Composable
+private fun SectionHeader(title: String, actionLabel: String, onAction: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = title,
+            style = labelMd(color = WarmObsidian.Primary),
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 0.08.sp,
+        )
+        Text(
+            text = actionLabel,
+            style = labelMd(color = WarmObsidian.Secondary),
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier
+                .clip(ShapePill)
+                .clickable(onClick = onAction)
+                .padding(horizontal = 10.dp, vertical = 4.dp),
+        )
+    }
+}
+
+@Composable
+private fun LogRow(entry: LogEntry) {
+    val time = Instant.ofEpochMilli(entry.timeMillis).atZone(ZoneId.systemDefault()).format(LOG_TIME)
+    Column {
+        Text(
+            text = "$time  ${entry.source}",
+            style = labelMd(color = WarmObsidian.OnSurfaceVariant),
+            fontSize = 11.sp,
+        )
+        Text(
+            text = entry.message,
+            style = bodyMd(color = WarmObsidian.OnSurface),
+            fontSize = 13.sp,
+        )
     }
 }

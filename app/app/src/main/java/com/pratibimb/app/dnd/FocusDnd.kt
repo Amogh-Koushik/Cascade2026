@@ -6,8 +6,11 @@ import android.content.Context
 import androidx.core.content.edit
 
 // Mode A silence. During focus the phone switches to Priority mode with a policy that lets
-// alarms, starred callers and repeat callers through and no app notifications. The user's own
-// filter and policy are saved first and put back when focus ends.
+// alarms, starred callers and repeat callers through and silences everything else: no sound,
+// no vibration, no pop-up, no screen wake, no light. Silenced notifications still sit in the
+// shade and status bar. Pratibimb's own alert channel bypasses DND, so the only thing that
+// rings is a ping the twin chose to send. The user's own filter and policy are saved first and
+// put back when focus ends.
 class FocusDnd(context: Context) {
     private val manager = context.getSystemService(NotificationManager::class.java)
 
@@ -18,18 +21,28 @@ class FocusDnd(context: Context) {
     val hasAccess: Boolean
         get() = manager.isNotificationPolicyAccessGranted
 
+    // True while our focus policy is in force and the user's own settings are waiting to be restored.
+    val isApplied: Boolean
+        get() = prefs.getBoolean(KEY_SAVED, false)
+
     fun enterPriority(): Boolean {
         if (!hasAccess) return false
-        // Only save once, so pressing "on" twice cannot overwrite the user's real settings
-        // with our own focus policy.
-        if (!prefs.getBoolean(KEY_SAVED, false)) saveCurrent()
+        // Only save once, so entering twice cannot overwrite the user's real settings with ours.
+        if (!isApplied) saveCurrent()
         manager.notificationPolicy = focusPolicy()
         manager.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_PRIORITY)
-        return true
+
+        // Some phones refuse the change without an error, for example when the user's own DND
+        // schedule is in charge. Report what is really in force, and undo our half-applied
+        // policy so the caller can fall back to hold-only Mode B.
+        val applied =
+            manager.currentInterruptionFilter == NotificationManager.INTERRUPTION_FILTER_PRIORITY
+        if (!applied) restore()
+        return applied
     }
 
     fun restore(): Boolean {
-        if (!hasAccess || !prefs.getBoolean(KEY_SAVED, false)) return false
+        if (!hasAccess || !isApplied) return false
         manager.notificationPolicy = Policy(
             prefs.getInt(KEY_CATEGORIES, 0),
             prefs.getInt(KEY_CALL_SENDERS, Policy.PRIORITY_SENDERS_ANY),
@@ -42,6 +55,19 @@ class FocusDnd(context: Context) {
         )
         prefs.edit { clear() }
         return true
+    }
+
+    fun describe(): String {
+        val filter = when (manager.currentInterruptionFilter) {
+            NotificationManager.INTERRUPTION_FILTER_ALL -> "off (all notifications)"
+            NotificationManager.INTERRUPTION_FILTER_PRIORITY -> "priority only"
+            NotificationManager.INTERRUPTION_FILTER_ALARMS -> "alarms only"
+            NotificationManager.INTERRUPTION_FILTER_NONE -> "total silence"
+            else -> "unknown"
+        }
+        val access = if (hasAccess) "granted" else "missing"
+        val ours = if (isApplied) "applied" else "not applied"
+        return "DND $filter · focus policy $ours · DND access $access"
     }
 
     private fun saveCurrent() {
@@ -57,14 +83,19 @@ class FocusDnd(context: Context) {
         }
     }
 
-    // No visual effects are suppressed, so silenced notifications still appear in the shade.
+    // Messages and conversations are not priority categories, so they are silenced. The visual
+    // effects below are suppressed only for silenced notifications: they still appear in the
+    // shade and status bar, but cannot pop up, wake the screen or flash the light.
     private fun focusPolicy() = Policy(
         Policy.PRIORITY_CATEGORY_ALARMS or
             Policy.PRIORITY_CATEGORY_CALLS or
             Policy.PRIORITY_CATEGORY_REPEAT_CALLERS,
         Policy.PRIORITY_SENDERS_STARRED,
         Policy.PRIORITY_SENDERS_STARRED,
-        0,
+        Policy.SUPPRESSED_EFFECT_PEEK or
+            Policy.SUPPRESSED_EFFECT_FULL_SCREEN_INTENT or
+            Policy.SUPPRESSED_EFFECT_LIGHTS or
+            Policy.SUPPRESSED_EFFECT_AMBIENT,
         Policy.CONVERSATION_SENDERS_NONE,
     )
 

@@ -57,6 +57,8 @@ fun PratibimbApp(
     val heldTray by viewModel.heldTray.collectAsStateWithLifecycle()
     val selectedPersona by viewModel.selectedPersona.collectAsStateWithLifecycle()
     val useLivePermissions by viewModel.useLivePermissions.collectAsStateWithLifecycle()
+    val focusStatus by viewModel.focusStatus.collectAsStateWithLifecycle()
+    val logEntries by viewModel.logEntries.collectAsStateWithLifecycle()
 
     var selectedTab by remember { mutableStateOf(AppTab.HOME) }
 
@@ -156,6 +158,10 @@ fun PratibimbApp(
                                 phoneState = phoneState,
                                 autonomy = autonomy,
                                 useLivePermissions = useLivePermissions,
+                                focusStatus = focusStatus,
+                                logEntries = logEntries,
+                                onRefreshStatus = viewModel::refreshFocusStatus,
+                                onClearLog = viewModel::clearLog,
                                 onToggleModeA = viewModel::setModeA,
                                 onSetPhoneState = viewModel::setPhoneState,
                                 onSetAutonomy = viewModel::setAutonomy,

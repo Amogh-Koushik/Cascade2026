@@ -5,7 +5,9 @@ import android.app.PendingIntent
 import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.pratibimb.app.data.LogEntry
 import com.pratibimb.app.data.NotificationLog
+import com.pratibimb.app.dnd.AlertChannel
 import com.pratibimb.app.dnd.FocusDnd
 import com.pratibimb.app.engine.MockScenario
 import com.pratibimb.app.engine.TwinRouter
@@ -66,6 +68,11 @@ class PratibimbViewModel(application: Application) : AndroidViewModel(applicatio
         if (_useLivePermissions.value) {
             _permissionStatus.value = PermissionStatus.read(context)
         }
+        // Mode A needs DND access; if it was taken away in Settings, stop claiming Mode A.
+        if (TwinRouter.isModeA.value && !focusDnd.hasAccess) {
+            setModeA(false)
+        }
+        refreshFocusStatus()
     }
 
     fun setLivePermissionMode(enabled: Boolean) {
@@ -93,8 +100,21 @@ class PratibimbViewModel(application: Application) : AndroidViewModel(applicatio
     // ── Delivery mode: Mode A (Priority DND) vs Mode B (Fallback) ──────────
     val isModeA: StateFlow<Boolean> = TwinRouter.isModeA
 
+    // A switch during a running session takes effect at once, so the phone is never left in a
+    // DND state that no longer matches the mode shown on screen.
     fun setModeA(modeA: Boolean) {
-        TwinRouter.setModeA(modeA)
+        var effective = modeA
+        if (_isFocusActive.value) {
+            if (modeA && !focusDnd.enterPriority()) {
+                effective = false
+                NotificationLog.add("focus", "Priority mode refused by the phone; staying in Mode B")
+            } else if (!modeA) {
+                focusDnd.restore()
+            }
+        }
+        TwinRouter.setModeA(effective)
+        NotificationLog.add("focus", if (effective) "Mode A: Priority DND" else "Mode B: hold-only")
+        refreshFocusStatus()
     }
 
     // ── Phone state & context ──────────────────────────────────────────────
@@ -136,11 +156,40 @@ class PratibimbViewModel(application: Application) : AndroidViewModel(applicatio
 
     private val focusDnd = FocusDnd(application)
 
+    // What the Debug screen shows: the delivery mode, the DND state actually in force, the
+    // alert channel, and every real decision as it happens.
+    private val _focusStatus = MutableStateFlow<List<String>>(emptyList())
+    val focusStatus: StateFlow<List<String>> = _focusStatus.asStateFlow()
+    val logEntries: StateFlow<List<LogEntry>> = NotificationLog.entries
+
     init {
         TwinRouter.init(application)
         // A new view model means no session is running. If the app was killed mid-focus, the
         // saved filter is still pending, so the phone gets its normal sound settings back here.
-        focusDnd.restore()
+        if (focusDnd.restore()) {
+            NotificationLog.add("focus", "Restored DND settings left over from an earlier session")
+        }
+        refreshFocusStatus()
+    }
+
+    fun refreshFocusStatus() {
+        val session = if (_isFocusActive.value) {
+            "running, ${_remainingSeconds.value / 60} min left"
+        } else {
+            "not running"
+        }
+        _focusStatus.value = listOf(
+            "Mode " + if (TwinRouter.isModeA.value) "A (Priority DND)" else "B (hold-only)",
+            "Session $session",
+            focusDnd.describe(),
+            AlertChannel.describe(getApplication<Application>()),
+            "Engine ${TwinRouter.engineStatus}",
+            "Listener " + if (TwinRouter.isListenerConnected.value) "connected" else "not connected",
+        )
+    }
+
+    fun clearLog() {
+        NotificationLog.clear()
     }
 
     fun selectDuration(minutes: Int) {
@@ -156,12 +205,20 @@ class PratibimbViewModel(application: Application) : AndroidViewModel(applicatio
         TwinRouter.startSession(_selectedDurationMinutes.value)
         _remainingSeconds.value = _selectedDurationMinutes.value * 60
 
-        // Mode A silences the phone with Priority mode. If that fails (DND access revoked since
-        // onboarding), fall back to Mode B: holds still work, but real apps may buzz once.
-        if (TwinRouter.isModeA.value && !focusDnd.enterPriority()) {
-            TwinRouter.setModeA(false)
-            NotificationLog.add("focus", "Priority mode unavailable; using hold-only Mode B")
+        // Mode A silences the phone with Priority mode. If the phone refuses (no DND access, or
+        // its own DND schedule is in charge), fall back to Mode B: holds still work, but real
+        // apps may buzz once.
+        if (TwinRouter.isModeA.value) {
+            if (focusDnd.enterPriority()) {
+                NotificationLog.add("focus", "Focus started: Priority DND on")
+            } else {
+                TwinRouter.setModeA(false)
+                NotificationLog.add("focus", "Focus started: Priority DND refused, using Mode B")
+            }
+        } else {
+            NotificationLog.add("focus", "Focus started: Mode B (hold-only)")
         }
+        refreshFocusStatus()
 
         timerJob?.cancel()
         timerJob = viewModelScope.launch {
@@ -180,10 +237,15 @@ class PratibimbViewModel(application: Application) : AndroidViewModel(applicatio
         TwinRouter.setPhoneState(PhoneState.FREE)
         TwinRouter.endSession()
         // Puts back the user's own filter and policy; does nothing if Priority was never set.
-        focusDnd.restore()
+        val restored = focusDnd.restore()
+        NotificationLog.add(
+            "focus",
+            if (restored) "Focus ended: your DND settings restored" else "Focus ended",
+        )
         timerJob?.cancel()
         _remainingSeconds.value = _selectedDurationMinutes.value * 60
         TwinRouter.releaseAllDigest(getApplication())
+        refreshFocusStatus()
     }
 
     // The session timer lives in viewModelScope, so the session ends with this view model;
