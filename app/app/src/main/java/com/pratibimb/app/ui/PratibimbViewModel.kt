@@ -3,23 +3,32 @@ package com.pratibimb.app.ui
 import android.app.Application
 import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.pratibimb.app.data.InspectedPost
 import com.pratibimb.app.data.LogEntry
+import com.pratibimb.app.data.NotificationInspector
+import com.pratibimb.app.engine.ContentRuleFlags
 import com.pratibimb.app.data.NotificationLog
 import com.pratibimb.app.dnd.AlertChannel
 import com.pratibimb.app.dnd.FocusDnd
 import com.pratibimb.app.engine.MockScenario
 import com.pratibimb.app.engine.PersonaOption
 import com.pratibimb.app.engine.Personas
+import com.pratibimb.app.engine.ReleasedDigest
 import com.pratibimb.app.engine.TwinRouter
+import com.pratibimb.app.engine.TwinSettings
 import com.pratibimb.app.service.FocusTileService
 import com.pratibimb.twin.Action
 import com.pratibimb.twin.Autonomy
 import com.pratibimb.twin.Decision
 import com.pratibimb.twin.FatigueRisk
+import com.pratibimb.twin.NotificationFeatures
 import com.pratibimb.twin.PhoneState
 import com.pratibimb.twin.RealTwinEngine
+import com.pratibimb.twin.TwinContext
 import com.pratibimb.twin.WorthLabelKind
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -41,7 +50,17 @@ data class LiveNotificationItem(
     val feedbackLabel: WorthLabelKind? = null,
     // Salted sender hash, so a tap teaches the twin about this sender and not just the app.
     val senderHash: String? = null,
+    // The notification's key and the engine's inputs, kept so the detail screen can decide it
+    // again with what the twin knows now, and so a suggested hold can still be taken.
+    val key: String? = null,
+    val features: NotificationFeatures? = null,
+    val context: TwinContext? = null,
+    val contentIntent: PendingIntent? = null,
+    // Suggest mode: what the user chose, once they chose.
+    val suggestionChoice: Action? = null,
 )
+
+data class InstalledApp(val packageName: String, val label: String, val category: String)
 
 data class HeldTrayItem(
     val id: String,
@@ -58,6 +77,8 @@ data class HeldTrayItem(
     val senderHash: String? = null,
     // When it was held; the hold cap releases it once it has waited policy.cap_min minutes.
     val heldAtMillis: Long = System.currentTimeMillis(),
+    // Set by a content rule, e.g. "New sender with a link"; shown on the tray row.
+    val flag: String? = null,
 )
 
 class PratibimbViewModel(application: Application) : AndroidViewModel(application) {
@@ -169,6 +190,113 @@ class PratibimbViewModel(application: Application) : AndroidViewModel(applicatio
 
     val demoLearning: StateFlow<Boolean> = TwinRouter.demoLearning
 
+    // ── Notification inspector and content rules ───────────────────────────
+    val inspectedPosts: StateFlow<List<InspectedPost>> = NotificationInspector.posts
+    val ruleFlags: StateFlow<ContentRuleFlags> = TwinSettings.ruleFlags
+    val mentionNames: StateFlow<Set<String>> = TwinSettings.mentionNames
+
+    fun setRuleFlags(flags: ContentRuleFlags) {
+        TwinSettings.setRuleFlags(flags)
+        NotificationLog.add("rules", "Content rules: $flags")
+    }
+
+    fun setMentionNames(entry: String) {
+        TwinSettings.setMentionNames(entry)
+    }
+
+    fun clearInspector() {
+        NotificationInspector.clear()
+    }
+
+    // ── Engine control ─────────────────────────────────────────────────────
+    val paused: StateFlow<Boolean> = TwinSettings.paused
+
+    // Pausing ends a running session first, so nothing stays held while paused.
+    fun setPaused(paused: Boolean) {
+        if (paused && _isFocusActive.value) stopFocus()
+        TwinSettings.setPaused(paused)
+        NotificationLog.add("focus", if (paused) "Pratibimb paused" else "Pratibimb resumed")
+        refreshFocusStatus()
+    }
+
+    val researchMode: StateFlow<Boolean> = TwinSettings.researchMode
+
+    fun setResearchMode(enabled: Boolean) {
+        TwinSettings.setResearchMode(enabled)
+    }
+
+    // ── Per-app opt-out ────────────────────────────────────────────────────
+    val optedOutPackages: StateFlow<Set<String>> = TwinSettings.optedOutPackages
+
+    // Launchable apps on the phone, with the category the params give them. Read on demand,
+    // never stored.
+    fun installedApps(): List<InstalledApp> {
+        val app = getApplication<Application>()
+        val launcher = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
+        val pm = app.packageManager
+        return pm.queryIntentActivities(launcher, PackageManager.MATCH_ALL)
+            .map { it.activityInfo.packageName }
+            .distinct()
+            .filter { it != app.packageName }
+            .map { pkg ->
+                val label = try {
+                    pm.getApplicationLabel(pm.getApplicationInfo(pkg, 0)).toString()
+                } catch (_: PackageManager.NameNotFoundException) {
+                    pkg
+                }
+                InstalledApp(pkg, label, TwinRouter.categoryOf(pkg).key)
+            }
+            .sortedBy { it.label.lowercase() }
+    }
+
+    fun setAppManaged(packageName: String, managed: Boolean) {
+        TwinSettings.setManaged(packageName, managed)
+    }
+
+    // ── Fatigue nudge ──────────────────────────────────────────────────────
+    val fatigueReasons: StateFlow<List<String>> = TwinRouter.fatigueReasons
+
+    // Shown when the proxy reads high during focus, at most once per 30 minutes.
+    private val _showFatigueNudge = MutableStateFlow(false)
+    val showFatigueNudge: StateFlow<Boolean> = _showFatigueNudge.asStateFlow()
+    private var lastNudgeAtMillis = 0L
+
+    fun dismissFatigueNudge() {
+        _showFatigueNudge.value = false
+    }
+
+    private fun updateFatigueNudge() {
+        val now = System.currentTimeMillis()
+        val high = TwinRouter.fatigueRisk.value == FatigueRisk.HIGH
+        if (high && _breakSecondsLeft.value == 0 && now - lastNudgeAtMillis >= NUDGE_GAP_MILLIS) {
+            lastNudgeAtMillis = now
+            _showFatigueNudge.value = true
+        } else if (!high) {
+            _showFatigueNudge.value = false
+        }
+    }
+
+    // ── Released digests ───────────────────────────────────────────────────
+    val lastDigest: StateFlow<ReleasedDigest?> = TwinRouter.lastDigest
+
+    // Only while focus runs: putting items back with no session would leave them nowhere to go.
+    fun undoLastDigest(): Boolean = _isFocusActive.value && TwinRouter.undoLastDigest(getApplication())
+
+    fun dismissLastDigest() {
+        TwinRouter.dismissLastDigest()
+    }
+
+    // ── Suggest mode and item detail ───────────────────────────────────────
+    fun holdSuggested(liveItemId: String) {
+        TwinRouter.holdSuggested(liveItemId)
+    }
+
+    fun deliverSuggested(liveItemId: String) {
+        TwinRouter.deliverSuggested(liveItemId)
+    }
+
+    fun decideAgain(item: LiveNotificationItem): Decision? = TwinRouter.decideAgain(item)
+
     fun setDemoLearning(enabled: Boolean) {
         TwinRouter.setDemoLearning(enabled)
     }
@@ -245,6 +373,8 @@ class PratibimbViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
     fun startFocus() {
+        if (TwinSettings.paused.value) return
+        TwinRouter.dismissLastDigest()
         _isFocusActive.value = true
         _breakSecondsLeft.value = 0
         _remainingSeconds.value = _selectedDurationMinutes.value * 60
@@ -263,7 +393,10 @@ class PratibimbViewModel(application: Application) : AndroidViewModel(applicatio
                     _remainingSeconds.value -= 1
                 }
                 ticks += 1
-                if (ticks % TICK_SECONDS == 0) TwinRouter.tick(getApplication())
+                if (ticks % TICK_SECONDS == 0) {
+                    TwinRouter.tick(getApplication())
+                    updateFatigueNudge()
+                }
             }
             if (_remainingSeconds.value <= 0) {
                 stopFocus()
@@ -296,6 +429,7 @@ class PratibimbViewModel(application: Application) : AndroidViewModel(applicatio
     fun takeBreak() {
         if (!_isFocusActive.value || _breakSecondsLeft.value > 0) return
         _breakSecondsLeft.value = BREAK_MINUTES * 60
+        _showFatigueNudge.value = false
         TwinRouter.setPhoneState(PhoneState.FREE)
         TwinRouter.endSession()
         focusDnd.restore()
@@ -366,8 +500,8 @@ class PratibimbViewModel(application: Application) : AndroidViewModel(applicatio
         TwinRouter.alwaysDeliverSender(getApplication(), trayId)
     }
 
-    fun markHeldWrong(trayId: String) {
-        TwinRouter.markHeldWrong(trayId)
+    fun markImportant(trayId: String) {
+        TwinRouter.markImportant(getApplication(), trayId)
     }
 
     fun markHeldCorrect(trayId: String) {
@@ -386,6 +520,7 @@ class PratibimbViewModel(application: Application) : AndroidViewModel(applicatio
         const val CONSENT_PREFS = "pratibimb_consent"
         const val CONSENT_KEY = "consent_v1"
         const val BREAK_MINUTES = 5
+        const val NUDGE_GAP_MILLIS = 30 * 60_000L
 
         // How often, in seconds, held items are checked against the hold cap and delivered
         // ones against the open window.

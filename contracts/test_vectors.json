@@ -1576,11 +1576,108 @@
   },
   {
    "id": "override_repeat_ping",
-   "description": "Mom's second message",
+   "description": "Mom's third try",
    "param_patches": [],
    "events": [],
    "features": {
     "key": "override_repeat_ping",
+    "posted_at_millis": 1792918800000,
+    "package_name": "com.whatsapp",
+    "category": "messaging",
+    "android_category": null,
+    "channel_importance": 3,
+    "is_ongoing": false,
+    "is_conversation": true,
+    "priority_conversation": false,
+    "group_chat": false,
+    "sender_hash": "s_mom",
+    "sender_display_name": "Mom",
+    "same_sender_recent_pings": 2,
+    "bait_hit": false,
+    "urgency_hit": false,
+    "otp_pattern": false
+   },
+   "context": {
+    "state": "FOCUS_STEADY",
+    "autonomy": "AUTO",
+    "minutes_until_release": 16.0,
+    "focus_minutes_elapsed": 34.0,
+    "fatigue_risk": "LOW",
+    "exploration_draw": 0.5,
+    "always_deliver_senders": [],
+    "always_deliver_packages": [],
+    "demo_learning": false
+   },
+   "expected": {
+    "intermediate": {
+     "p_cs": 0.2464,
+     "n_p": 5.0,
+     "mu_cs": 1.2,
+     "sigma_pred": 0.7826237921249264,
+     "structural_score": 0.8581489350995123,
+     "q": 0.8581489350995122,
+     "n_q": 20,
+     "used_sender": false,
+     "holding_wins": 1,
+     "pi": 0.0025
+    },
+    "decision": {
+     "action": "DELIVER",
+     "rule": "OVERRIDE",
+     "would_be_action": "DELIVER",
+     "suggest_only": false,
+     "explored": false,
+     "propensity": 1.0,
+     "reason": "Always delivered: repeated ping",
+     "explanation": "Delivered: Mom messaged 3 times in 3 minutes.",
+     "card": {
+      "pull_mean": 0.2464,
+      "pull_lo": 0.08290651318236567,
+      "pull_hi": 0.5316595031493442,
+      "mins_if_opened_lo": 1.1197437045958771,
+      "mins_if_opened_hi": 9.891650451807305,
+      "l_p10": 0.6001733836175178,
+      "l_p50": 1.1175782445276958,
+      "l_p90": 3.1151007636114594,
+      "l_mean": 1.7063888094628334,
+      "h_p10": 5.961880329104769,
+      "h_p50": 6.908725229570326,
+      "h_p90": 7.457512291102885,
+      "h_mean": 6.7527657242852435,
+      "q_mean": 0.8581489350995122,
+      "q_lo": 0.7452350411380961,
+      "q_hi": 0.9321890363878607,
+      "q_upper80": 0.9120039505284366,
+      "hold_better_per_hundred": 0,
+      "net_minutes_protected": -5.04637691482241,
+      "minutes_until_release": 16.0,
+      "low_confidence": true,
+      "fatigue_risk": "LOW"
+     }
+    },
+    "counts_after_events": {
+     "pull": {
+      "global": {
+       "shown": 0,
+       "opens": 0
+      },
+      "category": {},
+      "cell": {}
+     },
+     "worth": {
+      "app": {},
+      "sender": {}
+     }
+    }
+   }
+  },
+  {
+   "id": "no_override_second_ping",
+   "description": "A second message alone is not yet a repeated ping",
+   "param_patches": [],
+   "events": [],
+   "features": {
+    "key": "no_override_second_ping",
     "posted_at_millis": 1792918800000,
     "package_name": "com.whatsapp",
     "category": "messaging",
@@ -1623,13 +1720,13 @@
     },
     "decision": {
      "action": "DELIVER",
-     "rule": "OVERRIDE",
+     "rule": "MIGHT_MATTER",
      "would_be_action": "DELIVER",
      "suggest_only": false,
      "explored": false,
      "propensity": 1.0,
-     "reason": "Always delivered: repeated ping",
-     "explanation": "Delivered: Mom messaged twice in 3 minutes.",
+     "reason": "Delivered: might matter",
+     "explanation": "Delivered: might matter, so it is not worth the risk of holding.",
      "card": {
       "pull_mean": 0.2464,
       "pull_lo": 0.08290651318236567,

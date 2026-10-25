@@ -46,7 +46,7 @@ fun HeldTrayScreen(
     items: List<HeldTrayItem>,
     onReleaseNow: (trayId: String) -> Unit,
     onAlwaysDeliver: (trayId: String) -> Unit,
-    onMarkWrong: (trayId: String) -> Unit,
+    onMarkImportant: (trayId: String) -> Unit,
     onReleaseAll: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -171,7 +171,7 @@ fun HeldTrayScreen(
                         item = item,
                         onReleaseNow = { onReleaseNow(item.id) },
                         onAlwaysDeliver = { onAlwaysDeliver(item.id) },
-                        onMarkWrong = { onMarkWrong(item.id) },
+                        onMarkImportant = { onMarkImportant(item.id) },
                     )
                 }
             }
@@ -184,7 +184,7 @@ fun HeldItemCard(
     item: HeldTrayItem,
     onReleaseNow: () -> Unit,
     onAlwaysDeliver: () -> Unit,
-    onMarkWrong: () -> Unit,
+    onMarkImportant: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -231,6 +231,18 @@ fun HeldItemCard(
             )
 
             Spacer(modifier = Modifier.height(10.dp))
+
+            item.flag?.let { flag ->
+                Box(
+                    modifier = Modifier
+                        .clip(ShapePill)
+                        .background(WarmObsidian.ErrorContainer)
+                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                ) {
+                    Text(text = flag, style = labelMd(color = WarmObsidian.Error), fontSize = 12.sp)
+                }
+                Spacer(modifier = Modifier.height(6.dp))
+            }
 
             // Held reason tag
             Box(
@@ -291,9 +303,9 @@ fun HeldItemCard(
                     Text(text = "Always deliver", fontSize = 12.sp)
                 }
 
-                // Action 3: Wrong hold
+                // Action 3: it mattered; releases it and teaches the twin
                 Button(
-                    onClick = onMarkWrong,
+                    onClick = onMarkImportant,
                     modifier = Modifier
                         .weight(1f)
                         .height(38.dp),
@@ -304,7 +316,7 @@ fun HeldItemCard(
                     ),
                     contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 4.dp),
                 ) {
-                    Text(text = "Wrong hold", fontSize = 12.sp)
+                    Text(text = "This was important", fontSize = 12.sp, maxLines = 2)
                 }
             }
         }

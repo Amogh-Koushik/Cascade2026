@@ -18,7 +18,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.pratibimb.app.ui.PratibimbViewModel
+import androidx.activity.compose.BackHandler
 import com.pratibimb.app.ui.debug.DebugScreen
+import com.pratibimb.app.ui.debug.InspectorScreen
 import com.pratibimb.app.ui.home.HomeScreen
 import com.pratibimb.app.ui.livetwin.LiveTwinScreen
 import com.pratibimb.app.ui.onboarding.ConsentScreen
@@ -64,7 +66,12 @@ fun PratibimbApp(
     val focusStatus by viewModel.focusStatus.collectAsStateWithLifecycle()
     val logEntries by viewModel.logEntries.collectAsStateWithLifecycle()
 
+    val inspectedPosts by viewModel.inspectedPosts.collectAsStateWithLifecycle()
+    val ruleFlags by viewModel.ruleFlags.collectAsStateWithLifecycle()
+    val mentionNames by viewModel.mentionNames.collectAsStateWithLifecycle()
+
     var selectedTab by remember { mutableStateOf(AppTab.HOME) }
+    var inspectorOpen by remember { mutableStateOf(false) }
 
     NavHost(
         navController = navController,
@@ -169,11 +176,22 @@ fun PratibimbApp(
                                 items = heldTray,
                                 onReleaseNow = viewModel::releaseHeldItem,
                                 onAlwaysDeliver = viewModel::alwaysDeliverSender,
-                                onMarkWrong = viewModel::markHeldWrong,
+                                onMarkImportant = viewModel::markImportant,
                                 onReleaseAll = viewModel::releaseAllDigest,
                             )
                         }
-                        AppTab.DEBUG -> {
+                        AppTab.DEBUG -> if (inspectorOpen) {
+                            BackHandler { inspectorOpen = false }
+                            InspectorScreen(
+                                posts = inspectedPosts,
+                                ruleFlags = ruleFlags,
+                                mentionNames = mentionNames,
+                                onSetRuleFlags = viewModel::setRuleFlags,
+                                onSetMentionNames = viewModel::setMentionNames,
+                                onClear = viewModel::clearInspector,
+                                onBack = { inspectorOpen = false },
+                            )
+                        } else {
                             DebugScreen(
                                 isModeA = isModeA,
                                 phoneState = phoneState,
@@ -190,6 +208,7 @@ fun PratibimbApp(
                                 onTriggerScenario = viewModel::triggerScenario,
                                 onSendTestPing = onSendTestPing,
                                 onResetTwin = viewModel::resetAllCounts,
+                                onOpenInspector = { inspectorOpen = true },
                             )
                         }
                         AppTab.SETTINGS -> {

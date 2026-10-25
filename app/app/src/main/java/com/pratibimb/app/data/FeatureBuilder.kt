@@ -3,6 +3,7 @@ package com.pratibimb.app.data
 import android.app.Notification
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
+import com.pratibimb.app.engine.PingCounter
 import com.pratibimb.twin.NotificationFeatures
 import java.security.MessageDigest
 
@@ -12,8 +13,8 @@ import java.security.MessageDigest
  */
 object FeatureBuilder {
 
-    // Earlier conversation notifications per sender hash, for the repeated-ping override.
-    private val recentBySender = HashMap<String, ArrayDeque<Long>>()
+    // Recent pings per sender hash, for the repeated-ping override.
+    private val pings = PingCounter()
 
     @Synchronized
     fun build(
@@ -21,6 +22,8 @@ object FeatureBuilder {
         rankingMap: NotificationListenerService.RankingMap,
         rules: FeatureRules,
         senderSalt: String,
+        // False for a reel or a forward under the text-only rule: it is not a new ping.
+        countsAsPing: Boolean = true,
     ): NotificationFeatures {
         val ranking = NotificationListenerService.Ranking()
             .takeIf { rankingMap.getRanking(sbn.key, it) }
@@ -64,7 +67,7 @@ object FeatureBuilder {
             groupChat = groupChat,
             senderHash = senderHash,
             senderDisplayName = senderDisplayName,
-            sameSenderRecentPings = recentPings(senderHash, sbn.postTime, rules.repeatWindowMillis),
+            sameSenderRecentPings = recentPings(senderHash, sbn.postTime, rules.repeatWindowMillis, countsAsPing),
             baitHit = rules.baitHit(haystack),
             urgencyHit = rules.urgencyHit(haystack),
             otpPattern = rules.otpPattern(haystack, text),
@@ -73,18 +76,15 @@ object FeatureBuilder {
 
     @Synchronized
     fun reset() {
-        recentBySender.clear()
+        pings.clear()
     }
 
-    // Counts earlier pings from this sender inside the window, then records this one.
-    private fun recentPings(senderHash: String?, postedAt: Long, windowMillis: Long): Int {
-        if (senderHash == null) return 0
-        val times = recentBySender.getOrPut(senderHash) { ArrayDeque() }
-        while (times.isNotEmpty() && postedAt - times.first() > windowMillis) times.removeFirst()
-        val earlier = times.size
-        times.addLast(postedAt)
-        return earlier
-    }
+    private fun recentPings(senderHash: String?, postedAt: Long, windowMillis: Long, countsAsPing: Boolean): Int =
+        when {
+            senderHash == null -> 0
+            countsAsPing -> pings.record(senderHash, postedAt, windowMillis)
+            else -> pings.peek(senderHash, postedAt, windowMillis)
+        }
 
     // Salted, so the stored hash cannot be matched against a list of names.
     private fun hashSender(name: String, salt: String): String {

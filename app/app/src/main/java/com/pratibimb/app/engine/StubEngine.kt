@@ -402,7 +402,7 @@ class StubEngine : TwinEngine {
                     groupChat = false,
                     senderHash = "hash_mom",
                     senderDisplayName = "Mom",
-                    sameSenderRecentPings = 1,
+                    sameSenderRecentPings = 2,
                     baitHit = false,
                     urgencyHit = true,
                     otpPattern = false

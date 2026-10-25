@@ -6,7 +6,9 @@
 # union of both; the draw bank is always the shared one. Two exceptions to "fitted wins": an
 # app's category follows the contract's app map, and the keyword lists are the contract's
 # (contracts/lexicons.py), because the text bank, the red-team set, the sample scenarios and
-# the phone's feature builder are all checked against them. Every change is reported, and the
+# the phone's feature builder are all checked against them. The repeated-ping rule
+# (policy.repeat_ping) also follows the example params, for the same reason. Every change is
+# reported, and the
 # result must pass the schema before it is written.
 #
 # Run: uv run python -m fit.convert_params [fit files...]
@@ -159,6 +161,13 @@ def convert(
         if dropped:
             report.corrected.append(f"lexicons.{name}: dropped {dropped}, not in the contract")
         converted["lexicons"][name] = list(words)
+    # The repeated-ping rule is part of the contract too: both feature builders count pings by it.
+    contract_ping = example["policy"]["repeat_ping"]
+    if converted["policy"]["repeat_ping"] != contract_ping:
+        report.corrected.append(
+            f"policy.repeat_ping: {converted['policy']['repeat_ping']!r} -> {contract_ping!r}"
+        )
+    converted["policy"]["repeat_ping"] = copy.deepcopy(contract_ping)
 
     provenance = {k: str(v) for k, v in open_maps["provenance"].items()}
     provenance["conversion"] = (

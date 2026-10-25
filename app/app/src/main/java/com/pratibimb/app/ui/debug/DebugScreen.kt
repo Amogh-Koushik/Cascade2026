@@ -73,6 +73,7 @@ fun DebugScreen(
     onTriggerScenario: (MockScenario) -> Unit,
     onSendTestPing: () -> Unit,
     onResetTwin: () -> Unit,
+    onOpenInspector: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val scrollState = rememberScrollState()
@@ -123,6 +124,10 @@ fun DebugScreen(
             }
         }
 
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Raw notification facts and the content rules, on their own screen.
+        SectionHeader("NOTIFICATION INSPECTOR", actionLabel = "Open", onAction = onOpenInspector)
         Spacer(modifier = Modifier.height(24.dp))
 
         // Section 0: what is really in force right now, and every real decision as it happens.

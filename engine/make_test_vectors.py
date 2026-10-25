@@ -143,7 +143,12 @@ def override_cases() -> list[dict[str, Any]]:
             "OTP from the SMS app",
             features("v", "com.google.android.apps.messaging", "messaging", otp_pattern=True),
         ),
-        case("override_repeat_ping", "Mom's second message", message(same_sender_recent_pings=1)),
+        case("override_repeat_ping", "Mom's third try", message(same_sender_recent_pings=2)),
+        case(
+            "no_override_second_ping",
+            "A second message alone is not yet a repeated ping",
+            message(same_sender_recent_pings=1),
+        ),
         case(
             "override_order",
             "Several overrides match; the always-deliver app wins",

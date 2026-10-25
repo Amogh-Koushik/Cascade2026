@@ -36,7 +36,8 @@ def test_every_fitted_value_survives_conversion(name: str, example: dict[str, An
     assert converted["pull"]["state"] == fitted["pull"]["state"]
     assert converted["persona"] == fitted["persona"]
     for key, value in fitted["policy"].items():
-        assert converted["policy"][key] == value
+        if key != "repeat_ping":
+            assert converted["policy"][key] == value
     assert (
         converted["worth"]["weights"]["same_sender_repeat"]
         == fitted["worth"]["weights"]["same_sender_repeats_3m"]
@@ -57,6 +58,13 @@ def test_converted_files_use_the_contract_lexicons(name: str, example: dict[str,
     converted, _ = convert(FITTED[name], example, name)
 
     assert converted["lexicons"] == LEXICONS
+
+
+@pytest.mark.parametrize("name", sorted(FITTED))
+def test_converted_files_use_the_contract_repeat_ping(name: str, example: dict[str, Any]) -> None:
+    converted, _ = convert(FITTED[name], example, name)
+
+    assert converted["policy"]["repeat_ping"] == example["policy"]["repeat_ping"]
 
 
 def test_lists_keep_fitted_entries_and_add_the_examples(example: dict[str, Any]) -> None:

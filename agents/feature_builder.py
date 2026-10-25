@@ -37,19 +37,34 @@ def sender_hash(sender: str | None) -> str | None:
     return f"s_{digest[:12]}"
 
 
+# Messages from one person less than this far apart are one ping: someone typing several
+# lines, not someone trying again. CONTRACTS.md section 3; the phone uses the same gap.
+BURST_GAP_MIN = 20 / 60
+
+
 def recent_pings_from_sender(
     notification: RawNotification, earlier: list[RawNotification], window_min: float
 ) -> int:
     # Only conversation notifications from the same person count, never an app's own repeats.
     if not notification.is_conversation or notification.sender is None:
         return 0
-    return sum(
-        1
+    times = sorted(
+        previous.at_min
         for previous in earlier
         if previous.is_conversation
         and previous.sender == notification.sender
-        and notification.at_min - previous.at_min <= window_min
+        and previous.at_min <= notification.at_min
     )
+    burst_starts: list[float] = []
+    last = None
+    for at in times:
+        if last is None or at - last >= BURST_GAP_MIN:
+            burst_starts.append(at)
+        last = at
+    # A message that continues the latest burst does not count that burst as an earlier ping.
+    if last is not None and notification.at_min - last < BURST_GAP_MIN:
+        burst_starts.pop()
+    return sum(1 for start in burst_starts if notification.at_min - start <= window_min)
 
 
 def build_features(

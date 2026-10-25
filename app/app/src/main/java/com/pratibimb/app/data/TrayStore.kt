@@ -105,6 +105,7 @@ object TrayStore {
             .put("decision", DecisionJson.encode(item.decision))
             .put("senderHash", item.senderHash ?: JSONObject.NULL)
             .put("heldAtMillis", item.heldAtMillis)
+            .put("flag", item.flag ?: JSONObject.NULL)
 
     private fun fromJson(json: JSONObject): HeldTrayItem =
         HeldTrayItem(
@@ -121,6 +122,8 @@ object TrayStore {
             contentIntent = null,
             senderHash = json.optStringOrNull("senderHash"),
             heldAtMillis = json.getLong("heldAtMillis"),
+            // Files saved before flags existed have no key.
+            flag = if (json.has("flag")) json.optStringOrNull("flag") else null,
         )
 
     private fun JSONObject.optStringOrNull(key: String): String? = if (isNull(key)) null else getString(key)

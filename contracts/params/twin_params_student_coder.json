@@ -101,7 +101,7 @@
   "upper80_z": 0.84,
   "low_confidence_width": 0.4,
   "repeat_ping": {
-   "count": 2,
+   "count": 3,
    "window_min": 3
   }
  },

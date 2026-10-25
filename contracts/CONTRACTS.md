@@ -72,9 +72,11 @@ every key present in `demo_learning` replaces the default, and `k_app` / `k_send
 
 - `minutes_until_release` (D) = `min(remaining session minutes, cap_min)`.
 - `exploration_draw` (u) = a fresh `Uniform[0, 1)` per decision, logged in the feature row.
-- `same_sender_recent_pings` = earlier **conversation** notifications with the same
-  `sender_hash` in the last `repeat_ping.window_min` minutes, not counting this one. Always 0
-  when the notification is not a conversation or has no sender.
+- `same_sender_recent_pings` = earlier **pings** from the same `sender_hash` that started in
+  the last `repeat_ping.window_min` minutes, not counting the one this notification belongs to.
+  A ping is a burst of **conversation** notifications: a message less than 20 seconds after
+  the sender's previous one continues the same ping. Always 0 when the notification is not a
+  conversation or has no sender.
 - Lexicon hits: lowercase the title and text joined by a space (`Locale.ROOT` in Kotlin,
   `str.lower()` in Python) and look for each lexicon entry, also lowercased, as a substring.
   `bait_hit` / `urgency_hit` are true when any entry matches.

@@ -67,16 +67,16 @@ object DigestNotifier {
     }
 
     // One notification for many released items: at the end of focus, at a break, or when
-    // items reach the hold cap.
+    // items reach the hold cap. Returns its id, or null if it could not be posted.
     fun postBatchDigest(
         context: Context,
         title: String,
         summaryLines: List<String>,
-    ) {
+    ): Int? {
         val count = summaryLines.size
-        if (count == 0) return
+        if (count == 0) return null
         val permission = context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)
-        if (permission != PackageManager.PERMISSION_GRANTED) return
+        if (permission != PackageManager.PERMISSION_GRANTED) return null
         ensureChannel(context)
 
         val appIntent = PendingIntent.getActivity(
@@ -102,7 +102,12 @@ object DigestNotifier {
             .setAutoCancel(true)
             .build()
 
-        context.getSystemService(NotificationManager::class.java)
-            .notify(nextId.getAndIncrement(), notification)
+        val id = nextId.getAndIncrement()
+        context.getSystemService(NotificationManager::class.java).notify(id, notification)
+        return id
+    }
+
+    fun cancel(context: Context, id: Int) {
+        context.getSystemService(NotificationManager::class.java).cancel(id)
     }
 }

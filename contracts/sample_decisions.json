@@ -307,7 +307,7 @@
     "group_chat": false,
     "sender_hash": "s_7c41e2a9",
     "sender_display_name": "Mom",
-    "same_sender_recent_pings": 1,
+    "same_sender_recent_pings": 2,
     "bait_hit": false,
     "urgency_hit": false,
     "otp_pattern": false
@@ -331,7 +331,7 @@
     "explored": false,
     "propensity": 1.0,
     "reason": "Always delivered: repeated ping",
-    "explanation": "Delivered: Mom messaged twice in 3 minutes.",
+    "explanation": "Delivered: Mom messaged 3 times in 3 minutes.",
     "card": {
      "pull_mean": 0.2464,
      "pull_lo": 0.08290651318236567,

@@ -120,6 +120,22 @@ def test_recent_pings_count_only_the_same_person_within_the_window(
     assert recent_pings_from_sender(current, previous, window_min=3) == expected
 
 
+def test_messages_typed_in_one_burst_are_one_ping() -> None:
+    current = RawNotification.from_dict(note(at_min=2.1))
+    burst = [note(at_min=1.9), note(at_min=2.0)]
+    previous = [RawNotification.from_dict(n) for n in burst]
+
+    assert recent_pings_from_sender(current, previous, window_min=3) == 0
+
+
+def test_separate_tries_count_even_after_a_burst() -> None:
+    current = RawNotification.from_dict(note(at_min=2))
+    earlier = [note(at_min=0), note(at_min=0.1), note(at_min=1)]
+    previous = [RawNotification.from_dict(n) for n in earlier]
+
+    assert recent_pings_from_sender(current, previous, window_min=3) == 2
+
+
 def test_pings_older_than_the_window_do_not_count() -> None:
     current = RawNotification.from_dict(note(at_min=10))
     previous = [RawNotification.from_dict(note(at_min=2))]
@@ -141,11 +157,12 @@ def test_features_take_category_and_lexicon_hits_from_the_params(
     assert features.sender_hash is None
 
 
-def test_a_second_message_from_mom_is_a_repeated_ping(params: dict[str, Any]) -> None:
-    results = run_attack(attack(note(at_min=0), note(at_min=1)), params)
+def test_a_third_try_from_mom_is_a_repeated_ping(params: dict[str, Any]) -> None:
+    results = run_attack(attack(note(at_min=0), note(at_min=1), note(at_min=2)), params)
 
-    assert results[1].rule == DecisionRule.OVERRIDE
-    assert results[1].reason == "Always delivered: repeated ping"
+    assert results[1].rule != DecisionRule.OVERRIDE
+    assert results[2].rule == DecisionRule.OVERRIDE
+    assert results[2].reason == "Always delivered: repeated ping"
 
 
 def test_scoring_marks_held_important_items_and_delivered_bait(params: dict[str, Any]) -> None:

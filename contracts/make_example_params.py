@@ -104,7 +104,8 @@ def build_example_params() -> dict[str, Any]:
             "explore_upper80": 0.3,
             "upper80_z": 0.84,
             "low_confidence_width": 0.4,
-            "repeat_ping": {"count": 2, "window_min": 3},
+            # Three separate pings in three minutes: someone trying to reach you, not chatting.
+            "repeat_ping": {"count": 3, "window_min": 3},
         },
         "demo_learning": {
             "k_app": 4,

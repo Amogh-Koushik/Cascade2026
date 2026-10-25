@@ -113,7 +113,7 @@ def build_scenario_inputs() -> list[dict[str, Any]]:
                 is_conversation=True,
                 sender_hash=MOM_HASH,
                 sender_display_name="Mom",
-                same_sender_recent_pings=1,
+                same_sender_recent_pings=2,
             ),
             steady,
         ),

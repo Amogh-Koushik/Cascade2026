@@ -9,6 +9,7 @@ import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import com.pratibimb.app.data.FeatureBuilder
 import com.pratibimb.app.data.FeatureRules
+import com.pratibimb.app.data.NotificationInspector
 import com.pratibimb.app.data.NotificationLog
 import com.pratibimb.app.data.TrayStore
 import com.pratibimb.app.data.UsageReader
@@ -36,11 +37,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import java.io.IOException
+import java.util.Calendar
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.min
+import kotlin.random.Random
 
 /**
  * TwinRouter acts as the central coordinator between the Android NotificationListenerService,
@@ -124,6 +127,15 @@ object TwinRouter {
     private val _fatigueRisk = MutableStateFlow(FatigueRisk.LOW)
     val fatigueRisk: StateFlow<FatigueRisk> = _fatigueRisk.asStateFlow()
 
+    // Why the proxy reads as it does ("1 h 50 min since your last break"), for Home's nudge.
+    private val _fatigueReasons = MutableStateFlow<List<String>>(emptyList())
+    val fatigueReasons: StateFlow<List<String>> = _fatigueReasons.asStateFlow()
+
+    // The last batch released as one digest; Home and the Tray show it, and the Tray can undo it
+    // for a short while.
+    private val _lastDigest = MutableStateFlow<ReleasedDigest?>(null)
+    val lastDigest: StateFlow<ReleasedDigest?> = _lastDigest.asStateFlow()
+
     // The persona id (see Personas).
     private val _selectedPersona = MutableStateFlow(Personas.default.id)
     val selectedPersona: StateFlow<String> = _selectedPersona.asStateFlow()
@@ -172,9 +184,15 @@ object TwinRouter {
     private var lastDetectedState: PhoneState? = null
 
     @Volatile
+    private var lastDetectedFatigue: FatigueRisk? = null
+
+    @Volatile
     private var usageAccessWarned = false
 
     private val deliveredInFocus = AtomicInteger(0)
+
+    // How long a released digest can be put back into the tray.
+    private const val UNDO_WINDOW_MILLIS = 60_000L
 
     // Loads the saved persona's params, the counts learned so far and the user's settings.
     // Both the activity and the listener call this, because after a reboot the listener can
@@ -183,6 +201,7 @@ object TwinRouter {
     fun init(context: Context) {
         if (appContext != null) return
         val app = context.applicationContext
+        TwinSettings.init(app)
         val settings = settingsOf(app)
         val saved = settings.getString(PERSONA_KEY, null)?.let { Personas.find(it) }
         val loaded = (saved != null && loadPersona(app, saved)) ||
@@ -272,7 +291,9 @@ object TwinRouter {
             minutesUntilRelease = min(remainingMin, holdCapMin),
             focusMinutesElapsed = elapsedMin,
             fatigueRisk = _fatigueRisk.value,
-            explorationDraw = 0.5,
+            // A fresh draw per decision lets Auto explore with probability epsilon; with research
+            // mode off the draw is 1.0, which never explores.
+            explorationDraw = if (TwinSettings.researchMode.value) Random.nextDouble() else 1.0,
             alwaysDeliverSenders = alwaysDeliverSenders,
             alwaysDeliverPackages = alwaysDeliverPackages,
             demoLearning = _demoLearning.value,
@@ -320,50 +341,69 @@ object TwinRouter {
         rankingMap: NotificationListenerService.RankingMap,
     ) {
         val listener = activeListener ?: return
-        if (sbn.isOngoing) return
         // The app's own notifications are skipped, except demo posts standing in for another app.
         val demo = if (sbn.packageName == listener.packageName) demoScenarioOf(sbn) ?: return else null
-        // Without params the engine cannot decide; leaving the notification alone is the safe choice.
-        val rules = featureRules ?: return
-        // A group summary ("3 new messages") only bundles notifications decided on their own.
-        if ((sbn.notification.flags and Notification.FLAG_GROUP_SUMMARY) != 0) return
-        sweepOutcomes()
 
-        val content = contentOf(sbn)
-        val previous = seenByKey[sbn.key]
-        if (previous != null && previous.content == content) {
-            if (previous.held) cancelQuietly(listener, sbn.key)
-            return
-        }
-
-        // 1. Build features from live StatusBarNotification
-        val features = demo?.features?.copy(key = sbn.key, postedAtMillis = sbn.postTime)
-            ?: FeatureBuilder.build(sbn, rankingMap, rules, senderSalt)
-
-        // 2. Engine evaluates features against the current focus session
-        val decision = engine.decide(features, currentContext())
-        if (seenByKey.size > MAX_TRACKED_KEYS) seenByKey.clear()
-        seenByKey[sbn.key] = SeenPost(content, decision.action == Action.HOLD)
-
-        // 4. Extract display metadata
         val appLabel = demo?.display?.app ?: getAppLabel(listener, sbn.packageName)
         val extras = sbn.notification.extras
         val rawTitle = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString().orEmpty()
         val title = if (rawTitle.isNotBlank()) rawTitle else appLabel
         val text = extras.getCharSequence(Notification.EXTRA_TEXT)?.toString().orEmpty()
         val contentIntent = sbn.notification.contentIntent
+        val content = ContentRules.classify(rawTitle, text, extras.containsKey(Notification.EXTRA_PICTURE), sbn.postTime)
+        fun inspect(outcome: String) = NotificationInspector.record(sbn, rankingMap, appLabel, rawTitle, content, outcome)
 
+        if (sbn.isOngoing) return inspect("Ongoing: left alone")
+        // Without params the engine cannot decide; leaving the notification alone is the safe choice.
+        val rules = featureRules ?: return inspect("Engine not loaded: left alone")
+        // A group summary ("3 new messages") only bundles notifications decided on their own.
+        if ((sbn.notification.flags and Notification.FLAG_GROUP_SUMMARY) != 0) return inspect("Group summary: skipped")
+        // Paused, or an app the user opted out: the notification arrives untouched and unlogged.
+        val sourcePackage = demo?.features?.packageName ?: sbn.packageName
+        if (TwinSettings.paused.value) return inspect("Paused: left alone")
+        if (!TwinSettings.isManaged(sourcePackage)) return inspect("App opted out: left alone")
+        sweepOutcomes()
+
+        val contentHash = contentOf(sbn)
+        val previous = seenByKey[sbn.key]
+        if (previous != null && previous.content == contentHash) {
+            if (previous.held) cancelQuietly(listener, sbn.key)
+            return inspect("Re-post, same content: not decided again")
+        }
+
+        // 1. Build features from live StatusBarNotification
+        val flags = TwinSettings.ruleFlags.value
+        val countsAsPing = !(flags.textOnlyRepeatPings && content.kind != ContentKind.TEXT)
+        val features = demo?.features?.copy(key = sbn.key, postedAtMillis = sbn.postTime)
+            ?: FeatureBuilder.build(sbn, rankingMap, rules, senderSalt, countsAsPing)
+        val newSender = features.senderHash?.let { TwinSettings.firstTimeSeen(it) } ?: false
+
+        // 2. Engine evaluates features against the current focus session, then the content
+        // rules the user switched on get their say.
+        val context = currentContext()
+        val ruled = ContentPolicy.apply(
+            decision = engine.decide(features, context),
+            features = features,
+            content = content,
+            flags = flags,
+            mentionsYou = ContentRules.mentionsYou(text, TwinSettings.mentionNames.value),
+            newSender = newSender,
+        )
+        val decision = ruled.decision
+        // In Suggest mode the decision is only a recommendation: the notification is delivered
+        // and the user can still hold it from its detail screen.
+        val holds = decision.action == Action.HOLD && !decision.suggestOnly
+        if (seenByKey.size > MAX_TRACKED_KEYS) seenByKey.clear()
+        seenByKey[sbn.key] = SeenPost(contentHash, holds)
+
+        val line = describeDecision(title, features.category, features.isConversation, decision, features.groupChat) +
+            (ruled.rule?.let { " · content rule: $it" } ?: "")
         NotificationLog.add(
             source = if (demo != null) "demo: $appLabel" else appLabel,
-            message = describeDecision(
-                title,
-                features.category,
-                features.isConversation,
-                decision,
-                features.groupChat,
-            ),
+            message = line,
             timeMillis = sbn.postTime,
         )
+        inspect(line)
 
         // 5. Create Live Feed Item
         val liveItem = LiveNotificationItem(
@@ -376,11 +416,15 @@ object TwinRouter {
             senderDisplayName = features.senderDisplayName,
             packageName = features.packageName,
             senderHash = features.senderHash,
+            key = sbn.key,
+            features = features,
+            context = context,
+            contentIntent = contentIntent,
         )
         _liveNotifications.value = (listOf(liveItem) + _liveNotifications.value).take(60)
 
         // 6. Action Execution: HOLD vs DELIVER
-        if (decision.action == Action.HOLD) {
+        if (holds) {
             outcomes.forget(sbn.key)
             // Cancel notification from Android system shade to keep user in focus
             cancelQuietly(listener, sbn.key)
@@ -398,6 +442,7 @@ object TwinRouter {
                 decision = decision,
                 contentIntent = contentIntent,
                 senderHash = features.senderHash,
+                flag = ruled.flag,
             )
             updateTray { listOf(trayItem) + it }
             _heldTodayCount.value += 1
@@ -495,8 +540,13 @@ object TwinRouter {
             isConversation -> "${category.key}, conversation"
             else -> category.key
         }
+        val mode = when {
+            decision.suggestOnly -> " (suggested only)"
+            decision.explored -> " · explored, propensity %.2f".format(decision.propensity)
+            else -> ""
+        }
         return "${decision.action.name} \"$title\" [$kind] ${decision.rule.name}: ${decision.reason}" +
-            " · hold wins ${card.holdBetterPerHundred}/100 · worth up to %.2f".format(card.qUpper80)
+            " · hold wins ${card.holdBetterPerHundred}/100 · worth up to %.2f".format(card.qUpper80) + mode
     }
 
     fun onNotificationRemoved(
@@ -574,31 +624,54 @@ object TwinRouter {
         learnAll(settled)
     }
 
-    // FOCUS_STEADY or FOCUS_RESTLESS from app switches since the session (re)started, over the
-    // last ten minutes. Nothing is read in FREE.
-    private fun detectPhoneState(context: Context, nowMillis: Long) {
+    // During focus: FOCUS_STEADY or FOCUS_RESTLESS from app switches in the last ten minutes,
+    // and the fatigue-risk proxy. Nothing is read in FREE. Without usage access the state stays
+    // as set and the proxy uses only time since the break and the hour.
+    private fun readBehaviour(context: Context, nowMillis: Long) {
         if (_phoneState.value == PhoneState.FREE || sessionStartMillis == 0L) {
             lastDetectedState = null
+            lastDetectedFatigue = null
             return
         }
-        if (!UsageReader.hasAccess(context)) {
-            if (!usageAccessWarned) {
-                usageAccessWarned = true
-                NotificationLog.add("TwinRouter", "No usage access: phone state stays as set, opens use the estimate")
-            }
-            return
+        val hasAccess = UsageReader.hasAccess(context)
+        if (!hasAccess && !usageAccessWarned) {
+            NotificationLog.add("TwinRouter", "No usage access: phone state stays as set, opens use the estimate")
         }
-        usageAccessWarned = false
-        val from = maxOf(nowMillis - ForegroundRules.SWITCH_WINDOW_MILLIS, sessionStartMillis)
-        val events = UsageReader.events(context, from, nowMillis)
+        usageAccessWarned = !hasAccess
+        val sessionEvents = if (hasAccess) UsageReader.events(context, sessionStartMillis, nowMillis) else emptyList()
         val passThrough = UsageReader.systemPackages() + UsageReader.launcherPackages(context)
-        val switches = ForegroundRules.countSwitches(events, passThrough)
-        val detected = if (ForegroundRules.isRestless(switches)) PhoneState.FOCUS_RESTLESS else PhoneState.FOCUS_STEADY
-        if (detected == lastDetectedState) return
-        lastDetectedState = detected
-        if (_phoneState.value != detected) {
-            _phoneState.value = detected
-            NotificationLog.add("TwinRouter", "Phone state $detected: $switches app switches in the last 10 min")
+        fun switchesSince(fromMillis: Long) =
+            ForegroundRules.countSwitches(sessionEvents.filter { it.atMillis >= fromMillis }, passThrough)
+
+        if (hasAccess) {
+            val switches = switchesSince(nowMillis - ForegroundRules.SWITCH_WINDOW_MILLIS)
+            val state = if (ForegroundRules.isRestless(switches)) PhoneState.FOCUS_RESTLESS else PhoneState.FOCUS_STEADY
+            if (state != lastDetectedState) {
+                lastDetectedState = state
+                if (_phoneState.value != state) {
+                    _phoneState.value = state
+                    NotificationLog.add("TwinRouter", "Phone state $state: $switches app switches in the last 10 min")
+                }
+            }
+        }
+
+        val sessionMinutes = (nowMillis - sessionStartMillis) / 60_000.0
+        val assessment = FatigueRules.assess(
+            minutesSinceBreak = sessionMinutes,
+            recentSwitches = switchesSince(nowMillis - (FatigueRules.RECENT_WINDOW_MIN * 60_000).toLong()),
+            sessionSwitches = switchesSince(sessionStartMillis),
+            sessionMinutes = sessionMinutes,
+            hourOfDay = Calendar.getInstance().get(Calendar.HOUR_OF_DAY),
+        )
+        _fatigueReasons.value = assessment.reasons
+        // Like the phone state, a level picked on the Debug screen stays until the proxy changes.
+        if (assessment.risk != lastDetectedFatigue) {
+            lastDetectedFatigue = assessment.risk
+            if (_fatigueRisk.value != assessment.risk) {
+                _fatigueRisk.value = assessment.risk
+                val why = assessment.reasons.joinToString().ifEmpty { "no signals" }
+                NotificationLog.add("TwinRouter", "Fatigue risk (proxy) ${assessment.risk}: $why")
+            }
         }
     }
 
@@ -615,7 +688,7 @@ object TwinRouter {
     // the hold cap.
     fun tick(context: Context, sessionOver: Boolean = false) {
         val now = System.currentTimeMillis()
-        if (!sessionOver) detectPhoneState(context, now)
+        if (!sessionOver) readBehaviour(context, now)
         sweepOutcomes()
         settleOpenTimers(context, now, sessionOver)
         releaseExpiredHolds(context, now)
@@ -660,6 +733,9 @@ object TwinRouter {
         _autonomy.value = autonomy
         editSettings { putString(AUTONOMY_KEY, autonomy.name) }
     }
+
+    // An app's category from the active params' app map, for screens that list apps.
+    fun categoryOf(packageName: String): Category = featureRules?.categoryOf(packageName) ?: Category.OTHER
 
     fun setFatigueRisk(risk: FatigueRisk) {
         _fatigueRisk.value = risk
@@ -728,14 +804,78 @@ object TwinRouter {
     fun releaseAllDigest(context: Context, title: String) {
         val currentItems = _heldTray.value
         if (currentItems.isNotEmpty()) {
-            DigestNotifier.postBatchDigest(
+            val notificationId = DigestNotifier.postBatchDigest(
                 context = context,
                 title = title,
                 summaryLines = currentItems.map { "${it.app}: ${it.title}" },
             )
             val released = currentItems.map { it.id }.toSet()
             updateTray { tray -> tray.filterNot { it.id in released } }
+            _lastDigest.value = ReleasedDigest(title, currentItems, System.currentTimeMillis(), notificationId)
         }
+    }
+
+    // Puts the last digest's items back in the tray and removes its notification, if it was
+    // released within the undo window.
+    fun undoLastDigest(context: Context): Boolean {
+        val digest = _lastDigest.value ?: return false
+        if (System.currentTimeMillis() - digest.releasedAtMillis > UNDO_WINDOW_MILLIS) return false
+        digest.notificationId?.let { DigestNotifier.cancel(context, it) }
+        updateTray { tray -> digest.items + tray }
+        _lastDigest.value = null
+        NotificationLog.add("TwinRouter", "Undo: ${digest.items.size} put back in the tray")
+        return true
+    }
+
+    fun dismissLastDigest() {
+        _lastDigest.value = null
+    }
+
+    // Suggest mode: the user takes the twin's advice to hold something already delivered.
+    fun holdSuggested(liveItemId: String) {
+        val item = _liveNotifications.value.firstOrNull { it.id == liveItemId } ?: return
+        val key = item.key ?: return
+        activeListener?.let { cancelQuietly(it, key) }
+        seenByKey[key]?.let { seenByKey[key] = it.copy(held = true) }
+        outcomes.forget(key)
+        val trayItem = HeldTrayItem(
+            id = "tray_${key.hashCode()}_${System.currentTimeMillis()}",
+            app = item.app,
+            title = item.title,
+            text = item.text,
+            sender = item.senderDisplayName,
+            packageName = item.packageName,
+            heldReason = item.decision.reason,
+            timeAgo = "Just now",
+            minutesUntilRelease = item.decision.card.minutesUntilRelease.toInt().coerceAtLeast(1),
+            decision = item.decision,
+            contentIntent = item.contentIntent,
+            senderHash = item.senderHash,
+        )
+        updateTray { listOf(trayItem) + it }
+        _heldTodayCount.value += 1
+        _netMinutesProtected.value += item.decision.card.netMinutesProtected
+        markSuggestion(liveItemId, Action.HOLD)
+        NotificationLog.add("TwinRouter", "Suggestion taken: held \"${item.title}\"")
+    }
+
+    // Suggest mode: the user keeps it delivered; it already is, so this only records the choice.
+    fun deliverSuggested(liveItemId: String) {
+        markSuggestion(liveItemId, Action.DELIVER)
+    }
+
+    private fun markSuggestion(liveItemId: String, choice: Action) {
+        _liveNotifications.update { items ->
+            items.map { if (it.id == liveItemId) it.copy(suggestionChoice = choice) else it }
+        }
+    }
+
+    // The same notification decided again with what the twin knows now, so a detail screen can
+    // show how its ranges moved since. Null for items that did not keep their inputs.
+    fun decideAgain(item: LiveNotificationItem): Decision? {
+        val features = item.features ?: return null
+        val context = item.context ?: return null
+        return engine.decide(features, context.copy(demoLearning = _demoLearning.value))
     }
 
     // A rule, not just a label: from now on this sender (or, for items with no sender, this
@@ -772,8 +912,18 @@ object TwinRouter {
         updateTray { tray -> tray.filterNot { it.id == trayId } }
     }
 
-    fun markHeldWrong(trayId: String) {
+    // "This was important": the item is shown now, and the twin learns it should have come
+    // through, for this sender and this app.
+    fun markImportant(context: Context, trayId: String) {
         val item = _heldTray.value.firstOrNull { it.id == trayId } ?: return
+        DigestNotifier.postReleasedNotification(
+            context,
+            item.app,
+            item.title,
+            item.text,
+            item.contentIntent,
+            item.packageName,
+        )
         learn(
             FeedbackEvent.WorthLabel(
                 packageName = item.packageName,
@@ -782,6 +932,7 @@ object TwinRouter {
             )
         )
         updateTray { tray -> tray.filterNot { it.id == trayId } }
+        NotificationLog.add("TwinRouter", "Marked important: \"${item.title}\" released, twin taught it matters")
     }
 
     fun markHeldCorrect(trayId: String) {
@@ -893,6 +1044,9 @@ object TwinRouter {
         }
         _heldTodayCount.value = 0
         _netMinutesProtected.value = 0.0
+        _lastDigest.value = null
+        _liveNotifications.value = emptyList()
+        TwinSettings.clear()
         updateTray { emptyList() }
     }
 
@@ -905,4 +1059,18 @@ object TwinRouter {
             packageName.substringAfterLast('.').replaceFirstChar { it.uppercase() }
         }
     }
+}
+
+// A batch released as one digest notification, kept so it can be shown and briefly undone.
+data class ReleasedDigest(
+    val title: String,
+    val items: List<HeldTrayItem>,
+    val releasedAtMillis: Long,
+    val notificationId: Int?,
+) {
+    // "WhatsApp ×3, Instagram": items grouped by app, in the order they were held.
+    val summary: String
+        get() = items.groupBy { it.app }.entries.joinToString { (app, held) ->
+            if (held.size > 1) "$app ×${held.size}" else app
+        }
 }

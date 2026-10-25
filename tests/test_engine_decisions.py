@@ -53,7 +53,7 @@ SMS = "com.google.android.apps.messaging"
             make_context(),
             "one-time password",
         ),
-        (mom_message(same_sender_recent_pings=1), make_context(), "repeated ping"),
+        (mom_message(same_sender_recent_pings=2), make_context(), "repeated ping"),
     ],
 )
 def test_never_hold_overrides_always_deliver(
@@ -89,11 +89,17 @@ def test_three_promos_in_a_row_are_all_held(twin: TwinEngine) -> None:
     assert [twin.decide(p, make_context()).action for p in promos] == [Action.HOLD] * 3
 
 
-def test_two_pings_from_the_same_person_are_delivered(twin: TwinEngine) -> None:
+def test_three_pings_from_the_same_person_are_delivered(twin: TwinEngine) -> None:
+    third = twin.decide(mom_message(same_sender_recent_pings=2), make_context())
+
+    assert third.action == Action.DELIVER
+    assert third.explanation == "Delivered: Mom messaged 3 times in 3 minutes."
+
+
+def test_a_second_ping_alone_is_not_an_override(twin: TwinEngine) -> None:
     second = twin.decide(mom_message(same_sender_recent_pings=1), make_context())
 
-    assert second.action == Action.DELIVER
-    assert second.explanation == "Delivered: Mom messaged twice in 3 minutes."
+    assert second.rule != DecisionRule.OVERRIDE
 
 
 def test_repeated_pings_from_a_group_member_without_a_sender_do_not_override(
