@@ -45,7 +45,7 @@ class PratibimbListener : NotificationListenerService() {
         ).joinToString(" ")
         NotificationLog.add(
             source = sbn.packageName,
-            message = "posted: ${title.orEmpty()} | ${text.orEmpty()}\n$facts",
+            message = "posted: ${maskCodes(title.orEmpty())} | ${maskCodes(text.orEmpty())}\n$facts",
             timeMillis = sbn.postTime,
         )
 
@@ -75,6 +75,11 @@ class PratibimbListener : NotificationListenerService() {
 
     private companion object {
         const val SOURCE = "listener"
+
+        // OTPs and banking codes are never written to the log, here or in Logcat.
+        val CODE = Regex("\\d{4,8}")
+
+        fun maskCodes(text: String): String = CODE.replace(text, "••••")
     }
 }
 

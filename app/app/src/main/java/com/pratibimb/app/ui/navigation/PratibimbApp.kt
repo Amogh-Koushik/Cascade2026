@@ -21,6 +21,7 @@ import com.pratibimb.app.ui.PratibimbViewModel
 import com.pratibimb.app.ui.debug.DebugScreen
 import com.pratibimb.app.ui.home.HomeScreen
 import com.pratibimb.app.ui.livetwin.LiveTwinScreen
+import com.pratibimb.app.ui.onboarding.ConsentScreen
 import com.pratibimb.app.ui.onboarding.PermissionChecklistScreen
 import com.pratibimb.app.ui.onboarding.SetupResultModeAScreen
 import com.pratibimb.app.ui.onboarding.SetupResultModeBScreen
@@ -29,6 +30,7 @@ import com.pratibimb.app.ui.theme.WarmObsidian
 import com.pratibimb.app.ui.tray.HeldTrayScreen
 
 object PratibimbRoutes {
+    const val CONSENT = "consent"
     const val CHECKLIST = "checklist"
     const val SETUP_RESULT_MODE_A = "setup_result_mode_a"
     const val SETUP_RESULT_MODE_B = "setup_result_mode_b"
@@ -66,9 +68,24 @@ fun PratibimbApp(
 
     NavHost(
         navController = navController,
-        startDestination = PratibimbRoutes.CHECKLIST,
+        // Read once: accepting consent later navigates on, it does not swap the start screen.
+        startDestination = remember {
+            if (viewModel.consentGiven.value) PratibimbRoutes.CHECKLIST else PratibimbRoutes.CONSENT
+        },
         modifier = modifier.fillMaxSize().background(WarmObsidian.Background),
     ) {
+        // Screen A1: Consent, before any permission is requested
+        composable(PratibimbRoutes.CONSENT) {
+            ConsentScreen(
+                onAccept = {
+                    viewModel.giveConsent()
+                    navController.navigate(PratibimbRoutes.CHECKLIST) {
+                        popUpTo(PratibimbRoutes.CONSENT) { inclusive = true }
+                    }
+                },
+            )
+        }
+
         // Screen A2: Permission Checklist
         composable(PratibimbRoutes.CHECKLIST) {
             PermissionChecklistScreen(

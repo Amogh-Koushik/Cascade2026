@@ -64,6 +64,17 @@ class PratibimbViewModel(application: Application) : AndroidViewModel(applicatio
 
     val engine: RealTwinEngine get() = TwinRouter.engine
 
+    // ── Consent ────────────────────────────────────────────────────────────
+    // Shown once before any permission is requested.
+    private val consentPrefs = application.getSharedPreferences(CONSENT_PREFS, Context.MODE_PRIVATE)
+    private val _consentGiven = MutableStateFlow(consentPrefs.getBoolean(CONSENT_KEY, false))
+    val consentGiven: StateFlow<Boolean> = _consentGiven.asStateFlow()
+
+    fun giveConsent() {
+        consentPrefs.edit().putBoolean(CONSENT_KEY, true).apply()
+        _consentGiven.value = true
+    }
+
     // ── Permissions ────────────────────────────────────────────────────────
     // Real permission status by default; the mockup is only for the Debug screen's design view.
     private val _useLivePermissions = MutableStateFlow(true)
@@ -372,6 +383,8 @@ class PratibimbViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
     private companion object {
+        const val CONSENT_PREFS = "pratibimb_consent"
+        const val CONSENT_KEY = "consent_v1"
         const val BREAK_MINUTES = 5
 
         // How often, in seconds, held items are checked against the hold cap and delivered
