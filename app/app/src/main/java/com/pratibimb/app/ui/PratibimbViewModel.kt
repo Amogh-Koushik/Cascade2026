@@ -5,14 +5,16 @@ import android.app.PendingIntent
 import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.pratibimb.app.data.NotificationLog
+import com.pratibimb.app.dnd.FocusDnd
 import com.pratibimb.app.engine.MockScenario
-import com.pratibimb.app.engine.StubEngine
 import com.pratibimb.app.engine.TwinRouter
 import com.pratibimb.twin.Action
 import com.pratibimb.twin.Autonomy
 import com.pratibimb.twin.Decision
 import com.pratibimb.twin.FatigueRisk
 import com.pratibimb.twin.PhoneState
+import com.pratibimb.twin.RealTwinEngine
 import com.pratibimb.twin.WorthLabelKind
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -50,7 +52,7 @@ data class HeldTrayItem(
 
 class PratibimbViewModel(application: Application) : AndroidViewModel(application) {
 
-    val engine: StubEngine get() = TwinRouter.engine
+    val engine: RealTwinEngine get() = TwinRouter.engine
 
     // ── Permissions ────────────────────────────────────────────────────────
     // Real permission status by default; the mockup is only for the Debug screen's design view.
@@ -132,6 +134,15 @@ class PratibimbViewModel(application: Application) : AndroidViewModel(applicatio
 
     private var timerJob: Job? = null
 
+    private val focusDnd = FocusDnd(application)
+
+    init {
+        TwinRouter.init(application)
+        // A new view model means no session is running. If the app was killed mid-focus, the
+        // saved filter is still pending, so the phone gets its normal sound settings back here.
+        focusDnd.restore()
+    }
+
     fun selectDuration(minutes: Int) {
         if (!_isFocusActive.value) {
             _selectedDurationMinutes.value = minutes
@@ -142,7 +153,15 @@ class PratibimbViewModel(application: Application) : AndroidViewModel(applicatio
     fun startFocus() {
         _isFocusActive.value = true
         TwinRouter.setPhoneState(PhoneState.FOCUS_STEADY)
+        TwinRouter.startSession(_selectedDurationMinutes.value)
         _remainingSeconds.value = _selectedDurationMinutes.value * 60
+
+        // Mode A silences the phone with Priority mode. If that fails (DND access revoked since
+        // onboarding), fall back to Mode B: holds still work, but real apps may buzz once.
+        if (TwinRouter.isModeA.value && !focusDnd.enterPriority()) {
+            TwinRouter.setModeA(false)
+            NotificationLog.add("focus", "Priority mode unavailable; using hold-only Mode B")
+        }
 
         timerJob?.cancel()
         timerJob = viewModelScope.launch {
@@ -159,9 +178,23 @@ class PratibimbViewModel(application: Application) : AndroidViewModel(applicatio
     fun stopFocus() {
         _isFocusActive.value = false
         TwinRouter.setPhoneState(PhoneState.FREE)
+        TwinRouter.endSession()
+        // Puts back the user's own filter and policy; does nothing if Priority was never set.
+        focusDnd.restore()
         timerJob?.cancel()
         _remainingSeconds.value = _selectedDurationMinutes.value * 60
         TwinRouter.releaseAllDigest(getApplication())
+    }
+
+    // The session timer lives in viewModelScope, so the session ends with this view model;
+    // the phone must not be left in Priority mode afterwards.
+    override fun onCleared() {
+        if (_isFocusActive.value) {
+            TwinRouter.endSession()
+            TwinRouter.setPhoneState(PhoneState.FREE)
+            focusDnd.restore()
+        }
+        super.onCleared()
     }
 
     // ── Metrics & Feeds (Delegated to TwinRouter singleton) ────────────────

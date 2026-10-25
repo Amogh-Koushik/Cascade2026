@@ -1,6 +1,7 @@
 package com.pratibimb.app.engine
 
 import android.app.Notification
+import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.pm.PackageManager
@@ -20,19 +21,41 @@ import com.pratibimb.twin.Decision
 import com.pratibimb.twin.FatigueRisk
 import com.pratibimb.twin.FeedbackEvent
 import com.pratibimb.twin.PhoneState
+import com.pratibimb.twin.RealTwinEngine
 import com.pratibimb.twin.TwinContext
 import com.pratibimb.twin.WorthLabelKind
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.math.min
 
 /**
  * TwinRouter acts as the central coordinator between the Android NotificationListenerService,
  * the TwinEngine decision engine, and the Pratibimb UI state.
  */
 object TwinRouter {
-    val engine = StubEngine()
+    // Bundled from contracts/params (see app/app/build.gradle.kts). The persona switcher can
+    // load another file later; until then every decision uses the student persona.
+    private const val PARAMS_ASSET = "twin_params_student_coder.json"
+    private const val COUNTS_PREFS = "twin_counts"
+    private const val COUNTS_KEY = "counts_json"
+
+    // The plan's hold cap: nothing waits longer than this before release.
+    private const val HOLD_CAP_MIN = 45.0
+
+    val engine = RealTwinEngine()
+
+    // Set once params are loaded; until then incoming notifications are left untouched.
+    @Volatile
+    private var appContext: Context? = null
+
+    @Volatile
+    private var sessionStartMillis = 0L
+
+    @Volatile
+    private var sessionEndMillis = 0L
 
     @Volatile
     var activeListener: PratibimbListener? = null
@@ -47,10 +70,10 @@ object TwinRouter {
     private val _heldTray = MutableStateFlow<List<HeldTrayItem>>(emptyList())
     val heldTray: StateFlow<List<HeldTrayItem>> = _heldTray.asStateFlow()
 
-    private val _heldTodayCount = MutableStateFlow(18)
+    private val _heldTodayCount = MutableStateFlow(0)
     val heldTodayCount: StateFlow<Int> = _heldTodayCount.asStateFlow()
 
-    private val _netMinutesProtected = MutableStateFlow(42.0)
+    private val _netMinutesProtected = MutableStateFlow(0.0)
     val netMinutesProtected: StateFlow<Double> = _netMinutesProtected.asStateFlow()
 
     // ── Engine Context States ──────────────────────────────────────────────
@@ -66,56 +89,82 @@ object TwinRouter {
     private val _selectedPersona = MutableStateFlow("Deep work (balanced)")
     val selectedPersona: StateFlow<String> = _selectedPersona.asStateFlow()
 
-    private val _isModeA = MutableStateFlow(true)
+    // Mode A is only claimed once DND access is confirmed in init().
+    private val _isModeA = MutableStateFlow(false)
     val isModeA: StateFlow<Boolean> = _isModeA.asStateFlow()
 
     // Tracks recent notifications per package for burst detection
     private val recentPackagePings = ConcurrentHashMap<String, Int>()
 
-    init {
-        loadInitialMockData()
+    // Loads the persona params and the counts learned so far. Both the activity and the
+    // listener call this, because after a reboot the listener can start first; only the first
+    // successful call does the work.
+    @Synchronized
+    fun init(context: Context) {
+        if (appContext != null) return
+        val app = context.applicationContext
+        try {
+            val paramsJson = app.assets.open(PARAMS_ASSET).bufferedReader().use { it.readText() }
+            engine.loadParams(paramsJson)
+        } catch (e: IOException) {
+            NotificationLog.add("TwinRouter", "Could not load $PARAMS_ASSET: ${e.message}")
+            return
+        }
+        app.getSharedPreferences(COUNTS_PREFS, Context.MODE_PRIVATE)
+            .getString(COUNTS_KEY, null)
+            ?.let { engine.importCounts(it) }
+        _isModeA.value = app.getSystemService(NotificationManager::class.java)
+            .isNotificationPolicyAccessGranted
+        appContext = app
+        NotificationLog.add("TwinRouter", "Engine ready with $PARAMS_ASSET")
     }
 
-    private fun loadInitialMockData() {
-        val initialLive = mutableListOf<LiveNotificationItem>()
-        val initialTray = mutableListOf<HeldTrayItem>()
+    fun startSession(durationMinutes: Int) {
+        val now = System.currentTimeMillis()
+        sessionStartMillis = now
+        sessionEndMillis = now + durationMinutes * 60_000L
+    }
 
-        StubEngine.SCENARIOS.take(4).forEachIndexed { idx, sc ->
-            val decision = sc.decision
-            val item = LiveNotificationItem(
-                id = "init_${sc.id}",
-                app = sc.display.app,
-                title = sc.display.title,
-                text = sc.display.text,
-                timeLabel = "${(idx + 1) * 3}m ago",
-                decision = decision,
-                senderDisplayName = sc.features.senderDisplayName,
-                packageName = sc.features.packageName,
-            )
-            initialLive.add(item)
+    fun endSession() {
+        sessionStartMillis = 0L
+        sessionEndMillis = 0L
+    }
 
-            if (decision.action == Action.HOLD) {
-                initialTray.add(
-                    HeldTrayItem(
-                        id = "tray_${sc.id}",
-                        app = sc.display.app,
-                        title = sc.display.title,
-                        text = sc.display.text,
-                        sender = sc.features.senderDisplayName,
-                        packageName = sc.features.packageName,
-                        heldReason = decision.reason,
-                        timeAgo = "${(idx + 1) * 3}m ago",
-                        minutesUntilRelease = decision.card.minutesUntilRelease.toInt(),
-                        decision = decision,
-                    )
-                )
-            }
-        }
-        _liveNotifications.value = initialLive
-        _heldTray.value = initialTray
+    // D (minutes until a held item would be released) and time in focus come from the running
+    // session, because the engine charges the cost of holding by how long the item will wait.
+    private fun currentContext(): TwinContext {
+        val now = System.currentTimeMillis()
+        val inSession = sessionEndMillis > now
+        val remainingMin = if (inSession) (sessionEndMillis - now) / 60_000.0 else 0.0
+        val elapsedMin = if (inSession) (now - sessionStartMillis) / 60_000.0 else 0.0
+        return TwinContext(
+            state = _phoneState.value,
+            autonomy = _autonomy.value,
+            minutesUntilRelease = min(remainingMin, HOLD_CAP_MIN),
+            focusMinutesElapsed = elapsedMin,
+            fatigueRisk = _fatigueRisk.value,
+            explorationDraw = 0.5,
+            alwaysDeliverSenders = emptySet(),
+            alwaysDeliverPackages = emptySet(),
+            demoLearning = true,
+        )
+    }
+
+    // Every feedback goes through here, so what the twin learns survives a restart.
+    private fun learn(event: FeedbackEvent) {
+        engine.applyFeedback(event)
+        saveCounts()
+    }
+
+    private fun saveCounts() {
+        appContext?.getSharedPreferences(COUNTS_PREFS, Context.MODE_PRIVATE)
+            ?.edit()
+            ?.putString(COUNTS_KEY, engine.exportCounts())
+            ?.apply()
     }
 
     fun onListenerConnected(listener: PratibimbListener) {
+        init(listener)
         activeListener = listener
         _isListenerConnected.value = true
         NotificationLog.setListenerConnected(true)
@@ -139,26 +188,15 @@ object TwinRouter {
         val listener = activeListener ?: return
         if (sbn.packageName == listener.packageName) return
         if (sbn.isOngoing) return
+        // Without params the engine cannot decide; leaving the notification alone is the safe choice.
+        if (appContext == null) return
 
         // 1. Build features from live StatusBarNotification
         val features = FeatureBuilder.build(sbn, rankingMap, recentPackagePings)
         recentPackagePings[sbn.packageName] = (recentPackagePings[sbn.packageName] ?: 0) + 1
 
-        // 2. Build current TwinContext
-        val context = TwinContext(
-            state = _phoneState.value,
-            autonomy = _autonomy.value,
-            minutesUntilRelease = 25.0,
-            focusMinutesElapsed = 10.0,
-            fatigueRisk = _fatigueRisk.value,
-            explorationDraw = 0.5,
-            alwaysDeliverSenders = emptySet(),
-            alwaysDeliverPackages = emptySet(),
-            demoLearning = true,
-        )
-
-        // 3. Engine evaluates features against context
-        val decision = engine.decide(features, context)
+        // 2. Engine evaluates features against the current focus session
+        val decision = engine.decide(features, currentContext())
 
         // 4. Extract display metadata
         val appLabel = getAppLabel(listener, sbn.packageName)
@@ -233,7 +271,7 @@ object TwinRouter {
     ) {
         if (reason == NotificationListenerService.REASON_CLICK) {
             // User opened notification: feedback signal
-            engine.applyFeedback(
+            learn(
                 FeedbackEvent.PullOutcome(
                     category = Category.OTHER,
                     state = _phoneState.value,
@@ -276,7 +314,7 @@ object TwinRouter {
             text = item.text,
             contentIntent = item.contentIntent,
         )
-        engine.applyFeedback(
+        learn(
             FeedbackEvent.WorthLabel(
                 packageName = item.packageName,
                 senderHash = null,
@@ -300,7 +338,7 @@ object TwinRouter {
 
     fun alwaysDeliverSender(trayId: String) {
         val item = _heldTray.value.firstOrNull { it.id == trayId } ?: return
-        engine.applyFeedback(
+        learn(
             FeedbackEvent.WorthLabel(
                 packageName = item.packageName,
                 senderHash = null,
@@ -312,7 +350,7 @@ object TwinRouter {
 
     fun markHeldWrong(trayId: String) {
         val item = _heldTray.value.firstOrNull { it.id == trayId } ?: return
-        engine.applyFeedback(
+        learn(
             FeedbackEvent.WorthLabel(
                 packageName = item.packageName,
                 senderHash = null,
@@ -324,7 +362,7 @@ object TwinRouter {
 
     fun markHeldCorrect(trayId: String) {
         val item = _heldTray.value.firstOrNull { it.id == trayId } ?: return
-        engine.applyFeedback(
+        learn(
             FeedbackEvent.WorthLabel(
                 packageName = item.packageName,
                 senderHash = null,
@@ -337,7 +375,7 @@ object TwinRouter {
         val label = if (isWorth) WorthLabelKind.WORTH_IT else WorthLabelKind.NOT_WORTH_IT
         _liveNotifications.value = _liveNotifications.value.map { item ->
             if (item.id == itemId) {
-                engine.applyFeedback(
+                learn(
                     FeedbackEvent.WorthLabel(
                         packageName = item.packageName,
                         senderHash = null,
@@ -352,6 +390,10 @@ object TwinRouter {
     }
 
     fun triggerScenario(scenario: MockScenario) {
+        if (appContext == null) {
+            NotificationLog.add("TwinRouter", "Scenario ignored: engine params not loaded yet")
+            return
+        }
         val currentContext = scenario.context.copy(
             state = _phoneState.value,
             autonomy = _autonomy.value,
@@ -395,6 +437,7 @@ object TwinRouter {
 
     fun resetAll() {
         engine.resetCounts()
+        saveCounts()
         recentPackagePings.clear()
         _heldTodayCount.value = 0
         _netMinutesProtected.value = 0.0

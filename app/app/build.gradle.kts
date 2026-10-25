@@ -37,10 +37,12 @@ android {
         compose = true
     }
 
-    // The engine contract lives once, in contracts/, and is compiled straight into the app.
+    // The engine contract and the persona params live once, in contracts/, and are compiled
+    // and bundled straight into the app, so the phone always uses the same files as engine.py.
     sourceSets {
         getByName("main") {
             java.srcDir("../../contracts/kotlin")
+            assets.srcDir("../../contracts/params")
         }
     }
 }
