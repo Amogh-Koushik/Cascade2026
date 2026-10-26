@@ -1,6 +1,8 @@
 package com.pratibimb.app.data
 
 import android.app.Notification
+import android.app.Person
+import android.os.Bundle
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import com.pratibimb.app.engine.PingCounter
@@ -78,6 +80,31 @@ object FeatureBuilder {
     // WhatsApp names chats by an id: groups end in "@g.us", people in "@s.whatsapp.net". On phones
     // where it posts only a summary ("Test group: 23 new messages"), that id on the shortcut, the
     // tag or the group key is the one sign that the chat is a group.
+    // All the message text a notification carries: its main line, the expanded text, inbox lines
+    // and each MessagingStyle message. A WhatsApp group often shows only "5 new messages" as its
+    // main line, with the messages themselves in the other fields.
+    fun messageText(notification: Notification): String {
+        val extras = notification.extras
+        // The typed getParcelableArray is unreliable on Android 13, so the untyped one is used.
+        @Suppress("DEPRECATION")
+        val messages = extras.getParcelableArray(Notification.EXTRA_MESSAGES).orEmpty()
+            .mapNotNull { (it as? Bundle)?.getCharSequence("text")?.toString() }
+        val lines = extras.getCharSequenceArray(Notification.EXTRA_TEXT_LINES).orEmpty().map { it.toString() }
+        return (
+            listOfNotNull(
+                extras.getCharSequence(Notification.EXTRA_TEXT)?.toString(),
+                extras.getCharSequence(Notification.EXTRA_BIG_TEXT)?.toString(),
+            ) + lines + messages
+            ).joinToString("\n")
+    }
+
+    // The name the messaging app knows the user by, as it shows in the notification.
+    fun selfNames(notification: Notification): List<String?> {
+        val extras = notification.extras
+        val person = extras.getParcelable(Notification.EXTRA_MESSAGING_PERSON, Person::class.java)
+        return listOf(extras.getCharSequence(Notification.EXTRA_SELF_DISPLAY_NAME)?.toString(), person?.name?.toString())
+    }
+
     fun isWhatsAppGroupId(sbn: StatusBarNotification): Boolean =
         listOf(sbn.notification.shortcutId, sbn.tag, sbn.groupKey).any { it?.contains(WHATSAPP_GROUP_SUFFIX) == true }
 

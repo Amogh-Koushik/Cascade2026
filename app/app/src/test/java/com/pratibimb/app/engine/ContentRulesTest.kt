@@ -85,4 +85,20 @@ class ContentRulesTest {
         assertFalse(ContentRules.mentionsYou("@Rahul can you check", listOf("amogh")))
         assertFalse(ContentRules.mentionsYou("anyone has notes", emptyList()))
     }
+
+    @Test
+    fun whatsAppTagMarkupStillCountsAsAMention() {
+        // WhatsApp wraps a tag in direction isolates, and puts "~" before names not in contacts.
+        assertTrue(ContentRules.mentionsYou("Rohan: ⁨@Satvik⁩ send the file", listOf("Satvik")))
+        assertTrue(ContentRules.mentionsYou("@~Satvik are you coming", listOf("satvik")))
+        assertFalse(ContentRules.mentionsYou("Satvik said hi", listOf("Satvik")))
+    }
+
+    @Test
+    fun mentionNamesJoinEnteredAndAppNamesButNotSelfLabels() {
+        assertEquals(
+            setOf("Satvik", "Sat", "Satvik R"),
+            ContentRules.mentionNames(listOf("Satvik", " Sat "), listOf("Satvik R", "You", null, "me", "")),
+        )
+    }
 }

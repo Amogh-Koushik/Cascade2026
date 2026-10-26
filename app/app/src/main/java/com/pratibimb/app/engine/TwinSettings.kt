@@ -15,6 +15,7 @@ object TwinSettings {
     private const val RESEARCH_KEY = "research_mode"
     private const val RULE_TEXT_ONLY_KEY = "rule_text_only_repeat"
     private const val GROUP_MARKS_KEY = "group_marks"
+    private const val ALWAYS_GROUPS_KEY = "always_deliver_groups"
     private const val PAUSE_CARD_KEY = "pause_card"
     private const val DEVELOPER_MODE_KEY = "developer_mode"
     private const val RULE_NEW_SENDER_KEY = "rule_new_sender_links"
@@ -66,6 +67,10 @@ object TwinSettings {
     @Volatile
     private var groupMarks: Map<String, Int> = emptyMap()
 
+    // Groups the user chose "Always deliver" for (salted keys).
+    @Volatile
+    private var alwaysGroups: Set<String> = emptySet()
+
     @Synchronized
     fun init(context: Context) {
         if (prefs != null) return
@@ -81,6 +86,7 @@ object TwinSettings {
         _mentionNames.value = loaded.getStringSet(MENTION_NAMES_KEY, null).orEmpty().toSet()
         knownSenders = loaded.getStringSet(KNOWN_SENDERS_KEY, null).orEmpty().toSet()
         _developerMode.value = loaded.getBoolean(DEVELOPER_MODE_KEY, false)
+        alwaysGroups = loaded.getStringSet(ALWAYS_GROUPS_KEY, null).orEmpty().toSet()
         groupMarks = loaded.getStringSet(GROUP_MARKS_KEY, null).orEmpty().mapNotNull { entry ->
             val (key, net) = entry.split('=').takeIf { it.size == 2 } ?: return@mapNotNull null
             net.toIntOrNull()?.let { key to it }
@@ -123,7 +129,13 @@ object TwinSettings {
     // A group is considered worth delivering through focus once the user has marked it
     // "This was important" at least 3 more times than "Not worth it" (net score >= 3).
     // This prevents a single accidental tap from opening the floodgates.
-    fun isGroupWorth(groupKey: String): Boolean = (groupMarks[groupKey] ?: 0) >= 3
+    fun isGroupWorth(groupKey: String): Boolean = groupKey in alwaysGroups || (groupMarks[groupKey] ?: 0) >= 3
+
+    @Synchronized
+    fun alwaysDeliverGroup(groupKey: String) {
+        alwaysGroups = alwaysGroups + groupKey
+        prefs?.edit()?.putStringSet(ALWAYS_GROUPS_KEY, alwaysGroups)?.apply()
+    }
 
     @Synchronized
     fun markGroup(groupKey: String, worth: Boolean) {
@@ -168,6 +180,7 @@ object TwinSettings {
         _mentionNames.value = emptySet()
         knownSenders = emptySet()
         groupMarks = emptyMap()
+        alwaysGroups = emptySet()
         prefs?.edit()?.clear()?.apply()
     }
 }

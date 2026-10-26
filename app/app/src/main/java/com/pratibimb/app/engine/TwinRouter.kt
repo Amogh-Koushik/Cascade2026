@@ -507,7 +507,10 @@ object TwinRouter {
             bankAlert = !features.groupChat && MessageSignals.isBankAlert(features.packageName, paymentPackages, rawTitle, text),
             bot = MessageSignals.isBot(family, rawTitle),
             streak = MessageSignals.isStreak(text),
-            mentionsYou = ContentRules.mentionsYou(text, TwinSettings.mentionNames.value),
+            mentionsYou = ContentRules.mentionsYou(
+                FeatureBuilder.messageText(sbn.notification),
+                ContentRules.mentionNames(TwinSettings.mentionNames.value, FeatureBuilder.selfNames(sbn.notification)),
+            ),
             groupWorth = groupKey?.let { TwinSettings.isGroupWorth(it) } ?: false,
             textBurst = if (instaOrSnapText) textBursts.record(features.senderHash ?: rawTitle, sbn.postTime) else 0,
             burstToDeliver = dmBurstToDeliver,
@@ -1231,10 +1234,19 @@ object TwinRouter {
         return engine.decide(features, context.copy(demoLearning = _demoLearning.value))
     }
 
-    // A rule, not just a label: from now on this sender (or, for items with no sender, this
-    // app) is always delivered by the never-hold overrides. The item itself is released now.
+    // A rule, not just a label: from now on this group, this sender or (for items with neither)
+    // this app is always delivered. A group item marks only that group; marking the app would let
+    // every group in it through. The item itself is released now.
     fun alwaysDeliverSender(context: Context, trayId: String) {
         val item = _heldTray.value.firstOrNull { it.id == trayId } ?: return
+        val group = item.groupKey
+        if (group != null) {
+            TwinSettings.alwaysDeliverGroup(group)
+            NotificationLog.add("TwinRouter", "Always deliver: group \"${item.title}\" in ${item.app}")
+            DigestNotifier.postReleasedNotification(context, item.app, item.title, item.text, item.contentIntent, item.packageName)
+            updateTray { tray -> tray.filterNot { it.id == trayId } }
+            return
+        }
         val sender = item.senderHash
         if (sender != null) {
             alwaysDeliverSenders = alwaysDeliverSenders + sender

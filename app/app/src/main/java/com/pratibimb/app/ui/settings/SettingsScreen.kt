@@ -63,6 +63,8 @@ fun SettingsScreen(
     onOpenDebug: () -> Unit,
     developerMode: Boolean,
     onToggleDeveloperMode: (Boolean) -> Unit,
+    mentionNames: Set<String>,
+    onSetMentionNames: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val scrollState = rememberScrollState()
@@ -219,6 +221,19 @@ fun SettingsScreen(
                 onTogglePauseCard = onTogglePauseCard,
             )
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Text(
+            text = "WHEN YOU'RE TAGGED",
+            style = labelMd(color = WarmObsidian.Primary),
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 0.08.sp,
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        MentionNamesCard(mentionNames = mentionNames, onSave = onSetMentionNames)
 
         Spacer(modifier = Modifier.height(24.dp))
 

@@ -235,6 +235,8 @@ fun PratibimbApp(
                                 onOpenDebug = { debugOpen = true },
                                 developerMode = developerMode,
                                 onToggleDeveloperMode = viewModel::setDeveloperMode,
+                                mentionNames = mentionNames,
+                                onSetMentionNames = viewModel::setMentionNames,
                             )
                         }
                     }

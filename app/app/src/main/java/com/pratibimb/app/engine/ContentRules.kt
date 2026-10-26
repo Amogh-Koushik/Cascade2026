@@ -116,9 +116,22 @@ object ContentRules {
         }.timeInMillis
 
     // A group message mentions you when it tags everyone, or tags one of the names you go by.
+    // WhatsApp wraps a tag in invisible direction marks and may put a "~" before a name that is
+    // not in your contacts, so both are ignored.
     fun mentionsYou(text: String, names: Collection<String>): Boolean {
-        val lower = text.lowercase(Locale.ROOT)
+        val lower = text.replace(INVISIBLE_MARKS, "").replace("@~", "@").lowercase(Locale.ROOT)
         if (listOf("@everyone", "@all", "@channel").any { it in lower }) return true
         return names.any { name -> name.isNotBlank() && "@${name.trim().lowercase(Locale.ROOT)}" in lower }
     }
+
+    // The names to look for: the ones the user entered plus the name the messaging app itself
+    // calls the user. "You" and "Me" are how apps label the user's own messages, not a tag.
+    fun mentionNames(entered: Collection<String>, fromApp: Collection<String?>): Set<String> =
+        (entered + fromApp.filterNotNull())
+            .map { it.trim() }
+            .filter { it.isNotEmpty() && it.lowercase(Locale.ROOT) !in SELF_LABELS }
+            .toSet()
+
+    private val INVISIBLE_MARKS = Regex("[\u200e\u200f\u2066-\u2069]")
+    private val SELF_LABELS = setOf("you", "me")
 }
