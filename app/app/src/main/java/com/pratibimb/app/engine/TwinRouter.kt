@@ -131,6 +131,10 @@ object TwinRouter {
     @Volatile
     private var pauseCardsAskedLess = false
 
+    // params features.pause_card_min_loss_min, or the demo build's lower bar.
+    @Volatile
+    private var pauseCardMinLossMin = PauseCardRules.MIN_EXPECTED_LOSS_MIN
+
     // A ping for a card-eligible item is tagged with this prefix instead of the bare key, so a
     // tap on it is not taken as opening the original: only "Open anyway" is.
     private const val PAUSE_CARD_TAG = "pausecard:"
@@ -306,8 +310,14 @@ object TwinRouter {
             holdCaps = caps
             contexts = topics
             paymentPackages = payments
-            val pauseCardParam = ((params["features"] as Map<String, Any?>?)?.get("pause_card") as Boolean?) ?: false
+            val featureFlags = params["features"] as Map<String, Any?>?
+            val pauseCardParam = (featureFlags?.get("pause_card") as Boolean?) ?: false
             TwinSettings.setPauseCardDefault(pauseCardParam || BuildMode.DEMO)
+            pauseCardMinLossMin = if (BuildMode.DEMO) {
+                BuildMode.DEMO_PAUSE_CARD_MIN_LOSS_MIN
+            } else {
+                (featureFlags?.get("pause_card_min_loss_min") as Number?)?.toDouble() ?: PauseCardRules.MIN_EXPECTED_LOSS_MIN
+            }
             outcomes.openWindowMillis = (openWindowMin * 60_000).toLong()
         } catch (e: IOException) {
             NotificationLog.add("TwinRouter", "Could not load ${persona.asset}: ${e.message}")
@@ -531,7 +541,12 @@ object TwinRouter {
             contentIntent = contentIntent,
             groupKey = groupKey,
             pauseCardEligible = TwinSettings.pauseCard.value &&
-                PauseCardRules.eligible(decision, ruled.rule, whatsAppOneToOne = family == AppFamily.WHATSAPP && oneToOne),
+                PauseCardRules.eligible(
+                    decision,
+                    ruled.rule,
+                    whatsAppOneToOne = family == AppFamily.WHATSAPP && oneToOne,
+                    minLossMin = pauseCardMinLossMin,
+                ),
         )
         _liveNotifications.value = (listOf(liveItem) + _liveNotifications.value).take(60)
 

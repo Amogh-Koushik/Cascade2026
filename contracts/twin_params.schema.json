@@ -176,7 +176,8 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "pause_card": {"type": "boolean"}
+        "pause_card": {"type": "boolean"},
+        "pause_card_min_loss_min": {"$ref": "#/$defs/positive"}
       }
     },
     "contexts": {
