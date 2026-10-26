@@ -15,6 +15,7 @@ object TwinSettings {
     private const val RESEARCH_KEY = "research_mode"
     private const val RULE_TEXT_ONLY_KEY = "rule_text_only_repeat"
     private const val GROUP_MARKS_KEY = "group_marks"
+    private const val PAUSE_CARD_KEY = "pause_card"
     private const val RULE_NEW_SENDER_KEY = "rule_new_sender_links"
     private const val RULE_FOCUS_GATE_KEY = "rule_focus_gate"
     private const val MENTION_NAMES_KEY = "mention_names"
@@ -49,6 +50,11 @@ object TwinSettings {
     // phone. Tracked even with the rule off, so switching it on does not make everyone new.
     @Volatile
     private var knownSenders: Set<String> = emptySet()
+
+    // The pause card on our alert pings. Until the user sets it, it follows the params flag, or
+    // is on in the demo build (see setPauseCardDefault).
+    private val _pauseCard = MutableStateFlow(false)
+    val pauseCard: StateFlow<Boolean> = _pauseCard.asStateFlow()
 
     // Per group (salted key): worth-it taps minus not-worth-it taps. Above zero, it gets through.
     @Volatile
@@ -92,6 +98,15 @@ object TwinSettings {
     }
 
     fun isKnownSender(senderHash: String): Boolean = senderHash in knownSenders
+
+    fun setPauseCardDefault(enabled: Boolean) {
+        _pauseCard.value = prefs?.takeIf { it.contains(PAUSE_CARD_KEY) }?.getBoolean(PAUSE_CARD_KEY, enabled) ?: enabled
+    }
+
+    fun setPauseCard(enabled: Boolean) {
+        _pauseCard.value = enabled
+        prefs?.edit()?.putBoolean(PAUSE_CARD_KEY, enabled)?.apply()
+    }
 
     fun isGroupWorth(groupKey: String): Boolean = (groupMarks[groupKey] ?: 0) > 0
 

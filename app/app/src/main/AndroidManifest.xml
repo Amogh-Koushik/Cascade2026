@@ -46,6 +46,13 @@
             </intent-filter>
         </service>
 
+        <activity
+            android:name=".ui.pausecard.PauseCardActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.Material.Dialog.NoActionBar" />
+
         <receiver
             android:name=".service.WorthFeedbackReceiver"
             android:exported="false" />

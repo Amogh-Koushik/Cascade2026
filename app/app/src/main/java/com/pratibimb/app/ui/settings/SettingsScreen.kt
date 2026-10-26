@@ -57,6 +57,8 @@ fun SettingsScreen(
     onToggleDemoLearning: (Boolean) -> Unit,
     // Returns how many simulated outcomes were applied.
     onRunLearningReplay: () -> Int,
+    pauseCard: Boolean,
+    onTogglePauseCard: (Boolean) -> Unit,
     onDeleteAllData: () -> Unit,
     onOpenDebug: () -> Unit,
     modifier: Modifier = Modifier,
@@ -195,6 +197,8 @@ fun SettingsScreen(
             demoLearning = demoLearning,
             onToggleDemoLearning = onToggleDemoLearning,
             onRunLearningReplay = onRunLearningReplay,
+            pauseCard = pauseCard,
+            onTogglePauseCard = onTogglePauseCard,
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -309,6 +313,8 @@ private fun DemoLearningSection(
     demoLearning: Boolean,
     onToggleDemoLearning: (Boolean) -> Unit,
     onRunLearningReplay: () -> Int,
+    pauseCard: Boolean,
+    onTogglePauseCard: (Boolean) -> Unit,
 ) {
     var replayResult by remember { mutableStateOf<String?>(null) }
 
@@ -349,6 +355,38 @@ private fun DemoLearningSection(
                 Switch(
                     checked = demoLearning,
                     onCheckedChange = onToggleDemoLearning,
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = WarmObsidian.Primary,
+                        checkedTrackColor = WarmObsidian.PrimaryContainer,
+                        uncheckedThumbColor = WarmObsidian.Outline,
+                        uncheckedTrackColor = WarmObsidian.SurfaceContainerHigh,
+                    ),
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Pause card (demo)",
+                        style = bodyMd(color = WarmObsidian.OnSurface),
+                        fontWeight = FontWeight.Medium,
+                    )
+                    Text(
+                        text = "Tapping our alert shows what opening it now would cost first. On in the demo build.",
+                        style = labelMd(color = WarmObsidian.Outline),
+                        fontSize = 12.sp,
+                    )
+                }
+                Spacer(modifier = Modifier.width(12.dp))
+                Switch(
+                    checked = pauseCard,
+                    onCheckedChange = onTogglePauseCard,
                     colors = SwitchDefaults.colors(
                         checkedThumbColor = WarmObsidian.Primary,
                         checkedTrackColor = WarmObsidian.PrimaryContainer,

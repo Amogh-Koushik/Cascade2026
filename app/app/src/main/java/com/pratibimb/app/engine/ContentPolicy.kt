@@ -114,7 +114,7 @@ object ContentPolicy {
                 val reason = "Delivered: $who ×${signals.textBurst} in 2 minutes"
                 return RuledDecision(
                     decision.copy(action = Action.DELIVER, reason = reason, explanation = "$reason."),
-                    "5 texts in 2 minutes",
+                    PauseCardRules.BURST_RULE,
                     releaseSenderBurst = true,
                 )
             }
@@ -129,10 +129,11 @@ object ContentPolicy {
 
     private fun unchanged(decision: Decision) = RuledDecision(decision, null)
 
-    // A delivery decided here; an engine decision that already delivered keeps its own reason.
+    // A delivery decided here. An engine decision that already delivered keeps its own reason,
+    // but the rule is still named, so the pause card knows the model was not what let it through.
     private fun deliver(decision: Decision, reason: String, rule: String): RuledDecision =
         if (decision.action == Action.DELIVER) {
-            RuledDecision(decision, null)
+            RuledDecision(decision, rule)
         } else {
             RuledDecision(decision.copy(action = Action.DELIVER, reason = reason, explanation = "$reason."), rule)
         }

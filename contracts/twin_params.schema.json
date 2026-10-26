@@ -172,6 +172,13 @@
         "otp_source_packages": {"$ref": "#/$defs/string_list"}
       }
     },
+    "features": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "pause_card": {"type": "boolean"}
+      }
+    },
     "contexts": {
       "type": "array",
       "items": {

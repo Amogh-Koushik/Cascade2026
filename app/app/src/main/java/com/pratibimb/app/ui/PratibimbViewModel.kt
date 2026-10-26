@@ -59,6 +59,8 @@ data class LiveNotificationItem(
     val contentIntent: PendingIntent? = null,
     // Suggest mode: what the user chose, once they chose.
     val suggestionChoice: Action? = null,
+    // Tapping our ping for it opens the pause card (see PauseCardRules).
+    val pauseCardEligible: Boolean = false,
     // For a group message: the group's salted key, so a worth tap marks the group.
     val groupKey: String? = null,
 )
@@ -246,6 +248,12 @@ class PratibimbViewModel(application: Application) : AndroidViewModel(applicatio
 
     val researchMode: StateFlow<Boolean> = TwinSettings.researchMode
 
+    val pauseCard: StateFlow<Boolean> = TwinSettings.pauseCard
+
+    fun setPauseCard(enabled: Boolean) {
+        TwinSettings.setPauseCard(enabled)
+    }
+
     fun setResearchMode(enabled: Boolean) {
         TwinSettings.setResearchMode(enabled)
     }
@@ -382,6 +390,8 @@ class PratibimbViewModel(application: Application) : AndroidViewModel(applicatio
             focusDnd.describe(),
             AlertChannel.describe(getApplication<Application>()),
             "Engine ${TwinRouter.engineStatus}",
+            "Pause cards this session: ${TwinRouter.pauseCardsThisSession.value}" +
+                if (TwinSettings.pauseCard.value) "" else " (pause card off)",
             "Listener " + if (TwinRouter.isListenerConnected.value) "connected" else "not connected",
         )
     }
@@ -400,6 +410,7 @@ class PratibimbViewModel(application: Application) : AndroidViewModel(applicatio
     fun startFocus() {
         if (TwinSettings.paused.value) return
         TwinRouter.dismissLastDigest()
+        TwinRouter.resetPauseCards()
         _isFocusActive.value = true
         _breakSecondsLeft.value = 0
         _remainingSeconds.value = _selectedDurationMinutes.value * 60

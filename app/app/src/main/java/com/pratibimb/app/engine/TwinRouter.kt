@@ -1,15 +1,19 @@
 package com.pratibimb.app.engine
 
+import android.app.ActivityOptions
 import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
+import android.os.Build
 import android.content.SharedPreferences
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import com.pratibimb.app.data.FeatureBuilder
 import com.pratibimb.app.data.FeatureRules
 import com.pratibimb.app.data.NotificationInspector
+import com.pratibimb.app.data.PauseCardLog
 import com.pratibimb.app.data.ReportStore
 import com.pratibimb.app.data.NotificationLog
 import com.pratibimb.app.data.TrayStore
@@ -22,6 +26,7 @@ import com.pratibimb.app.dnd.WorthPrompts
 import com.pratibimb.app.service.PratibimbListener
 import com.pratibimb.app.ui.HeldTrayItem
 import com.pratibimb.app.ui.LiveNotificationItem
+import com.pratibimb.app.ui.pausecard.PauseCardActivity
 import com.pratibimb.twin.Action
 import com.pratibimb.twin.Autonomy
 import com.pratibimb.twin.Category
@@ -45,6 +50,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.min
+import kotlin.math.roundToInt
 import kotlin.random.Random
 
 /**
@@ -114,6 +120,20 @@ object TwinRouter {
 
     // Instagram and Snapchat texts per sender in the last 2 minutes (5 get through).
     private val textBursts = TextBurstCounter()
+
+    // Pause cards in the current focus session (see PauseCardRules).
+    private val _pauseCardsThisSession = MutableStateFlow(0)
+    val pauseCardsThisSession: StateFlow<Int> = _pauseCardsThisSession.asStateFlow()
+
+    @Volatile
+    private var lastPauseCardAtMillis = 0L
+
+    @Volatile
+    private var pauseCardsAskedLess = false
+
+    // A ping for a card-eligible item is tagged with this prefix instead of the bare key, so a
+    // tap on it is not taken as opening the original: only "Open anyway" is.
+    private const val PAUSE_CARD_TAG = "pausecard:"
 
     @Volatile
     var activeListener: PratibimbListener? = null
@@ -286,6 +306,8 @@ object TwinRouter {
             holdCaps = caps
             contexts = topics
             paymentPackages = payments
+            val pauseCardParam = ((params["features"] as Map<String, Any?>?)?.get("pause_card") as Boolean?) ?: false
+            TwinSettings.setPauseCardDefault(pauseCardParam || BuildMode.DEMO)
             outcomes.openWindowMillis = (openWindowMin * 60_000).toLong()
         } catch (e: IOException) {
             NotificationLog.add("TwinRouter", "Could not load ${persona.asset}: ${e.message}")
@@ -508,6 +530,8 @@ object TwinRouter {
             context = context,
             contentIntent = contentIntent,
             groupKey = groupKey,
+            pauseCardEligible = TwinSettings.pauseCard.value &&
+                PauseCardRules.eligible(decision, ruled.rule, whatsAppOneToOne = family == AppFamily.WHATSAPP && oneToOne),
         )
         _liveNotifications.value = (listOf(liveItem) + _liveNotifications.value).take(60)
 
@@ -624,8 +648,8 @@ object TwinRouter {
                 context = listener,
                 title = "[${item.app}] ${item.title}",
                 text = item.text,
-                contentIntent = contentIntent,
-                tag = key,
+                contentIntent = if (item.pauseCardEligible) PauseCardActivity.pendingIntent(listener, item.id) else contentIntent,
+                tag = if (item.pauseCardEligible) PAUSE_CARD_TAG + key else key,
                 prompt = prompt,
             )
             NotificationLog.add("alert", "Ping for ${item.app}: ${ping.label}" + if (prompt != null) ", asks worth it" else "")
@@ -1026,8 +1050,16 @@ object TwinRouter {
 
     // Suggest mode: the user takes the twin's advice to hold something already delivered.
     fun holdSuggested(liveItemId: String) {
-        val item = _liveNotifications.value.firstOrNull { it.id == liveItemId } ?: return
-        val key = item.key ?: return
+        if (holdLiveItem(liveItemId)) {
+            markSuggestion(liveItemId, Action.HOLD)
+            NotificationLog.add("TwinRouter", "Suggestion taken: held \"$liveItemId\"")
+        }
+    }
+
+    // Takes a delivered notification back: cancels it in the shade and puts it in the tray.
+    private fun holdLiveItem(liveItemId: String): Boolean {
+        val item = _liveNotifications.value.firstOrNull { it.id == liveItemId } ?: return false
+        val key = item.key ?: return false
         activeListener?.let { cancelQuietly(it, key) }
         seenByKey[key]?.let { seenByKey[key] = it.copy(held = true) }
         outcomes.forget(key)
@@ -1049,8 +1081,106 @@ object TwinRouter {
         updateTray { listOf(trayItem) + it }
         _heldTodayCount.value += 1
         _netMinutesProtected.value += item.decision.card.netMinutesProtected
-        markSuggestion(liveItemId, Action.HOLD)
-        NotificationLog.add("TwinRouter", "Suggestion taken: held \"${item.title}\"")
+        return true
+    }
+
+    // ── Pause card ─────────────────────────────────────────────────────────
+    fun resetPauseCards() {
+        _pauseCardsThisSession.value = 0
+        lastPauseCardAtMillis = 0L
+        pauseCardsAskedLess = false
+    }
+
+    // The card for a tapped ping, or null when it should not show now; every number comes from
+    // the item's Future Card and the running session.
+    fun pauseCardFor(liveItemId: String): PauseCardView? {
+        val item = _liveNotifications.value.firstOrNull { it.id == liveItemId } ?: return null
+        val now = System.currentTimeMillis()
+        if (!item.pauseCardEligible || sessionEndMillis <= now) return null
+        if (!PauseCardRules.canShow(now, _pauseCardsThisSession.value, lastPauseCardAtMillis, pauseCardsAskedLess)) return null
+        val card = item.decision.card
+        return PauseCardView(
+            liveItemId = item.id,
+            app = item.app,
+            title = item.title,
+            packageName = item.packageName,
+            senderHash = item.senderHash,
+            lossLowMin = card.lP10.roundToInt(),
+            lossHighMin = card.lP90.roundToInt().coerceAtLeast(card.lP10.roundToInt()),
+            waitMin = card.minutesUntilRelease.roundToInt().coerceAtLeast(1),
+            focusLeftMin = ((sessionEndMillis - now) / 60_000).toInt(),
+        )
+    }
+
+    fun pauseCardShown(liveItemId: String) {
+        _pauseCardsThisSession.value += 1
+        lastPauseCardAtMillis = System.currentTimeMillis()
+        logPauseCard("pause_card_shown", liveItemId)
+    }
+
+    fun pauseCardStayFocused(liveItemId: String) {
+        logPauseCard("stay_focused", liveItemId)
+        holdLiveItem(liveItemId)
+    }
+
+    // Opening anyway is pull, not worth: it is timed as an open, never taught as "worth it".
+    fun pauseCardOpenAnyway(context: Context, liveItemId: String) {
+        logPauseCard("open_anyway", liveItemId)
+        _liveNotifications.value.firstOrNull { it.id == liveItemId }?.key?.let { key ->
+            outcomes.opened(key, System.currentTimeMillis())?.let { startOpenTimer(it) }
+        }
+        openOriginal(context, liveItemId)
+    }
+
+    fun pauseCardAutoDismissed(liveItemId: String) {
+        logPauseCard("auto_dismissed", liveItemId)
+    }
+
+    fun pauseCardAskLess(liveItemId: String) {
+        pauseCardsAskedLess = true
+        logPauseCard("ask_me_less", liveItemId)
+    }
+
+    private fun logPauseCard(event: String, liveItemId: String) {
+        val app = appContext ?: return
+        val item = _liveNotifications.value.firstOrNull { it.id == liveItemId }
+        PauseCardLog.record(
+            app,
+            event,
+            mapOf(
+                "package" to item?.packageName,
+                "category" to item?.features?.category?.key,
+                "rule" to item?.decision?.rule?.name,
+                "l_p50" to item?.decision?.card?.lP50,
+                "minutes_until_release" to item?.decision?.card?.minutesUntilRelease,
+                "card_this_session" to _pauseCardsThisSession.value,
+            ),
+        )
+    }
+
+    // Fires the original notification's tap action, or opens its app if that is gone.
+    fun openOriginal(context: Context, liveItemId: String) {
+        val item = _liveNotifications.value.firstOrNull { it.id == liveItemId } ?: return
+        val intent = item.contentIntent
+        if (intent != null) {
+            try {
+                // From Android 14 an app must opt in to lend its foreground status to a PendingIntent.
+                val options = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                    ActivityOptions.makeBasic()
+                        .setPendingIntentBackgroundActivityStartMode(ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
+                        .toBundle()
+                } else {
+                    null
+                }
+                intent.send(context, 0, null, null, null, null, options)
+                return
+            } catch (e: PendingIntent.CanceledException) {
+                NotificationLog.add("TwinRouter", "Original tap action gone, opening ${item.app}")
+            }
+        }
+        context.packageManager.getLaunchIntentForPackage(item.packageName)?.let {
+            context.startActivity(it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        }
     }
 
     // Suggest mode: the user keeps it delivered; it already is, so this only records the choice.
@@ -1260,6 +1390,19 @@ object TwinRouter {
         }
     }
 }
+
+// The pause card's numbers for one tapped ping.
+data class PauseCardView(
+    val liveItemId: String,
+    val app: String,
+    val title: String,
+    val packageName: String,
+    val senderHash: String?,
+    val lossLowMin: Int,
+    val lossHighMin: Int,
+    val waitMin: Int,
+    val focusLeftMin: Int,
+)
 
 // A batch released as one digest notification, kept so it can be shown and briefly undone.
 data class ReleasedDigest(

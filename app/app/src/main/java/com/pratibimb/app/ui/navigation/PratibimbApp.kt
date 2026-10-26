@@ -75,6 +75,7 @@ fun PratibimbApp(
     var inspectorOpen by remember { mutableStateOf(false) }
     var debugOpen by remember { mutableStateOf(false) }
     val report by viewModel.report.collectAsStateWithLifecycle()
+    val pauseCard by viewModel.pauseCard.collectAsStateWithLifecycle()
 
     NavHost(
         navController = navController,
@@ -224,6 +225,8 @@ fun PratibimbApp(
                                 demoLearning = demoLearning,
                                 onToggleDemoLearning = viewModel::setDemoLearning,
                                 onRunLearningReplay = viewModel::runLearningReplay,
+                                pauseCard = pauseCard,
+                                onTogglePauseCard = viewModel::setPauseCard,
                                 onDeleteAllData = viewModel::resetAllCounts,
                                 onOpenDebug = { debugOpen = true },
                             )

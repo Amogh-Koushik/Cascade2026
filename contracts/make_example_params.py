@@ -132,6 +132,8 @@ def build_example_params() -> dict[str, Any]:
                 "net.one97.paytm",
             ],
         },
+        # Optional app features; the demo build switches the pause card on regardless.
+        "features": {"pause_card": False},
         "contexts": [dict(context) for context in CONTEXTS],
         "lexicons": {name: list(words) for name, words in LEXICONS.items()},
         "draw_bank": load_draw_bank(),

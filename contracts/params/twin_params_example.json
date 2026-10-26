@@ -168,6 +168,9 @@
    "net.one97.paytm"
   ]
  },
+ "features": {
+  "pause_card": false
+ },
  "contexts": [
   {
    "id": "placements",
