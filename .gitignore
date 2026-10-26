@@ -35,6 +35,9 @@ Thumbs.db
 # Pitch and presentation notes stay on each laptop
 pitch/
 
+# Earlier working copy of the simulator and evaluation (the live ones are sim/, fit/, eval/)
+Experimental/
+
 # Half-finished agent runs (resumed on the next run)
 *.progress.json
 *.progress.json.tmp
