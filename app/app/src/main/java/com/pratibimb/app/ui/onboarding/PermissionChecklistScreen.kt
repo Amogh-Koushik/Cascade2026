@@ -159,7 +159,7 @@ fun PermissionChecklistScreen(
                     .fillMaxWidth()
                     .height(6.dp)
                     .clip(ShapePill),
-                color = WarmObsidian.PrimaryContainer,
+                color = WarmObsidian.Primary,
                 trackColor = WarmObsidian.SurfaceContainerHigh,
             )
 
@@ -199,10 +199,10 @@ fun PermissionChecklistScreen(
                     .height(56.dp),
                 shape = ShapePill,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = WarmObsidian.PrimaryContainer,
+                    containerColor = WarmObsidian.Primary,
                     contentColor = WarmObsidian.OnPrimary,
-                    disabledContainerColor = WarmObsidian.PrimaryContainer.copy(alpha = 0.38f),
-                    disabledContentColor = WarmObsidian.OnPrimary.copy(alpha = 0.38f),
+                    disabledContainerColor = WarmObsidian.OnSurface.copy(alpha = 0.12f),
+                    disabledContentColor = WarmObsidian.OnSurface.copy(alpha = 0.38f),
                 ),
                 enabled = canProceed,
             ) {
@@ -245,7 +245,7 @@ private fun PermissionRow(
                 .size(42.dp)
                 .clip(CircleShape)
                 .background(
-                    if (item.isGranted) WarmObsidian.PrimaryContainer.copy(alpha = 0.15f)
+                    if (item.isGranted) WarmObsidian.Primary.copy(alpha = 0.15f)
                     else WarmObsidian.SurfaceContainerHigh
                 ),
             contentAlignment = Alignment.Center,
@@ -253,7 +253,7 @@ private fun PermissionRow(
             Icon(
                 imageVector = if (item.isGranted) Icons.Default.Check else item.icon,
                 contentDescription = null,
-                tint = if (item.isGranted) WarmObsidian.PrimaryContainer else WarmObsidian.Outline,
+                tint = if (item.isGranted) WarmObsidian.Primary else WarmObsidian.Outline,
                 modifier = Modifier.size(22.dp),
             )
         }

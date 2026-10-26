@@ -473,7 +473,7 @@ private fun InterruptionsCard(
                         modifier = Modifier
                             .weight(deliveredCount.toFloat() / total)
                             .fillMaxHeight()
-                            .background(WarmObsidian.PrimaryContainer),
+                            .background(WarmObsidian.Primary),
                     )
                 }
 

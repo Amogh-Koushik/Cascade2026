@@ -134,6 +134,19 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        Text(
+            text = "ACCENT COLOUR",
+            style = labelMd(color = WarmObsidian.Primary),
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 0.08.sp,
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        AccentPicker()
+
+        Spacer(modifier = Modifier.height(24.dp))
+
         // Section 1: Persona Switcher
         Text(
             text = "YOUR PROFILE",
@@ -179,7 +192,7 @@ fun SettingsScreen(
                                 modifier = Modifier
                                     .size(24.dp)
                                     .clip(CircleShape)
-                                    .background(WarmObsidian.PrimaryContainer),
+                                    .background(WarmObsidian.Primary),
                                 contentAlignment = Alignment.Center,
                             ) {
                                 Icon(
@@ -337,8 +350,8 @@ fun SettingsScreen(
                 checked = developerMode,
                 onCheckedChange = onToggleDeveloperMode,
                 colors = SwitchDefaults.colors(
-                    checkedThumbColor = WarmObsidian.Primary,
-                    checkedTrackColor = WarmObsidian.PrimaryContainer,
+                    checkedThumbColor = WarmObsidian.OnPrimary,
+                    checkedTrackColor = WarmObsidian.Primary,
                     uncheckedThumbColor = WarmObsidian.Outline,
                     uncheckedTrackColor = WarmObsidian.SurfaceContainerHigh,
                 ),
@@ -397,8 +410,8 @@ private fun DemoLearningSection(
                     checked = demoLearning,
                     onCheckedChange = onToggleDemoLearning,
                     colors = SwitchDefaults.colors(
-                        checkedThumbColor = WarmObsidian.Primary,
-                        checkedTrackColor = WarmObsidian.PrimaryContainer,
+                        checkedThumbColor = WarmObsidian.OnPrimary,
+                        checkedTrackColor = WarmObsidian.Primary,
                         uncheckedThumbColor = WarmObsidian.Outline,
                         uncheckedTrackColor = WarmObsidian.SurfaceContainerHigh,
                     ),
@@ -429,8 +442,8 @@ private fun DemoLearningSection(
                     checked = pauseCard,
                     onCheckedChange = onTogglePauseCard,
                     colors = SwitchDefaults.colors(
-                        checkedThumbColor = WarmObsidian.Primary,
-                        checkedTrackColor = WarmObsidian.PrimaryContainer,
+                        checkedThumbColor = WarmObsidian.OnPrimary,
+                        checkedTrackColor = WarmObsidian.Primary,
                         uncheckedThumbColor = WarmObsidian.Outline,
                         uncheckedTrackColor = WarmObsidian.SurfaceContainerHigh,
                     ),

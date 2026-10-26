@@ -58,7 +58,7 @@ fun AppBottomNav(
                                 Box(
                                     modifier = Modifier
                                         .clip(CircleShape)
-                                        .background(WarmObsidian.PrimaryContainer)
+                                        .background(WarmObsidian.Primary)
                                         .padding(horizontal = 5.dp, vertical = 1.dp),
                                     contentAlignment = Alignment.Center,
                                 ) {
@@ -85,9 +85,9 @@ fun AppBottomNav(
                     )
                 },
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = WarmObsidian.OnPrimary,
+                    selectedIconColor = WarmObsidian.OnSecondaryContainer,
                     selectedTextColor = WarmObsidian.OnSurface,
-                    indicatorColor = WarmObsidian.PrimaryContainer,
+                    indicatorColor = WarmObsidian.SecondaryContainer,
                     unselectedIconColor = WarmObsidian.Outline,
                     unselectedTextColor = WarmObsidian.OnSurfaceVariant,
                 ),

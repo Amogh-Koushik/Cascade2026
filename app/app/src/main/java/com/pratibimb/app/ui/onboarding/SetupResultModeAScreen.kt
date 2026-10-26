@@ -64,7 +64,7 @@ fun SetupResultModeAScreen(
                 Icon(
                     imageVector = Icons.Default.Check,
                     contentDescription = null,
-                    tint = WarmObsidian.PrimaryContainer,
+                    tint = WarmObsidian.Primary,
                     modifier = Modifier.size(40.dp),
                 )
             }
@@ -105,7 +105,7 @@ fun SetupResultModeAScreen(
                     .height(56.dp),
                 shape = ShapePill,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = WarmObsidian.PrimaryContainer,
+                    containerColor = WarmObsidian.Primary,
                     contentColor = WarmObsidian.OnPrimary,
                 ),
             ) {

@@ -119,7 +119,7 @@ fun SetupResultModeBScreen(
                     .height(56.dp),
                 shape = ShapePill,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = WarmObsidian.PrimaryContainer,
+                    containerColor = WarmObsidian.Primary,
                     contentColor = WarmObsidian.OnPrimary,
                 ),
             ) {

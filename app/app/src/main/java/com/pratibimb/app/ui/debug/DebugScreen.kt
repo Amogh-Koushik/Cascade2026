@@ -233,7 +233,7 @@ fun DebugScreen(
                             Text(
                                 text = if (isHold) "HOLD" else "DELIVER",
                                 style = labelMd(
-                                    color = if (isHold) WarmObsidian.OnPrimary else WarmObsidian.StatusMint
+                                    color = if (isHold) WarmObsidian.OnPrimaryContainer else WarmObsidian.StatusMint
                                 ),
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 11.sp,
@@ -284,8 +284,8 @@ fun DebugScreen(
                         checked = isModeA,
                         onCheckedChange = onToggleModeA,
                         colors = SwitchDefaults.colors(
-                            checkedThumbColor = WarmObsidian.Primary,
-                            checkedTrackColor = WarmObsidian.PrimaryContainer,
+                            checkedThumbColor = WarmObsidian.OnPrimary,
+                            checkedTrackColor = WarmObsidian.Primary,
                             uncheckedThumbColor = WarmObsidian.Outline,
                             uncheckedTrackColor = WarmObsidian.SurfaceContainerHigh,
                         ),
@@ -320,7 +320,7 @@ fun DebugScreen(
                                 modifier = Modifier
                                     .weight(1f)
                                     .clip(ShapePill)
-                                    .background(if (isSelected) WarmObsidian.PrimaryContainer else Color.Transparent)
+                                    .background(if (isSelected) WarmObsidian.SecondaryContainer else Color.Transparent)
                                     .clickable { onSetPhoneState(state) }
                                     .padding(vertical = 8.dp),
                                 contentAlignment = Alignment.Center,
@@ -328,7 +328,7 @@ fun DebugScreen(
                                 Text(
                                     text = label,
                                     style = labelMd(
-                                        color = if (isSelected) WarmObsidian.OnPrimary else WarmObsidian.OnSurfaceVariant
+                                        color = if (isSelected) WarmObsidian.OnSecondaryContainer else WarmObsidian.OnSurfaceVariant
                                     ),
                                     fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
                                 )
@@ -365,7 +365,7 @@ fun DebugScreen(
                                 modifier = Modifier
                                     .weight(1f)
                                     .clip(ShapePill)
-                                    .background(if (isSelected) WarmObsidian.PrimaryContainer else Color.Transparent)
+                                    .background(if (isSelected) WarmObsidian.SecondaryContainer else Color.Transparent)
                                     .clickable { onSetAutonomy(a) }
                                     .padding(vertical = 8.dp),
                                 contentAlignment = Alignment.Center,
@@ -373,7 +373,7 @@ fun DebugScreen(
                                 Text(
                                     text = label,
                                     style = labelMd(
-                                        color = if (isSelected) WarmObsidian.OnPrimary else WarmObsidian.OnSurfaceVariant
+                                        color = if (isSelected) WarmObsidian.OnSecondaryContainer else WarmObsidian.OnSurfaceVariant
                                     ),
                                     fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
                                 )

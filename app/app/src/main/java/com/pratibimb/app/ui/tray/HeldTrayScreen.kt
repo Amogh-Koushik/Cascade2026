@@ -78,7 +78,7 @@ fun HeldTrayScreen(
                     Box(
                         modifier = Modifier
                             .clip(ShapePill)
-                            .background(WarmObsidian.PrimaryContainer)
+                            .background(WarmObsidian.Primary)
                             .padding(horizontal = 10.dp, vertical = 2.dp)
                     ) {
                         Text(
@@ -280,7 +280,7 @@ fun HeldItemCard(
                         .height(38.dp),
                     shape = ShapePill,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = WarmObsidian.PrimaryContainer,
+                        containerColor = WarmObsidian.Primary,
                         contentColor = WarmObsidian.OnPrimary,
                     ),
                     contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 4.dp),

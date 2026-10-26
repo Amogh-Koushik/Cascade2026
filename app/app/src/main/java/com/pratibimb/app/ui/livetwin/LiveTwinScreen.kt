@@ -202,7 +202,7 @@ fun NotificationDecisionCard(
                         Text(
                             text = if (isHold) "Held for later" else "Delivered",
                             style = labelMd(
-                                color = if (isHold) WarmObsidian.OnPrimary else WarmObsidian.StatusMint
+                                color = if (isHold) WarmObsidian.OnPrimaryContainer else WarmObsidian.StatusMint
                             ),
                             fontWeight = FontWeight.Bold,
                         )

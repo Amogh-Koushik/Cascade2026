@@ -153,7 +153,7 @@ private fun PauseCard(
             onClick = onStayFocused,
             modifier = Modifier.fillMaxWidth().height(46.dp),
             shape = ShapePill,
-            colors = ButtonDefaults.buttonColors(containerColor = WarmObsidian.PrimaryContainer, contentColor = WarmObsidian.OnPrimary),
+            colors = ButtonDefaults.buttonColors(containerColor = WarmObsidian.Primary, contentColor = WarmObsidian.OnPrimary),
         ) {
             Text(text = "Stay focused", fontWeight = FontWeight.SemiBold)
         }

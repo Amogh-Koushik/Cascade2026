@@ -1,76 +1,61 @@
 package com.pratibimb.app.ui.theme
 
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-// ── Warm Obsidian colour palette ────────────────────────────────────────────
+// The colour tokens every screen uses. They read the active palette (AppPalette), which
+// follows the accent picked in Settings; Compose redraws whatever read a token when it changes.
+// The name is the original palette's, kept so the screens did not have to change.
 object WarmObsidian {
-    val Background       = Color(0xFF1E1002)
-    val Surface          = Color(0xFF1E1002)
-    val SurfaceContainer = Color(0xFF2C1C0A)
-    val SurfaceContainerHigh = Color(0xFF382714)
-    val SurfaceContainerHighest = Color(0xFF43311D)
-    val SurfaceDark      = Color(0xFF4A3B32)
+    var palette: AppPalette by mutableStateOf(AppPalette.Original)
+        internal set
 
-    val Primary          = Color(0xFFFFB781)   // #ffb781 on-primary in M3 terms
-    val PrimaryContainer = Color(0xFFD98C4E)   // terracotta — used as CTA
-    val OnPrimary        = Color(0xFF4E2600)
-    val OnPrimaryContainer = Color(0xFF552A00)
+    val Background: Color get() = palette.surface
+    val Surface: Color get() = palette.surface
+    val SurfaceContainer: Color get() = palette.surfaceContainer
+    val SurfaceContainerHigh: Color get() = palette.surfaceContainerHigh
+    val SurfaceContainerHighest: Color get() = palette.surfaceContainerHighest
 
-    val Secondary        = Color(0xFFEEC154)   // mustard
-    val SecondaryContainer = Color(0xFFB38B22)
-    val OnSecondary      = Color(0xFF3F2E00)
+    val Primary: Color get() = palette.primary
+    val OnPrimary: Color get() = palette.onPrimary
+    val PrimaryContainer: Color get() = palette.primaryContainer
+    val OnPrimaryContainer: Color get() = palette.onPrimaryContainer
 
-    val Tertiary         = Color(0xFFFFB59A)   // accent coral
-    val TertiaryContainer = Color(0xFFD98A6C)
-    val OnTertiary       = Color(0xFF55200A)
+    val Secondary: Color get() = palette.secondary
+    val OnSecondary: Color get() = palette.onSecondary
+    val SecondaryContainer: Color get() = palette.secondaryContainer
+    val OnSecondaryContainer: Color get() = palette.onSecondaryContainer
 
-    val OnSurface        = Color(0xFFFCDDC0)   // cream parchment
-    val OnSurfaceVariant = Color(0xFFD8C2B5)
-    val Outline          = Color(0xFFA08D80)
-    val OutlineVariant   = Color(0xFF534439)
+    val Tertiary: Color get() = palette.tertiary
+    val OnTertiary: Color get() = palette.onTertiary
+    val TertiaryContainer: Color get() = palette.tertiaryContainer
 
-    val Error            = Color(0xFFFFB4AB)
-    val OnError          = Color(0xFF690005)
-    val ErrorContainer   = Color(0xFF93000A)
+    val OnSurface: Color get() = palette.onSurface
+    val OnSurfaceVariant: Color get() = palette.onSurfaceVariant
+    val Outline: Color get() = palette.outline
+    val OutlineVariant: Color get() = palette.outlineVariant
 
-    // Status
-    val StatusMint       = Color(0xFF86EFAC)
-    val StatusLavender   = Color(0xFFC4B5FD)
-    val StatusCoral      = Color(0xFFC97D60)
-    val StatusError      = Color(0xFFB83232)
+    val Error: Color get() = palette.error
+    val OnError: Color get() = palette.onError
+    val ErrorContainer: Color get() = palette.errorContainer
+
+    // Status colours mean the same thing under every accent, so they stay fixed.
+    val StatusMint = Color(0xFF86EFAC)
+    val StatusLavender = Color(0xFFC4B5FD)
+    val StatusCoral = Color(0xFFC97D60)
+    val StatusError = Color(0xFFB83232)
 }
-
-private val DarkColorScheme = darkColorScheme(
-    primary          = WarmObsidian.Primary,
-    onPrimary        = WarmObsidian.OnPrimary,
-    primaryContainer = WarmObsidian.PrimaryContainer,
-    onPrimaryContainer = WarmObsidian.OnPrimaryContainer,
-    secondary        = WarmObsidian.Secondary,
-    onSecondary      = WarmObsidian.OnSecondary,
-    secondaryContainer = WarmObsidian.SecondaryContainer,
-    tertiary         = WarmObsidian.Tertiary,
-    onTertiary       = WarmObsidian.OnTertiary,
-    tertiaryContainer = WarmObsidian.TertiaryContainer,
-    background       = WarmObsidian.Background,
-    onBackground     = WarmObsidian.OnSurface,
-    surface          = WarmObsidian.Surface,
-    onSurface        = WarmObsidian.OnSurface,
-    surfaceVariant   = WarmObsidian.SurfaceContainerHighest,
-    onSurfaceVariant = WarmObsidian.OnSurfaceVariant,
-    outline          = WarmObsidian.Outline,
-    outlineVariant   = WarmObsidian.OutlineVariant,
-    error            = WarmObsidian.Error,
-    onError          = WarmObsidian.OnError,
-    errorContainer   = WarmObsidian.ErrorContainer,
-)
 
 // Nunito Sans is a Google Font; we load it at runtime via downloadable fonts.
 // For now we keep the system default so the app builds without a bundled .ttf.
@@ -79,8 +64,10 @@ val NunitoSans = FontFamily.Default   // TODO: swap with bundled Nunito Sans
 
 @Composable
 fun PratibimbTheme(content: @Composable () -> Unit) {
+    val context = LocalContext.current
+    remember { AccentSettings.init(context) }
     MaterialTheme(
-        colorScheme = DarkColorScheme,
+        colorScheme = WarmObsidian.palette.toColorScheme(),
         content = content,
     )
 }

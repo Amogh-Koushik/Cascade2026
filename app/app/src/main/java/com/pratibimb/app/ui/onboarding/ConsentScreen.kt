@@ -144,7 +144,7 @@ fun ConsentScreen(
                     checked = agreed,
                     onCheckedChange = { agreed = it },
                     colors = CheckboxDefaults.colors(
-                        checkedColor = WarmObsidian.PrimaryContainer,
+                        checkedColor = WarmObsidian.Primary,
                         uncheckedColor = WarmObsidian.Outline,
                         checkmarkColor = WarmObsidian.OnPrimary,
                     ),
@@ -167,7 +167,7 @@ fun ConsentScreen(
                     .height(56.dp),
                 shape = ShapePill,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = WarmObsidian.PrimaryContainer,
+                    containerColor = WarmObsidian.Primary,
                     contentColor = WarmObsidian.OnPrimary,
                     disabledContainerColor = WarmObsidian.SurfaceContainerHigh,
                     disabledContentColor = WarmObsidian.Outline,

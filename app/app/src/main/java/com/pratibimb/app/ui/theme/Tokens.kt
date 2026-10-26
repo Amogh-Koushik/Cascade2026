@@ -65,13 +65,13 @@ val Gutter   = 12.dp
 // ── Card border modifier ──────────────────────────────────────────────────
 fun Modifier.cardBorder() = this.border(
     width = 1.dp,
-    color = Color(0x408C745C),   // taupe at ~25% alpha
+    color = WarmObsidian.Outline.copy(alpha = 0.25f),
     shape = ShapeCard,
 )
 
 fun Modifier.cardSurface() = this
     .clip(ShapeCard)
-    .background(Color(0xFF2C1C0A))
+    .background(WarmObsidian.SurfaceContainer)
     .cardBorder()
 
 // ── Status pill ───────────────────────────────────────────────────────────

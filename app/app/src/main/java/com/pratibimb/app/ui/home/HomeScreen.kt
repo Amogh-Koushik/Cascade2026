@@ -157,7 +157,7 @@ fun HomeScreen(
                             .weight(1f)
                             .clip(ShapePill)
                             .background(
-                                if (isSelected) WarmObsidian.PrimaryContainer
+                                if (isSelected) WarmObsidian.SecondaryContainer
                                 else Color.Transparent
                             )
                             .clickable { onSelectDuration(mins) }
@@ -167,7 +167,7 @@ fun HomeScreen(
                         Text(
                             text = "$mins min",
                             style = bodyMd(
-                                color = if (isSelected) WarmObsidian.OnPrimary
+                                color = if (isSelected) WarmObsidian.OnSecondaryContainer
                                 else WarmObsidian.OnSurfaceVariant
                             ),
                             fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
@@ -178,7 +178,7 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Primary filled pill button: "Start focus" (terracotta #D98C4E)
+            // Primary filled pill button: "Start focus"
             Button(
                 onClick = onStartFocus,
                 modifier = Modifier
@@ -186,7 +186,7 @@ fun HomeScreen(
                     .height(56.dp),
                 shape = ShapePill,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = WarmObsidian.PrimaryContainer,
+                    containerColor = WarmObsidian.Primary,
                     contentColor = WarmObsidian.OnPrimary,
                 ),
             ) {
@@ -251,7 +251,7 @@ fun HomeScreen(
                                 .height(50.dp),
                             shape = ShapePill,
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = WarmObsidian.PrimaryContainer,
+                                containerColor = WarmObsidian.Primary,
                                 contentColor = WarmObsidian.OnPrimary,
                             ),
                         ) {

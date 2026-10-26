@@ -123,7 +123,7 @@ private fun RulesCard(
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = WarmObsidian.PrimaryContainer,
+                    focusedBorderColor = WarmObsidian.Primary,
                     unfocusedBorderColor = WarmObsidian.Outline,
                     focusedTextColor = WarmObsidian.OnSurface,
                     unfocusedTextColor = WarmObsidian.OnSurface,
@@ -150,8 +150,8 @@ private fun RuleSwitch(title: String, subtitle: String, checked: Boolean, onChan
             checked = checked,
             onCheckedChange = onChange,
             colors = SwitchDefaults.colors(
-                checkedThumbColor = WarmObsidian.Primary,
-                checkedTrackColor = WarmObsidian.PrimaryContainer,
+                checkedThumbColor = WarmObsidian.OnPrimary,
+                checkedTrackColor = WarmObsidian.Primary,
                 uncheckedThumbColor = WarmObsidian.Outline,
                 uncheckedTrackColor = WarmObsidian.SurfaceContainerHigh,
             ),
