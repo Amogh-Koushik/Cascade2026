@@ -229,6 +229,8 @@ class RealTwinEngine(initialParamsJson: String = "") : TwinEngine {
         val logitQ = logit(worth.q)
 
         val cGlance = (policy["c_glance"] as Number).toDouble()
+        // Getting back into the task after an open costs focus on top of the time in the app.
+        val resume = (policy["resume_min"] as Number).toDouble()
         val w = (policy["w"] as Number).toDouble()
         val lam = (policy["lambda"] as Number).toDouble()
 
@@ -252,7 +254,7 @@ class RealTwinEngine(initialParamsJson: String = "") : TwinEngine {
             mI.add(m)
             qI.add(q)
 
-            val l = p * m + (1.0 - p) * cGlance
+            val l = p * (m + resume) + (1.0 - p) * cGlance
             val h = q * w * minutesUntilRelease
 
             loss.add(l)

@@ -97,7 +97,7 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "lambda", "w", "pi_star", "epsilon", "cap_min", "c_glance", "open_window_min",
+        "lambda", "w", "pi_star", "epsilon", "cap_min", "c_glance", "resume_min", "open_window_min",
         "idle_min", "minutes_lost_cap_min", "minutes_floor_min", "might_matter_upper80",
         "explore_upper80", "upper80_z", "low_confidence_width", "repeat_ping"
       ],
@@ -108,6 +108,7 @@
         "epsilon": {"$ref": "#/$defs/probability"},
         "cap_min": {"$ref": "#/$defs/positive"},
         "c_glance": {"type": "number", "minimum": 0},
+        "resume_min": {"type": "number", "minimum": 0},
         "open_window_min": {"$ref": "#/$defs/positive"},
         "idle_min": {"$ref": "#/$defs/positive"},
         "minutes_lost_cap_min": {"$ref": "#/$defs/positive"},

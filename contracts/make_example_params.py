@@ -97,6 +97,10 @@ def build_example_params() -> dict[str, Any]:
             "epsilon": 0.1,
             "cap_min": 45,
             "c_glance": 0.5,
+            # Minutes to get back into the task after opening a notification. Placeholder from
+            # the problem statement's example ("task resumption delay of 8 min"), to be replaced
+            # by a measured value.
+            "resume_min": 8,
             "open_window_min": 10,
             "idle_min": 2,
             "minutes_lost_cap_min": 60,

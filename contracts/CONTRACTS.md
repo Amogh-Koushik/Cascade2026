@@ -50,6 +50,9 @@ uv run python -m engine.make_learning_replay
   `h = (N - 1) · p`, `lo = floor(h)`, `value = x[lo] + (h - lo) · (x[lo + 1] - x[lo])`
   (with `x[lo + 1] = x[lo]` when `lo = N - 1`). Ranges on the card are p10 to p90; `l_p50` and
   `h_p50` are p50.
+- Per draw: `L_i = p_i · (m_i + resume_min) + (1 − p_i) · c_glance` (focus minutes lost if shown:
+  time in the app plus getting back into the task when it is opened, a glance otherwise) and
+  `H_i = q_i · w · D` (the cost of making something that matters wait).
 - `π = (count of i with L_i > λ · H_i) / 400`. The comparison is strict.
 - `hold_better_per_hundred = floor(100 · π + 0.5)`, computed in whole numbers as
   `(200 · wins + 400) div 800` where `wins` is the count above. Not Python's `round`, which

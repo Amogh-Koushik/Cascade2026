@@ -115,6 +115,7 @@
   "epsilon": 0.1,
   "cap_min": 45,
   "c_glance": 0.5,
+  "resume_min": 8,
   "open_window_min": 10,
   "idle_min": 2,
   "minutes_lost_cap_min": 60,

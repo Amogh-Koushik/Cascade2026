@@ -54,6 +54,8 @@ def sample_futures(
     logit_p = logit(pull.p_cs)
     logit_q = logit(worth.q)
     c_glance, w, lam = policy["c_glance"], policy["w"], policy["lambda"]
+    # Getting back into the task after an open costs focus on top of the time in the app.
+    resume = policy["resume_min"]
 
     p_i, m_i, q_i, loss, hold_cost = [], [], [], [], []
     for z1, z2, z3 in draws:
@@ -63,7 +65,7 @@ def sample_futures(
         p_i.append(p)
         m_i.append(m)
         q_i.append(q)
-        loss.append(p * m + (1.0 - p) * c_glance)
+        loss.append(p * (m + resume) + (1.0 - p) * c_glance)
         hold_cost.append(q * w * minutes_until_release)
 
     holding_wins = sum(1 for shown, held in zip(loss, hold_cost, strict=True) if shown > lam * held)
