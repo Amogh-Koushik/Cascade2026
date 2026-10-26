@@ -140,6 +140,41 @@ class ContentPolicyTest {
     }
 
     @Test
+    fun urgencyKeywordsBreakGroupHold() {
+        // A group message with a genuine urgency keyword ("emergency", "urgent" etc.) must go through.
+        val urgentGroup = features("com.whatsapp", Category.MESSAGING, conversation = true, group = true, urgent = true)
+        val result = decide(urgentGroup)
+        assertEquals(Action.DELIVER, result.decision.action)
+        assertEquals("urgent group", result.rule)
+    }
+
+    @Test
+    fun baitPlusUrgencyInGroupIsStillHeld() {
+        // A message that is BOTH a bait hit and an urgency hit (e.g. "URGENT: 50% off!") must NOT
+        // bypass the group hold — only genuine urgency (urgencyHit = true, baitHit = false) counts.
+        val fakeUrgentGroup = NotificationFeatures(
+            key = "k", postedAtMillis = 0L, packageName = "com.whatsapp",
+            category = Category.MESSAGING, androidCategory = null, channelImportance = 4,
+            isOngoing = false, isConversation = true, priorityConversation = false,
+            groupChat = true, senderHash = null, senderDisplayName = null,
+            sameSenderRecentPings = 0, baitHit = true, urgencyHit = true, otpPattern = false,
+        )
+        assertEquals(Action.HOLD, decide(fakeUrgentGroup).decision.action)
+    }
+
+    @Test
+    fun urgencyKeywordsBreakInstagramThrottle() {
+        // An Instagram DM with urgency keywords must be delivered immediately, not throttled.
+        val urgentInstaDm = features(
+            "com.instagram.android", Category.SOCIAL,
+            conversation = true, sender = "Priya", urgent = true,
+        )
+        val result = decide(urgentInstaDm, insta(1))  // only 1 text, well below the 5-text threshold
+        assertEquals(Action.DELIVER, result.decision.action)
+        assertEquals("urgent insta/snap", result.rule)
+    }
+
+    @Test
     fun aNewSendersLinkIsHeldAndFlaggedEvenWithAContext() {
         val result = decide(
             whatsappDm,

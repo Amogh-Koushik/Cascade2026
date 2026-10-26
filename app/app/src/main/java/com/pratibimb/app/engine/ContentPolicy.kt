@@ -10,9 +10,11 @@ import com.pratibimb.twin.NotificationFeatures
 //   safety overrides stand (calls, alarms, OTPs, rides, always-deliver); order status and bank
 //   alerts are delivered; a new sender's link is held and flagged (switchable); a mention is
 //   delivered; snaps, streaks, promos and bots are held; a Placements match or a deadline within
-//   two hours is delivered; a group is delivered only if you mark it worth it; Instagram and
-//   Snapchat 1:1 texts wait until the same person sends 5 in 2 minutes; WhatsApp and other 1:1
-//   messengers are delivered; anything else not from a person is held unless urgent.
+//   two hours is delivered; a genuine urgency keyword (not also a bait hit) bypasses the group
+//   hold and the Instagram/Snapchat throttle; a group is delivered once marked worth it 3+
+//   times; Instagram and Snapchat 1:1 texts wait until the same person sends 5 in 2 minutes;
+//   WhatsApp and other 1:1 messengers are delivered; anything else not from a person is held
+//   unless it has a genuine urgency keyword.
 // Free state, Observe mode and Suggest-mode recommendations are never changed. With focus rules
 // switched off, only the switchable rules, the context and the deadline apply.
 data class ContentRuleFlags(
@@ -101,7 +103,13 @@ object ContentPolicy {
 
         if (!flags.focusGate) return unchanged(decision)
 
+        // Urgency keywords ("urgent", "emergency", etc.) override the group hold and the
+        // Instagram/Snapchat throttle — but only when the message is NOT also a bait hit
+        // (prevents fake "URGENT: 50% off!" promos from leaking through).
+        val genuineUrgency = features.urgencyHit && !features.baitHit
+
         if (features.groupChat) {
+            if (genuineUrgency) return deliver(decision, "Delivered: urgent message in group", "urgent group")
             return if (signals.groupWorth) {
                 deliver(decision, "Delivered: a group you mark worth it", "group worth it")
             } else {
@@ -118,12 +126,15 @@ object ContentPolicy {
                     releaseSenderBurst = true,
                 )
             }
+            if (genuineUrgency) return deliver(decision, "Delivered: urgent message", "urgent insta/snap")
             return RuledDecision(hold(decision, "Held: single message (5 texts in 2 minutes get through)"), "instagram/snapchat 1:1")
         }
         if (oneToOne) return deliver(decision, "Delivered: message from a person", "1:1 message")
 
-        val urgent = features.urgencyHit && (features.isConversation || features.category == Category.WORK_EMAIL)
-        if (!urgent) return RuledDecision(hold(decision, "Held: not a message from a person"), "focus gate")
+        // Non-person, non-conversation: only deliver if there are genuine urgency signals.
+        val urgentBroadcast = features.urgencyHit && !features.baitHit &&
+            (features.isConversation || features.category == Category.WORK_EMAIL)
+        if (!urgentBroadcast) return RuledDecision(hold(decision, "Held: not a message from a person"), "focus gate")
         return unchanged(decision)
     }
 

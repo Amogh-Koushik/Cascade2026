@@ -108,7 +108,10 @@ object TwinSettings {
         prefs?.edit()?.putBoolean(PAUSE_CARD_KEY, enabled)?.apply()
     }
 
-    fun isGroupWorth(groupKey: String): Boolean = (groupMarks[groupKey] ?: 0) > 0
+    // A group is considered worth delivering through focus once the user has marked it
+    // "This was important" at least 3 more times than "Not worth it" (net score >= 3).
+    // This prevents a single accidental tap from opening the floodgates.
+    fun isGroupWorth(groupKey: String): Boolean = (groupMarks[groupKey] ?: 0) >= 3
 
     @Synchronized
     fun markGroup(groupKey: String, worth: Boolean) {
