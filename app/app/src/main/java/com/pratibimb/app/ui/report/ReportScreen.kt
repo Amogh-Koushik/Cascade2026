@@ -169,8 +169,9 @@ fun ReportScreen(
             history = activeHistory,
         )
 
-        // ── Actionable Autonomy: Suggested Rules derived from findings ────────
-        SuggestedRulesCard()
+        // The suggested rules are illustrative, so they appear only in the labelled simulated
+        // view; on live data there is no Coach yet to propose real ones.
+        if (isDemoMode) SuggestedRulesCard()
 
         // ── Privacy & Audit Footer ─────────────────────────────────────────────
         Row(

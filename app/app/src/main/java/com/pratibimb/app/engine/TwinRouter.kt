@@ -106,6 +106,11 @@ object TwinRouter {
     @Volatile
     private var minutesLostCapMin = 60.0
 
+    // policy.resume_min: minutes to get back into the task after an open, for the cards.
+    @Volatile
+    var resumeMinutes = 0.0
+        private set
+
     // policy.cap_by_kind: a shorter wait for people than for feeds.
     @Volatile
     private var holdCaps = HoldCaps(45.0, emptyMap())
@@ -297,6 +302,7 @@ object TwinRouter {
             val capMin = (policy["cap_min"] as Number).toDouble()
             val openWindowMin = (policy["open_window_min"] as Number).toDouble()
             val lostCapMin = (policy["minutes_lost_cap_min"] as Number).toDouble()
+            val resume = (policy["resume_min"] as Number).toDouble()
             val caps = HoldCaps.fromParams(params)
             val topics = Contexts.fromParams(params)
             val payments = ((params["never_hold"] as Map<String, Any?>)["otp_source_packages"] as List<Any?>)
@@ -307,6 +313,7 @@ object TwinRouter {
             featureRules = rules
             holdCapMin = capMin
             minutesLostCapMin = lostCapMin
+            resumeMinutes = resume
             holdCaps = caps
             contexts = topics
             paymentPackages = payments

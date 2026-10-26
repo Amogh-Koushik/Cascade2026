@@ -252,7 +252,8 @@ fun HeldItemCard(
                     .padding(horizontal = 10.dp, vertical = 4.dp)
             ) {
                 Text(
-                    text = item.heldReason,
+                    // The plain-language sentence, not the engine's short reason code.
+                    text = item.decision.explanation.ifBlank { item.heldReason },
                     style = labelMd(color = WarmObsidian.Primary),
                     fontSize = 12.sp,
                 )

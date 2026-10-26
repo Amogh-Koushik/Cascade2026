@@ -57,11 +57,14 @@ import com.pratibimb.twin.Action
 import com.pratibimb.twin.DecisionRule
 import com.pratibimb.twin.FutureCard
 import com.pratibimb.twin.WorthLabelKind
+import kotlin.math.roundToInt
 
 @Composable
 fun LiveTwinScreen(
     items: List<LiveNotificationItem>,
     onFeedback: (itemId: String, isWorth: Boolean) -> Unit,
+    developerMode: Boolean,
+    resumeMinutes: Double,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -88,7 +91,7 @@ fun LiveTwinScreen(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "On-device decisions & future simulations",
+                    text = "What your twin decided, and what it expected to happen",
                     style = labelLg(color = WarmObsidian.OnSurfaceVariant),
                 )
             }
@@ -119,7 +122,11 @@ fun LiveTwinScreen(
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    text = "No live notifications yet.\nTrigger a scenario in Debug to see decisions.",
+                    text = if (developerMode) {
+                        "No live notifications yet.\nTrigger a scenario in Debug to see decisions."
+                    } else {
+                        "Nothing yet.\nNotifications that arrive during focus show up here, with what your twin decided."
+                    },
                     style = bodyLg(color = WarmObsidian.OnSurfaceVariant),
                     fontSize = 15.sp,
                     lineHeight = 22.sp,
@@ -134,6 +141,8 @@ fun LiveTwinScreen(
                     NotificationDecisionCard(
                         item = item,
                         onFeedback = { isWorth -> onFeedback(item.id, isWorth) },
+                        developerMode = developerMode,
+                        resumeMinutes = resumeMinutes,
                     )
                 }
             }
@@ -145,6 +154,8 @@ fun LiveTwinScreen(
 fun NotificationDecisionCard(
     item: LiveNotificationItem,
     onFeedback: (isWorth: Boolean) -> Unit,
+    developerMode: Boolean,
+    resumeMinutes: Double,
     modifier: Modifier = Modifier,
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -189,7 +200,7 @@ fun NotificationDecisionCard(
                             .padding(horizontal = 10.dp, vertical = 4.dp)
                     ) {
                         Text(
-                            text = if (isHold) "HOLD" else "DELIVER",
+                            text = if (isHold) "Held for later" else "Delivered",
                             style = labelMd(
                                 color = if (isHold) WarmObsidian.OnPrimary else WarmObsidian.StatusMint
                             ),
@@ -239,23 +250,32 @@ fun NotificationDecisionCard(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Rule Tag & Futures Count
+            // How the sampled futures came out, in plain words; the rule name is for developers.
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
+                if (developerMode) {
+                    Text(
+                        text = "Rule: ${formatRuleName(decision.rule)}",
+                        style = labelMd(color = WarmObsidian.Outline),
+                        fontSize = 12.sp,
+                    )
+                }
                 Text(
-                    text = "Rule: ${formatRuleName(decision.rule)}",
-                    style = labelMd(color = WarmObsidian.Outline),
-                    fontSize = 12.sp,
-                )
-
-                Text(
-                    text = "~${decision.card.holdBetterPerHundred} of 100 hold-better",
+                    text = "Waiting was better in ${decision.card.holdBetterPerHundred} of 100 likely outcomes",
                     style = labelMd(color = WarmObsidian.Secondary),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
+                )
+            }
+            if (!expanded) {
+                Text(
+                    text = "Tap to see what opening it would cost",
+                    style = labelMd(color = WarmObsidian.Outline),
+                    fontSize = 11.sp,
+                    modifier = Modifier.padding(top = 4.dp),
                 )
             }
 
@@ -275,7 +295,11 @@ fun NotificationDecisionCard(
                         modifier = Modifier.padding(bottom = 12.dp)
                     )
 
-                    FutureCardSection(card = decision.card)
+                    WhatHappensSection(card = decision.card, resumeMinutes = resumeMinutes)
+                    if (developerMode) {
+                        Spacer(modifier = Modifier.height(10.dp))
+                        FutureCardSection(card = decision.card)
+                    }
 
                     Spacer(modifier = Modifier.height(14.dp))
 
@@ -324,6 +348,62 @@ fun NotificationDecisionCard(
     }
 }
 
+// "If I allow this right now, what happens?" in plain words: the chance it pulls you in, the
+// time in the app, getting back into the task, and what waiting would cost instead.
+@Composable
+fun WhatHappensSection(card: FutureCard, resumeMinutes: Double) {
+    val pull = "${(card.pullLo * 100).toInt()}–${(card.pullHi * 100).toInt()}%"
+    val browsing = "${card.minsIfOpenedLo.roundToInt()}–${card.minsIfOpenedHi.roundToInt()} min"
+    val resume = resumeMinutes.roundToInt()
+    val total = "${(card.minsIfOpenedLo + resumeMinutes).roundToInt()}–${(card.minsIfOpenedHi + resumeMinutes).roundToInt()} min"
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(WarmObsidian.SurfaceContainerHigh.copy(alpha = 0.5f))
+            .padding(14.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text(
+            text = "If you open it now",
+            style = labelMd(color = WarmObsidian.Primary),
+            fontWeight = FontWeight.Bold,
+        )
+        ChainStep("Chance it pulls you in", pull)
+        ChainStep("Time in the app", browsing)
+        if (resume > 0) ChainStep("Getting back into your task", "about $resume min")
+        ChainStep("Focus lost if you open it", total)
+        HorizontalDivider(color = WarmObsidian.SurfaceContainerHigh, thickness = 1.dp)
+        Text(
+            text = "If it waits",
+            style = labelMd(color = WarmObsidian.Primary),
+            fontWeight = FontWeight.Bold,
+        )
+        ChainStep("Delivered at your break", "in ${card.minutesUntilRelease.roundToInt().coerceAtLeast(1)} min")
+        if (card.netMinutesProtected > 0) {
+            ChainStep("Focus saved by waiting", "about ${card.netMinutesProtected.roundToInt()} min")
+        }
+        Text(
+            text = if (card.lowConfidence) {
+                "Your twin is still learning this one, so it leans towards letting it through."
+            } else {
+                "Estimates from your on-device twin. Time lost is a lower bound."
+            },
+            style = labelMd(color = WarmObsidian.Outline),
+            fontSize = 11.sp,
+        )
+    }
+}
+
+@Composable
+private fun ChainStep(label: String, value: String) {
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        Text(text = label, style = bodyMd(color = WarmObsidian.OnSurfaceVariant), fontSize = 13.sp)
+        Text(text = value, style = bodyMd(color = WarmObsidian.OnSurface), fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+    }
+}
+
+// The model's raw numbers, shown in developer mode only.
 @Composable
 fun FutureCardSection(card: FutureCard) {
     Column(
@@ -335,7 +415,7 @@ fun FutureCardSection(card: FutureCard) {
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Text(
-            text = "FUTURE CARD SIMULATION",
+            text = "MODEL NUMBERS (DEVELOPER)",
             style = labelMd(color = WarmObsidian.Primary),
             fontSize = 11.sp,
             fontWeight = FontWeight.Bold,

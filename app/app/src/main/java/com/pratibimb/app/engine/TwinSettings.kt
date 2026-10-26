@@ -16,6 +16,7 @@ object TwinSettings {
     private const val RULE_TEXT_ONLY_KEY = "rule_text_only_repeat"
     private const val GROUP_MARKS_KEY = "group_marks"
     private const val PAUSE_CARD_KEY = "pause_card"
+    private const val DEVELOPER_MODE_KEY = "developer_mode"
     private const val RULE_NEW_SENDER_KEY = "rule_new_sender_links"
     private const val RULE_FOCUS_GATE_KEY = "rule_focus_gate"
     private const val MENTION_NAMES_KEY = "mention_names"
@@ -51,6 +52,11 @@ object TwinSettings {
     @Volatile
     private var knownSenders: Set<String> = emptySet()
 
+    // Developer mode shows Debug, the inspector, demo controls and the model's raw numbers;
+    // off, the app shows only what a user needs, in plain words.
+    private val _developerMode = MutableStateFlow(false)
+    val developerMode: StateFlow<Boolean> = _developerMode.asStateFlow()
+
     // The pause card on our alert pings. Until the user sets it, it follows the params flag, or
     // is on in the demo build (see setPauseCardDefault).
     private val _pauseCard = MutableStateFlow(false)
@@ -74,6 +80,7 @@ object TwinSettings {
         )
         _mentionNames.value = loaded.getStringSet(MENTION_NAMES_KEY, null).orEmpty().toSet()
         knownSenders = loaded.getStringSet(KNOWN_SENDERS_KEY, null).orEmpty().toSet()
+        _developerMode.value = loaded.getBoolean(DEVELOPER_MODE_KEY, false)
         groupMarks = loaded.getStringSet(GROUP_MARKS_KEY, null).orEmpty().mapNotNull { entry ->
             val (key, net) = entry.split('=').takeIf { it.size == 2 } ?: return@mapNotNull null
             net.toIntOrNull()?.let { key to it }
@@ -101,6 +108,11 @@ object TwinSettings {
 
     fun setPauseCardDefault(enabled: Boolean) {
         _pauseCard.value = prefs?.takeIf { it.contains(PAUSE_CARD_KEY) }?.getBoolean(PAUSE_CARD_KEY, enabled) ?: enabled
+    }
+
+    fun setDeveloperMode(enabled: Boolean) {
+        _developerMode.value = enabled
+        prefs?.edit()?.putBoolean(DEVELOPER_MODE_KEY, enabled)?.apply()
     }
 
     fun setPauseCard(enabled: Boolean) {

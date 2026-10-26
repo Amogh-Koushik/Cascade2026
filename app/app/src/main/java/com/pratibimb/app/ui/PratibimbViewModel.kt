@@ -250,6 +250,15 @@ class PratibimbViewModel(application: Application) : AndroidViewModel(applicatio
 
     val pauseCard: StateFlow<Boolean> = TwinSettings.pauseCard
 
+    val developerMode: StateFlow<Boolean> = TwinSettings.developerMode
+
+    fun setDeveloperMode(enabled: Boolean) {
+        TwinSettings.setDeveloperMode(enabled)
+    }
+
+    // Minutes to get back into the task after opening something, from the params.
+    val resumeMinutes: Double get() = TwinRouter.resumeMinutes
+
     fun setPauseCard(enabled: Boolean) {
         TwinSettings.setPauseCard(enabled)
     }

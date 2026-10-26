@@ -53,6 +53,7 @@ import com.pratibimb.twin.PhoneState
 
 @Composable
 fun HomeScreen(
+    developerMode: Boolean,
     isFocusActive: Boolean,
     selectedDurationMinutes: Int,
     remainingSeconds: Int,
@@ -100,19 +101,21 @@ fun HomeScreen(
 
                 Spacer(modifier = Modifier.width(12.dp))
 
-                // Restrained "Demo build" badge
-                Box(
-                    modifier = Modifier
-                        .clip(ShapePill)
-                        .background(WarmObsidian.SurfaceContainerHigh)
-                        .padding(horizontal = 10.dp, vertical = 4.dp),
-                ) {
-                    Text(
-                        text = "Demo build",
-                        style = labelMd(color = WarmObsidian.Secondary),
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Medium,
-                    )
+                // Only developers need to know this is the demo build.
+                if (developerMode) {
+                    Box(
+                        modifier = Modifier
+                            .clip(ShapePill)
+                            .background(WarmObsidian.SurfaceContainerHigh)
+                            .padding(horizontal = 10.dp, vertical = 4.dp),
+                    ) {
+                        Text(
+                            text = "Demo build",
+                            style = labelMd(color = WarmObsidian.Secondary),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Medium,
+                        )
+                    }
                 }
             }
 
@@ -291,8 +294,8 @@ fun HomeScreen(
         ) {
             StatusListRow(
                 icon = Icons.Default.NotificationsOff,
-                label = "Silent mode",
-                value = if (isModeA) "Priority" else "Hold-only",
+                label = "Phone silencing",
+                value = if (isModeA) "On (calls and alarms ring)" else "Holds only",
             )
             HorizontalDivider(
                 color = WarmObsidian.SurfaceContainer,
@@ -302,11 +305,11 @@ fun HomeScreen(
 
             StatusListRow(
                 icon = Icons.Default.PhoneAndroid,
-                label = "Phone state",
+                label = "Focus right now",
                 value = when (phoneState) {
-                    PhoneState.FREE -> "Free"
-                    PhoneState.FOCUS_STEADY -> "Steady"
-                    PhoneState.FOCUS_RESTLESS -> "Restless"
+                    PhoneState.FREE -> "Not in focus"
+                    PhoneState.FOCUS_STEADY -> "Steady focus"
+                    PhoneState.FOCUS_RESTLESS -> "Restless (switching apps)"
                 },
             )
             HorizontalDivider(
@@ -317,7 +320,7 @@ fun HomeScreen(
 
             StatusListRow(
                 icon = Icons.Default.Speed,
-                label = "Fatigue risk (proxy)",
+                label = "Tiredness (estimate)",
                 value = when (fatigueRisk) {
                     FatigueRisk.LOW -> "Low"
                     FatigueRisk.MEDIUM -> "Medium"
@@ -332,11 +335,11 @@ fun HomeScreen(
 
             StatusListRow(
                 icon = Icons.Default.Psychology,
-                label = "Autonomy",
+                label = "Twin mode",
                 value = when (autonomy) {
-                    Autonomy.AUTO -> "Auto"
-                    Autonomy.SUGGEST -> "Suggest"
-                    Autonomy.OBSERVE -> "Observe"
+                    Autonomy.AUTO -> "Acts for you"
+                    Autonomy.SUGGEST -> "Suggests, you decide"
+                    Autonomy.OBSERVE -> "Only watching"
                 },
             )
         }

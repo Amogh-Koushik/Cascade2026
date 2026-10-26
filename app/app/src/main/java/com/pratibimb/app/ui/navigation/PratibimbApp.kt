@@ -76,6 +76,7 @@ fun PratibimbApp(
     var debugOpen by remember { mutableStateOf(false) }
     val report by viewModel.report.collectAsStateWithLifecycle()
     val pauseCard by viewModel.pauseCard.collectAsStateWithLifecycle()
+    val developerMode by viewModel.developerMode.collectAsStateWithLifecycle()
 
     NavHost(
         navController = navController,
@@ -152,6 +153,7 @@ fun PratibimbApp(
                     when (selectedTab) {
                         AppTab.HOME -> {
                             HomeScreen(
+                                developerMode = developerMode,
                                 isFocusActive = isFocusActive,
                                 selectedDurationMinutes = selectedDurationMinutes,
                                 remainingSeconds = remainingSeconds,
@@ -173,6 +175,8 @@ fun PratibimbApp(
                             LiveTwinScreen(
                                 items = liveNotifications,
                                 onFeedback = viewModel::submitWorthFeedback,
+                                developerMode = developerMode,
+                                resumeMinutes = viewModel.resumeMinutes,
                             )
                         }
                         AppTab.TRAY -> {
@@ -229,6 +233,8 @@ fun PratibimbApp(
                                 onTogglePauseCard = viewModel::setPauseCard,
                                 onDeleteAllData = viewModel::resetAllCounts,
                                 onOpenDebug = { debugOpen = true },
+                                developerMode = developerMode,
+                                onToggleDeveloperMode = viewModel::setDeveloperMode,
                             )
                         }
                     }

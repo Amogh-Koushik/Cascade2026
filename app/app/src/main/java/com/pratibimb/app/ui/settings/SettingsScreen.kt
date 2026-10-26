@@ -61,6 +61,8 @@ fun SettingsScreen(
     onTogglePauseCard: (Boolean) -> Unit,
     onDeleteAllData: () -> Unit,
     onOpenDebug: () -> Unit,
+    developerMode: Boolean,
+    onToggleDeveloperMode: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val scrollState = rememberScrollState()
@@ -113,26 +115,28 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Debug, scenarios and the notification inspector live here, off the bottom bar.
-        Button(
-            onClick = onOpenDebug,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(44.dp),
-            shape = ShapePill,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = WarmObsidian.SurfaceContainerHigh,
-                contentColor = WarmObsidian.OnSurface,
-            ),
-        ) {
-            Text(text = "Debug, scenarios & notification inspector", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+        // Debug, scenarios and the notification inspector are for developers only.
+        if (developerMode) {
+            Button(
+                onClick = onOpenDebug,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(44.dp),
+                shape = ShapePill,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = WarmObsidian.SurfaceContainerHigh,
+                    contentColor = WarmObsidian.OnSurface,
+                ),
+            ) {
+                Text(text = "Debug, scenarios & notification inspector", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+            }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
         // Section 1: Persona Switcher
         Text(
-            text = "PERSONA PRIORS",
+            text = "YOUR PROFILE",
             style = labelMd(color = WarmObsidian.Primary),
             fontWeight = FontWeight.Bold,
             letterSpacing = 0.08.sp,
@@ -193,19 +197,21 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        DemoLearningSection(
-            demoLearning = demoLearning,
-            onToggleDemoLearning = onToggleDemoLearning,
-            onRunLearningReplay = onRunLearningReplay,
-            pauseCard = pauseCard,
-            onTogglePauseCard = onTogglePauseCard,
-        )
+        if (developerMode) {
+            DemoLearningSection(
+                demoLearning = demoLearning,
+                onToggleDemoLearning = onToggleDemoLearning,
+                onRunLearningReplay = onRunLearningReplay,
+                pauseCard = pauseCard,
+                onTogglePauseCard = onTogglePauseCard,
+            )
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
 
         // Section 2: Non-Negotiable Safety Overrides (PRD §5.5)
         Text(
-            text = "HARD SAFETY OVERRIDES (NEVER HOLD)",
+            text = "ALWAYS LET THROUGH",
             style = labelMd(color = WarmObsidian.Primary),
             fontWeight = FontWeight.Bold,
             letterSpacing = 0.08.sp,
@@ -236,7 +242,7 @@ fun SettingsScreen(
 
         // Section 3: Privacy & Data Controls (DPDP Act Compliance)
         Text(
-            text = "PRIVACY & LOCAL STORAGE (DPDP ACT 2023)",
+            text = "PRIVACY",
             style = labelMd(color = WarmObsidian.Primary),
             fontWeight = FontWeight.Bold,
             letterSpacing = 0.08.sp,
@@ -302,6 +308,41 @@ fun SettingsScreen(
                     )
                 }
             }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Developer mode reveals Debug, the inspector, demo controls and the model's raw numbers.
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .cardSurface()
+                .padding(18.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Developer mode",
+                    style = bodyMd(color = WarmObsidian.OnSurface),
+                    fontWeight = FontWeight.Medium,
+                )
+                Text(
+                    text = "Shows Debug, the notification inspector, demo controls and the model's raw numbers.",
+                    style = labelMd(color = WarmObsidian.Outline),
+                    fontSize = 12.sp,
+                )
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Switch(
+                checked = developerMode,
+                onCheckedChange = onToggleDeveloperMode,
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = WarmObsidian.Primary,
+                    checkedTrackColor = WarmObsidian.PrimaryContainer,
+                    uncheckedThumbColor = WarmObsidian.Outline,
+                    uncheckedTrackColor = WarmObsidian.SurfaceContainerHigh,
+                ),
+            )
         }
     }
 }
