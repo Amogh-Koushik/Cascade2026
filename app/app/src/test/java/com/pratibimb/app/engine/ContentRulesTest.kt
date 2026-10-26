@@ -95,6 +95,22 @@ class ContentRulesTest {
     }
 
     @Test
+    fun whatsAppsMentionedYouTitleIsAMentionWithoutAnyNames() {
+        // As logged on the phone: the title carries WhatsApp's own label for a tag.
+        val posted = "Cascade 2026 (3 messages): 📣 Mentioned you\nSingle Meerut Css: @Satvik Rastogi h"
+        assertTrue(ContentRules.mentionsYou(posted, emptyList()))
+        assertTrue(ContentRules.mentionsYou("Single Meerut Css: @Satvik Rastogi h", listOf("Satvik")))
+    }
+
+    @Test
+    fun groupTitleDropsWhatWhatsAppAddsPerNotification() {
+        assertEquals("Cascade 2026", ContentRules.groupTitle("Cascade 2026 (3 messages): 📣 Mentioned you"))
+        assertEquals("Cascade 2026", ContentRules.groupTitle("Cascade 2026 (12 new messages)"))
+        assertEquals("Cascade 2026", ContentRules.groupTitle("Cascade 2026"))
+        assertEquals("Room 1 (A)", ContentRules.groupTitle("Room 1 (A)"))
+    }
+
+    @Test
     fun mentionNamesJoinEnteredAndAppNamesButNotSelfLabels() {
         assertEquals(
             setOf("Satvik", "Sat", "Satvik R"),

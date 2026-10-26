@@ -494,9 +494,11 @@ object TwinRouter {
         val topic = Contexts.match(rawTitle, text, features.category, contexts)
         val family = MessageSignals.familyOf(features.packageName)
         val oneToOne = features.isConversation && !features.groupChat
-        // A group is known by its app and its name, salted like a sender.
-        val groupName = extras.getCharSequence(Notification.EXTRA_CONVERSATION_TITLE)?.toString() ?: rawTitle
-        val groupKey = if (features.groupChat) FeatureBuilder.keyFor("${features.packageName}:$groupName", senderSalt, "g_") else null
+        // A group is known by its chat id where the app gives one, else by its name, salted like
+        // a sender; WhatsApp's title changes with every message, so it cannot be the key.
+        val groupName = ContentRules.groupTitle(extras.getCharSequence(Notification.EXTRA_CONVERSATION_TITLE)?.toString() ?: rawTitle)
+        val groupId = FeatureBuilder.whatsAppGroupId(sbn) ?: groupName
+        val groupKey = if (features.groupChat) FeatureBuilder.keyFor("${features.packageName}:$groupId", senderSalt, "g_") else null
         val instaOrSnapText = oneToOne && content.kind == ContentKind.TEXT &&
             (family == AppFamily.INSTAGRAM || family == AppFamily.SNAPCHAT)
         val hasProgress = extras.getInt(Notification.EXTRA_PROGRESS_MAX, 0) > 0 ||
@@ -508,7 +510,7 @@ object TwinRouter {
             bot = MessageSignals.isBot(family, rawTitle),
             streak = MessageSignals.isStreak(text),
             mentionsYou = ContentRules.mentionsYou(
-                FeatureBuilder.messageText(sbn.notification),
+                rawTitle + "\n" + FeatureBuilder.messageText(sbn.notification),
                 ContentRules.mentionNames(TwinSettings.mentionNames.value, FeatureBuilder.selfNames(sbn.notification)),
             ),
             groupWorth = groupKey?.let { TwinSettings.isGroupWorth(it) } ?: false,

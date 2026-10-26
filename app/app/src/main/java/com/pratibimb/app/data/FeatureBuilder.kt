@@ -105,10 +105,16 @@ object FeatureBuilder {
         return listOf(extras.getCharSequence(Notification.EXTRA_SELF_DISPLAY_NAME)?.toString(), person?.name?.toString())
     }
 
-    fun isWhatsAppGroupId(sbn: StatusBarNotification): Boolean =
-        listOf(sbn.notification.shortcutId, sbn.tag, sbn.groupKey).any { it?.contains(WHATSAPP_GROUP_SUFFIX) == true }
+    fun isWhatsAppGroupId(sbn: StatusBarNotification): Boolean = whatsAppGroupId(sbn) != null
 
-    private const val WHATSAPP_GROUP_SUFFIX = "@g.us"
+    // WhatsApp's id for the group chat ("...@g.us"), which stays the same while the title
+    // changes with every message.
+    fun whatsAppGroupId(sbn: StatusBarNotification): String? =
+        listOf(sbn.notification.shortcutId, sbn.tag, sbn.groupKey)
+            .firstNotNullOfOrNull { id -> id?.let { WHATSAPP_GROUP_ID.find(it)?.value } }
+
+    private val WHATSAPP_GROUP_ID = Regex("""[\w.\-]+@g\.us""")
+
 
     @Synchronized
     fun reset() {

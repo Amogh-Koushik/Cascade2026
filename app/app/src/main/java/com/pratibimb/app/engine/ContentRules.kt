@@ -120,6 +120,8 @@ object ContentRules {
     // not in your contacts, so both are ignored.
     fun mentionsYou(text: String, names: Collection<String>): Boolean {
         val lower = text.replace(INVISIBLE_MARKS, "").replace("@~", "@").lowercase(Locale.ROOT)
+        // WhatsApp titles a group notification that tags you "Group (3 messages): Mentioned you".
+        if ("mentioned you" in lower) return true
         if (listOf("@everyone", "@all", "@channel").any { it in lower }) return true
         return names.any { name -> name.isNotBlank() && "@${name.trim().lowercase(Locale.ROOT)}" in lower }
     }
@@ -132,6 +134,11 @@ object ContentRules {
             .filter { it.isNotEmpty() && it.lowercase(Locale.ROOT) !in SELF_LABELS }
             .toSet()
 
+    // A group's name without what WhatsApp adds to the title per notification:
+    // "Cascade 2026 (3 messages): Mentioned you" is the group "Cascade 2026".
+    fun groupTitle(title: String): String = title.replace(GROUP_TITLE_SUFFIX, "").trim()
+
+    private val GROUP_TITLE_SUFFIX = Regex("""\s*\(\d+\s+(new\s+)?messages?\).*$""", RegexOption.IGNORE_CASE)
     private val INVISIBLE_MARKS = Regex("[\u200e\u200f\u2066-\u2069]")
     private val SELF_LABELS = setOf("you", "me")
 }
