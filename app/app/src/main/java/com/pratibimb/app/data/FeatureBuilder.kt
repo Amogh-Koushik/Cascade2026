@@ -45,7 +45,8 @@ object FeatureBuilder {
         val groupChat = isConversation && (
             extras.getBoolean(Notification.EXTRA_IS_GROUP_CONVERSATION, false) ||
                 extras.getCharSequence(Notification.EXTRA_CONVERSATION_TITLE) != null ||
-                channelId.contains("group", ignoreCase = true)
+                channelId.contains("group", ignoreCase = true) ||
+                isWhatsAppGroupId(sbn)
             )
 
         // A one-to-one chat's title is the person. In a group the title names the group, not
@@ -73,6 +74,14 @@ object FeatureBuilder {
             otpPattern = rules.otpPattern(haystack, text),
         )
     }
+
+    // WhatsApp names chats by an id: groups end in "@g.us", people in "@s.whatsapp.net". On phones
+    // where it posts only a summary ("Test group: 23 new messages"), that id on the shortcut, the
+    // tag or the group key is the one sign that the chat is a group.
+    fun isWhatsAppGroupId(sbn: StatusBarNotification): Boolean =
+        listOf(sbn.notification.shortcutId, sbn.tag, sbn.groupKey).any { it?.contains(WHATSAPP_GROUP_SUFFIX) == true }
+
+    private const val WHATSAPP_GROUP_SUFFIX = "@g.us"
 
     @Synchronized
     fun reset() {

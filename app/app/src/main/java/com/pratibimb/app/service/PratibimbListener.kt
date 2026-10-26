@@ -47,6 +47,9 @@ class PratibimbListener : NotificationListenerService() {
             "group=${extras.getBoolean(Notification.EXTRA_IS_GROUP_CONVERSATION)}",
             "category=${notification.category ?: "-"}",
             "ongoing=${sbn.isOngoing}",
+            // What kind of chat id the app attached (WhatsApp: ...@g.us is a group). Only the kind
+            // is logged: the id itself contains a phone number.
+            "chat-id=${idKind(notification.shortcutId, sbn.tag, sbn.groupKey)}",
         ).joinToString(" ")
         NotificationLog.add(
             source = sbn.packageName,
@@ -101,6 +104,13 @@ class PratibimbListener : NotificationListenerService() {
         val CODE = Regex("\\d{4,8}")
 
         fun maskCodes(text: String): String = CODE.replace(text, "••••")
+
+        fun idKind(vararg ids: String?): String = when {
+            ids.any { it?.contains("@g.us") == true } -> "…@g.us (group)"
+            ids.any { it?.contains("@s.whatsapp.net") == true } -> "…@s.whatsapp.net (person)"
+            ids.all { it.isNullOrEmpty() } -> "-"
+            else -> "other"
+        }
     }
 }
 
