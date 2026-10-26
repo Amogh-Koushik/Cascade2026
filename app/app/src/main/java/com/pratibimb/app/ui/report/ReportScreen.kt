@@ -1,5 +1,6 @@
 package com.pratibimb.app.ui.report
 
+import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -60,12 +61,15 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.pratibimb.app.data.NotificationLog
 import com.pratibimb.app.engine.AppFragment
 import com.pratibimb.app.engine.AppWorth
 import com.pratibimb.app.engine.CategoryLength
+import com.pratibimb.app.engine.DemoReport
 import com.pratibimb.app.engine.ReportHistory
 import com.pratibimb.app.ui.theme.ShapeCard
 import com.pratibimb.app.ui.theme.ShapeChip
@@ -100,15 +104,23 @@ fun ReportScreen(
     appLabel: (String) -> String,
     modifier: Modifier = Modifier,
 ) {
-    // If live history is minimal (< 5 min), default to demo baseline so testers and judges
-    // immediately experience the full report without having to wait a week.
+    // Until the phone has 5 minutes of its own focus, show the bundled simulated week so the
+    // report can be seen without waiting a week. Every number in it comes from the file.
+    val context = LocalContext.current
+    val demo = remember { loadDemoReport(context) }
     val hasLiveData = history.focusMinutesRecorded >= 5.0
-    var isDemoMode by remember { mutableStateOf(!hasLiveData) }
+    var isDemoMode by remember { mutableStateOf(!hasLiveData && demo != null) }
     var refreshKey by remember { mutableStateOf(0) }
 
-    val activeHistory = if (isDemoMode) DemoReportData.demoHistory else history
-    val sinceDate = if (isDemoMode) {
-        "7-day rolling baseline"
+    val shownDemo = demo?.takeIf { isDemoMode }
+    val activeHistory = shownDemo?.history ?: history
+    val labelFor: (String) -> String = if (shownDemo != null) {
+        { packageName -> shownDemo.appLabels[packageName] ?: appLabel(packageName) }
+    } else {
+        appLabel
+    }
+    val sinceDate = if (shownDemo != null) {
+        "Simulated week of our student coder persona (tap the pill for live)"
     } else {
         val dateStr = SimpleDateFormat("d MMM", Locale.getDefault()).format(Date(history.sinceMillis))
         "From this phone since $dateStr · ${formatMinutes(history.focusMinutesRecorded)} focus"
@@ -128,28 +140,24 @@ fun ReportScreen(
         // ── Top Header ──────────────────────────────────────────────────────────
         ReportHeader(
             isDemoMode = isDemoMode,
-            onToggleDemo = { isDemoMode = !isDemoMode },
+            onToggleDemo = { if (demo != null) isDemoMode = !isDemoMode },
             onRefresh = { refreshKey++ },
             subtitle = sinceDate,
         )
 
         // ── Question 1: When the user focuses best ─────────────────────────────
-        BestFocusHoursCard(
-            history = activeHistory,
-            isDemo = isDemoMode,
-        )
+        BestFocusHoursCard(history = activeHistory)
 
         // ── Question 6: Which applications fragment concentration ──────────────
         FragmentingAppsCard(
             history = activeHistory,
-            appLabel = if (isDemoMode) { { it } } else appLabel,
+            appLabel = labelFor,
         )
 
         // ── Question 2: What causes interruptions ──────────────────────────────
         InterruptionsCard(
             history = activeHistory,
-            appLabel = if (isDemoMode) { { it } } else appLabel,
-            isDemo = isDemoMode,
+            appLabel = labelFor,
         )
 
         // ── Question 3: What types of content cause prolonged sessions ─────────
@@ -160,8 +168,7 @@ fun ReportScreen(
         // ── Question 4: Which notifications actually matter ───────────────────
         NotificationsThatMatterCard(
             history = activeHistory,
-            appLabel = if (isDemoMode) { { it } } else appLabel,
-            isDemo = isDemoMode,
+            appLabel = labelFor,
         )
 
         // ── Question 5: When the user is mentally fatigued ─────────────────────
@@ -169,9 +176,9 @@ fun ReportScreen(
             history = activeHistory,
         )
 
-        // The suggested rules are illustrative, so they appear only in the labelled simulated
-        // view; on live data there is no Coach yet to propose real ones.
-        if (isDemoMode) SuggestedRulesCard()
+        // Approving a suggestion does not create a rule yet, so the card shows only in the
+        // labelled simulated view.
+        if (shownDemo != null) SuggestedRulesCard(history = activeHistory, appLabel = labelFor)
 
         // ── Privacy & Audit Footer ─────────────────────────────────────────────
         Row(
@@ -226,7 +233,7 @@ private fun ReportHeader(
                         .padding(horizontal = 10.dp, vertical = 5.dp),
                 ) {
                     Text(
-                        text = if (isDemoMode) "Demo preview" else "Live on-device",
+                        text = if (isDemoMode) "Simulated week" else "Live on-device",
                         style = labelMd(color = if (isDemoMode) WarmObsidian.Secondary else WarmObsidian.StatusMint),
                         fontWeight = FontWeight.SemiBold,
                     )
@@ -256,7 +263,7 @@ private fun ReportHeader(
             )
             Spacer(modifier = Modifier.width(6.dp))
             Text(
-                text = if (isDemoMode) "simulated - pre-generated (tap pill to switch to live)" else subtitle,
+                text = subtitle,
                 style = labelMd(color = WarmObsidian.OnSurfaceVariant),
             )
         }
@@ -343,11 +350,9 @@ private fun QuestionCard(
 
 // ── Question 1: When the user focuses best ────────────────────────────────────
 @Composable
-private fun BestFocusHoursCard(history: ReportHistory, isDemo: Boolean) {
+private fun BestFocusHoursCard(history: ReportHistory) {
     val window = history.bestFocusWindow()
-    val peakText = if (isDemo) {
-        "Peak windows: 09:00–12:00 & 15:00–19:00"
-    } else if (window != null) {
+    val peakText = if (window != null) {
         "Peak window: %02d:00–%02d:00".format(window.first % 24, (window.last + 1) % 24)
     } else {
         "Needs at least 10 minutes of recorded focus to map peaks."
@@ -359,19 +364,13 @@ private fun BestFocusHoursCard(history: ReportHistory, isDemo: Boolean) {
         insight = peakText,
         footnote = "Based on phone behaviour and declared focus.",
     ) {
-        if (!isDemo && history.steadySecondsByHour.sum() == 0L) {
+        if (history.steadySecondsByHour.sum() == 0L) {
             EmptyNotice("No focus sessions completed yet. Start a session from the Home tab to build your peak chart.")
         } else {
             val values = history.steadySecondsByHour.map { it.toDouble() }
-            val isPeak: (Int) -> Boolean = if (isDemo) {
-                { hour -> (hour in 9..11) || (hour in 15..18) }
-            } else {
-                { hour -> window?.contains(hour) == true }
-            }
-
             HourBarsHistogram(
                 values = values,
-                highlight = isPeak,
+                highlight = { hour -> window?.contains(hour) == true },
             )
         }
     }
@@ -416,35 +415,27 @@ private fun FragmentingAppsCard(history: ReportHistory, appLabel: (String) -> St
 private fun InterruptionsCard(
     history: ReportHistory,
     appLabel: (String) -> String,
-    isDemo: Boolean,
 ) {
     val heldTotal = history.heldByApp.values.sum()
     val deliveredTotal = history.deliveredByApp.values.sum()
     val totalNotifs = heldTotal + deliveredTotal
 
-    val filterPct = if (totalNotifs > 0) {
-        ((heldTotal.toDouble() / totalNotifs) * 100).toInt()
-    } else if (isDemo) {
-        78
-    } else {
-        0
-    }
+    val filterPct = if (totalNotifs > 0) ((heldTotal.toDouble() / totalNotifs) * 100).toInt() else 0
+    val mostHeld = history.heldByApp.entries.sortedByDescending { it.value }.take(2).map { appLabel(it.key) }
 
     QuestionCard(
         title = "What causes interruptions",
         icon = Icons.Outlined.NotificationsActive,
         tag = if (filterPct > 0) "$filterPct% noise held" else null,
-        insight = if (totalNotifs > 0 || isDemo) {
-            "Group chats & shopping pings cause ~75% of interruptions. Direct pings are delivered."
-        } else null,
+        insight = if (mostHeld.isNotEmpty()) "Held most: ${mostHeld.joinToString(" and ")}." else null,
         footnote = "Held notifications rest in the Tray until focus ends or an urgent keyword appears.",
     ) {
-        if (!isDemo && totalNotifs == 0) {
+        if (totalNotifs == 0) {
             EmptyNotice("No notifications evaluated during focus sessions yet.")
         } else {
             // High-level filter split bar
-            val heldCount = if (isDemo) 42 else heldTotal
-            val deliveredCount = if (isDemo) 12 else deliveredTotal
+            val heldCount = heldTotal
+            val deliveredCount = deliveredTotal
 
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Row(
@@ -489,20 +480,14 @@ private fun InterruptionsCard(
                 Spacer(modifier = Modifier.height(4.dp))
 
                 // Breakdown items
-                val breakdownItems = if (isDemo) {
-                    listOf(
-                        Triple("Group chats (WhatsApp, Telegram)", "24 held · 2 urgent allowed", 0.85),
-                        Triple("Promotional alerts & deals", "14 held · 0 allowed", 0.50),
-                        Triple("Direct 1-on-1 messages", "4 held · 8 allowed", 0.40),
-                        Triple("College & work emails", "0 held · 2 allowed", 0.15),
-                    )
-                } else {
-                    val allApps = (history.heldByApp.keys + history.deliveredByApp.keys).take(4)
-                    allApps.map { pkg ->
-                        val h = history.heldByApp[pkg] ?: 0
-                        val d = history.deliveredByApp[pkg] ?: 0
-                        Triple(appLabel(pkg), "$h held · $d delivered", ((h + d).toDouble() / total).coerceIn(0.1, 1.0))
-                    }
+                // The four apps that sent the most during focus.
+                val busiestApps = (history.heldByApp.keys + history.deliveredByApp.keys)
+                    .sortedByDescending { (history.heldByApp[it] ?: 0) + (history.deliveredByApp[it] ?: 0) }
+                    .take(4)
+                val breakdownItems = busiestApps.map { pkg ->
+                    val h = history.heldByApp[pkg] ?: 0
+                    val d = history.deliveredByApp[pkg] ?: 0
+                    Triple(appLabel(pkg), "$h held · $d delivered", ((h + d).toDouble() / total).coerceIn(0.1, 1.0))
                 }
 
                 breakdownItems.forEach { (name, desc, frac) ->
@@ -523,12 +508,15 @@ private fun InterruptionsCard(
 @Composable
 private fun LongRunningCategoriesCard(history: ReportHistory) {
     val categories = history.longRunningCategories()
+    val longest = categories.filter { it.opens > 0 }.maxByOrNull { it.minutesLost / it.opens }
 
     QuestionCard(
         title = "Content categories that run long",
         icon = Icons.Outlined.HourglassTop,
         tag = "time sink proxy",
-        insight = "Opening social feeds or group chatter leads to the longest rabbit holes.",
+        insight = longest?.let {
+            "Longest per open: ${categoryLabel(it.category)}, about ${formatMinutes(it.minutesLost / it.opens)} each."
+        },
         footnote = "Android shows which app, not what's inside it, so category is our proxy.",
     ) {
         if (categories.isEmpty()) {
@@ -557,27 +545,22 @@ private fun LongRunningCategoriesCard(history: ReportHistory) {
 private fun NotificationsThatMatterCard(
     history: ReportHistory,
     appLabel: (String) -> String,
-    isDemo: Boolean,
 ) {
-    val items = if (isDemo) {
-        DemoReportData.demoContactsThatMatter
-    } else {
-        history.appsThatMatter().map {
-            ContactMatterItem(
-                name = appLabel(it.packageName),
-                channel = "App taps",
-                percent = (it.share * 100).toInt(),
-                fraction = it.share,
-                count = it.total,
-            )
-        }
+    val items = history.appsThatMatter().map {
+        ContactMatterItem(
+            name = appLabel(it.packageName),
+            channel = "${it.worthIt} of ${it.total} marked worth it",
+            percent = (it.share * 100).toInt(),
+            fraction = it.share,
+            count = it.total,
+        )
     }
 
     QuestionCard(
         title = "Notifications that matter",
         icon = Icons.Outlined.VerifiedUser,
         tag = "Marked as \"Worth it\"",
-        insight = "People and channels you consistently verify as important when prompted.",
+        insight = "Apps whose notifications you marked as worth it when asked.",
         footnote = "Tap 'Worth it' or 'This was important' in the tray to train your twin.",
     ) {
         if (items.isEmpty()) {
@@ -603,48 +586,27 @@ private fun NotificationsThatMatterCard(
 private fun FatigueRiskCircadianCard(history: ReportHistory) {
     val levels = history.fatigueByHour()
     val hasReadings = levels.any { it != null }
+    val peakHour = levels.withIndex().filter { it.value != null }.maxByOrNull { it.value!! }?.index
 
     QuestionCard(
         title = "Fatigue risk (proxy)",
         icon = Icons.Outlined.Bedtime,
-        tag = "Normal circadian flow",
-        insight = "Fatigue peaks late night (after 10 PM) and post-lunch. Distraction resistance drops during these hours.",
-        footnote = "A proxy. We don't claim to read your mind.",
+        insight = peakHour?.let { "Highest around %02d:00, from long stretches, rising app switching and late hours.".format(it) },
+        footnote = "A proxy. We don't claim to read your mind. Hours with no focus sit at zero.",
     ) {
-        val displayLevels = if (hasReadings) {
-            levels.map { it ?: 0.3 }
+        if (!hasReadings) {
+            EmptyNotice("No focus sessions recorded yet.")
         } else {
-            DemoReportData.demoFatigueWave
+            CircadianWaveGraph(values = levels.map { it ?: 0.0 })
         }
-
-        CircadianWaveGraph(values = displayLevels)
     }
 }
 
 // ── Section 7: Suggested Rules (Actionable Intelligence) ──────────────────────
 @Composable
-private fun SuggestedRulesCard() {
+private fun SuggestedRulesCard(history: ReportHistory, appLabel: (String) -> String) {
     val approvedMap = remember { mutableStateMapOf<String, Boolean>() }
-    val rules = listOf(
-        SuggestedRule(
-            id = "batch_promos",
-            icon = Icons.Outlined.ShoppingBag,
-            question = "Batch shopping promos after 9 PM?",
-            detail = "Promos opened past 9 PM average 18 minutes lost.",
-        ),
-        SuggestedRule(
-            id = "deliver_rohan",
-            icon = Icons.Outlined.Person,
-            question = "Always deliver direct messages from Rohan?",
-            detail = "You marked his messages as important 3 times consecutively.",
-        ),
-        SuggestedRule(
-            id = "morning_mute_groups",
-            icon = Icons.Outlined.NotificationsActive,
-            question = "Auto-silence group chats during 09:00–12:00?",
-            detail = "Aligns with your primary peak focus window.",
-        ),
-    )
+    val rules = suggestedRules(history, appLabel)
 
     QuestionCard(
         title = "Suggested rules",
@@ -1051,60 +1013,55 @@ private data class ContactMatterItem(
     val count: Int,
 )
 
+// Read from the report itself: the app held most and never marked important, the app most
+// often marked worth it (over at least three answers), and the steadiest hours.
+private fun suggestedRules(history: ReportHistory, appLabel: (String) -> String): List<SuggestedRule> = buildList {
+    history.heldByApp.entries
+        .filter { (history.worthByApp[it.key]?.first() ?: 0) == 0 }
+        .maxByOrNull { it.value }
+        ?.let { (pkg, held) ->
+            add(
+                SuggestedRule(
+                    id = "hold_$pkg",
+                    icon = Icons.Outlined.ShoppingBag,
+                    question = "Always hold ${appLabel(pkg)} during focus?",
+                    detail = "$held held, none marked important.",
+                ),
+            )
+        }
+    history.appsThatMatter(limit = Int.MAX_VALUE).firstOrNull { it.total >= 3 }?.let {
+        add(
+            SuggestedRule(
+                id = "deliver_${it.packageName}",
+                icon = Icons.Outlined.Person,
+                question = "Always deliver ${appLabel(it.packageName)}?",
+                detail = "You marked ${it.worthIt} of ${it.total} as worth it.",
+            ),
+        )
+    }
+    history.bestFocusWindow()?.let { window ->
+        add(
+            SuggestedRule(
+                id = "protect_peak",
+                icon = Icons.Outlined.NotificationsActive,
+                question = "Hold group chats during %02d:00–%02d:00?".format(window.first % 24, (window.last + 1) % 24),
+                detail = "Your steadiest focus hours.",
+            ),
+        )
+    }
+}
+
+// The simulated week bundled with the app; null if the asset is missing or malformed.
+private fun loadDemoReport(context: Context): DemoReport? = try {
+    DemoReport.parse(context.assets.open(DemoReport.ASSET).bufferedReader().use { it.readText() })
+} catch (e: Exception) {
+    NotificationLog.add("Report", "Could not load ${DemoReport.ASSET}: ${e.message}")
+    null
+}
+
 private data class SuggestedRule(
     val id: String,
     val icon: ImageVector,
     val question: String,
     val detail: String,
 )
-
-/**
- * Pre-generated 7-day demo baseline data matching the design reference from the Problem Statement.
- * This ensures the report is immediately demonstrable, understandable, and testable on a phone.
- */
-private object DemoReportData {
-    val demoHistory: ReportHistory = ReportHistory(
-        sinceMillis = System.currentTimeMillis() - 7 * 86_400_000L,
-        steadySecondsByHour = listOf(
-            0L, 0L, 0L, 0L, 0L, 0L, 180L, 600L, 1200L,
-            3400L, 3800L, 3200L, 1600L, 1400L, 1800L,
-            3300L, 3700L, 3500L, 3100L, 1800L, 900L, 400L, 120L, 0L,
-        ),
-        restlessSecondsByHour = List(24) { 200L },
-        opensByApp = mapOf("Instagram" to 9, "WhatsApp" to 12, "YouTube" to 4, "Twitter" to 5),
-        minutesLostByApp = mapOf("Instagram" to 38.0, "WhatsApp" to 21.0, "YouTube" to 17.0, "Twitter" to 11.0),
-        switchesToApp = mapOf("Instagram" to 14, "WhatsApp" to 18, "YouTube" to 6, "Twitter" to 8),
-        opensByCategory = mapOf(
-            "short_video" to 4,
-            "messaging" to 6,
-            "shopping_promo" to 5,
-        ),
-        minutesLostByCategory = mapOf(
-            "short_video" to 44.0,
-            "messaging" to 26.0,
-            "shopping_promo" to 14.0,
-        ),
-        heldByApp = mapOf("WhatsApp" to 24, "Amazon" to 14, "Instagram" to 4),
-        deliveredByApp = mapOf("WhatsApp" to 8, "Gmail" to 2, "Telegram" to 2),
-        worthByApp = mapOf(
-            "WhatsApp" to listOf(8, 8),
-            "Gmail" to listOf(5, 5),
-            "Telegram" to listOf(11, 12),
-        ),
-    )
-
-    val demoContactsThatMatter = listOf(
-        ContactMatterItem("Mom", "WhatsApp", 100, 1.0, 8),
-        ContactMatterItem("College Placement Cell", "Gmail", 100, 1.0, 5),
-        ContactMatterItem("Professor Rao", "Telegram", 92, 0.92, 12),
-        ContactMatterItem("Direct 1-on-1 Chats", "Priority", 88, 0.88, 17),
-    )
-
-    // Circadian wave: low fatigue in morning peak, dip post lunch, peak late at night
-    val demoFatigueWave = listOf(
-        0.3, 0.2, 0.2, 0.2, 0.2, 0.3,
-        0.5, 0.4, 0.3, 0.2, 0.2, 0.3,
-        0.6, 1.1, 1.2, 0.8, 0.6, 0.5,
-        0.7, 0.9, 1.3, 1.6, 1.9, 1.7,
-    )
-}

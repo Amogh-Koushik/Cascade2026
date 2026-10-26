@@ -1,0 +1,380 @@
+{
+ "version": "1.0",
+ "label": "simulated",
+ "description": "7 simulated days of the student_coder persona, decided by engine.py",
+ "persona": "student_coder",
+ "seed": 2026,
+ "app_labels": {
+  "com.Slack": "Slack",
+  "com.amazon.mShop.android.shopping": "Amazon",
+  "com.application.zomato": "Zomato",
+  "com.discord": "Discord",
+  "com.facebook.katana": "Facebook",
+  "com.flipkart.android": "Flipkart",
+  "com.google.android.apps.magazines": "Google News",
+  "com.google.android.apps.messaging": "Messages",
+  "com.google.android.gm": "Gmail",
+  "com.google.android.youtube": "YouTube",
+  "com.inshorts": "Inshorts",
+  "com.instagram.android": "Instagram",
+  "com.linkedin.android": "LinkedIn",
+  "com.microsoft.office.outlook": "Outlook",
+  "com.myntra.android": "Myntra",
+  "com.reddit.frontpage": "Reddit",
+  "com.samsung.android.messaging": "Samsung Messages",
+  "com.snapchat.android": "Snapchat",
+  "com.twitter.android": "X",
+  "com.whatsapp": "WhatsApp",
+  "com.zhiliaoapp.musically": "TikTok",
+  "in.swiggy.android": "Swiggy",
+  "org.telegram.messenger": "Telegram",
+  "other": "Other apps"
+ },
+ "history": {
+  "since": 0,
+  "steady": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   19800,
+   11400,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   22800,
+   17400,
+   13200
+  ],
+  "restless": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   5400,
+   1200,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   2400,
+   1500,
+   1500
+  ],
+  "fatigue": [
+   [
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    0
+   ],
+   [
+    1680,
+    0,
+    0
+   ],
+   [
+    736,
+    104,
+    0
+   ],
+   [
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    0
+   ],
+   [
+    1676,
+    4,
+    0
+   ],
+   [
+    1260,
+    0,
+    0
+   ],
+   [
+    0,
+    980,
+    0
+   ]
+  ],
+  "opens_app": {
+   "com.Slack": 3,
+   "com.amazon.mShop.android.shopping": 1,
+   "com.discord": 9,
+   "com.google.android.apps.magazines": 1,
+   "com.google.android.apps.messaging": 9,
+   "com.google.android.gm": 8,
+   "com.google.android.youtube": 3,
+   "com.inshorts": 1,
+   "com.instagram.android": 1,
+   "com.linkedin.android": 2,
+   "com.microsoft.office.outlook": 8,
+   "com.myntra.android": 2,
+   "com.samsung.android.messaging": 9,
+   "com.whatsapp": 7,
+   "com.zhiliaoapp.musically": 4,
+   "org.telegram.messenger": 6,
+   "other": 3
+  },
+  "minutes_app": {
+   "com.Slack": 7.9,
+   "com.amazon.mShop.android.shopping": 4.0,
+   "com.discord": 37.0,
+   "com.google.android.apps.magazines": 1.0,
+   "com.google.android.apps.messaging": 49.3,
+   "com.google.android.gm": 24.1,
+   "com.google.android.youtube": 63.3,
+   "com.inshorts": 8.9,
+   "com.instagram.android": 6.1,
+   "com.linkedin.android": 46.3,
+   "com.microsoft.office.outlook": 17.3,
+   "com.myntra.android": 12.6,
+   "com.samsung.android.messaging": 70.1,
+   "com.whatsapp": 26.1,
+   "com.zhiliaoapp.musically": 41.1,
+   "org.telegram.messenger": 39.3,
+   "other": 21.1
+  },
+  "opens_category": {
+   "messaging": 40,
+   "news": 2,
+   "other": 3,
+   "shopping_promo": 3,
+   "short_video": 7,
+   "social": 3,
+   "work_email": 19
+  },
+  "minutes_category": {
+   "messaging": 221.7,
+   "news": 9.9,
+   "other": 21.1,
+   "shopping_promo": 16.6,
+   "short_video": 104.4,
+   "social": 52.4,
+   "work_email": 49.3
+  },
+  "switches": {
+   "com.Slack": 3,
+   "com.amazon.mShop.android.shopping": 1,
+   "com.discord": 9,
+   "com.google.android.apps.magazines": 1,
+   "com.google.android.apps.messaging": 9,
+   "com.google.android.gm": 8,
+   "com.google.android.youtube": 3,
+   "com.inshorts": 1,
+   "com.instagram.android": 1,
+   "com.linkedin.android": 2,
+   "com.microsoft.office.outlook": 8,
+   "com.myntra.android": 2,
+   "com.samsung.android.messaging": 9,
+   "com.whatsapp": 7,
+   "com.zhiliaoapp.musically": 4,
+   "org.telegram.messenger": 6,
+   "other": 3
+  },
+  "held": {
+   "com.amazon.mShop.android.shopping": 6,
+   "com.application.zomato": 13,
+   "com.facebook.katana": 10,
+   "com.flipkart.android": 8,
+   "com.google.android.youtube": 45,
+   "com.inshorts": 2,
+   "com.instagram.android": 6,
+   "com.linkedin.android": 12,
+   "com.myntra.android": 8,
+   "com.reddit.frontpage": 7,
+   "com.samsung.android.messaging": 1,
+   "com.snapchat.android": 16,
+   "com.twitter.android": 11,
+   "com.whatsapp": 1,
+   "com.zhiliaoapp.musically": 30,
+   "in.swiggy.android": 9,
+   "other": 1
+  },
+  "delivered": {
+   "com.Slack": 11,
+   "com.amazon.mShop.android.shopping": 2,
+   "com.discord": 27,
+   "com.flipkart.android": 4,
+   "com.google.android.apps.magazines": 5,
+   "com.google.android.apps.messaging": 28,
+   "com.google.android.gm": 15,
+   "com.google.android.youtube": 4,
+   "com.inshorts": 5,
+   "com.instagram.android": 2,
+   "com.linkedin.android": 2,
+   "com.microsoft.office.outlook": 12,
+   "com.myntra.android": 3,
+   "com.reddit.frontpage": 2,
+   "com.samsung.android.messaging": 22,
+   "com.whatsapp": 26,
+   "com.zhiliaoapp.musically": 7,
+   "in.swiggy.android": 1,
+   "org.telegram.messenger": 22,
+   "other": 20
+  },
+  "worth": {
+   "com.Slack": [
+    5,
+    11
+   ],
+   "com.discord": [
+    5,
+    21
+   ],
+   "com.google.android.apps.messaging": [
+    4,
+    22
+   ],
+   "com.google.android.gm": [
+    9,
+    15
+   ],
+   "com.google.android.youtube": [
+    1,
+    1
+   ],
+   "com.linkedin.android": [
+    2,
+    2
+   ],
+   "com.microsoft.office.outlook": [
+    7,
+    12
+   ],
+   "com.samsung.android.messaging": [
+    2,
+    18
+   ],
+   "com.snapchat.android": [
+    1,
+    1
+   ],
+   "com.whatsapp": [
+    5,
+    21
+   ],
+   "com.zhiliaoapp.musically": [
+    1,
+    1
+   ],
+   "in.swiggy.android": [
+    1,
+    1
+   ],
+   "org.telegram.messenger": [
+    5,
+    19
+   ]
+  }
+ }
+}

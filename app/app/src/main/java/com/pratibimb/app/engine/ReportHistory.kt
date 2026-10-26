@@ -114,8 +114,10 @@ data class ReportHistory(
         const val MIN_STEADY_SECONDS = 600L
 
         @Suppress("UNCHECKED_CAST")
-        fun fromJson(json: String): ReportHistory {
-            val root = SimpleJsonParser(json).parse() as Map<String, Any?>
+        fun fromJson(json: String): ReportHistory = fromMap(SimpleJsonParser(json).parse() as Map<String, Any?>)
+
+        @Suppress("UNCHECKED_CAST")
+        fun fromMap(root: Map<String, Any?>): ReportHistory {
             fun longs(key: String) = (root[key] as List<Any?>).map { (it as Number).toLong() }
             fun counts(key: String) = (root[key] as Map<String, Any?>).mapValues { (it.value as Number).toInt() }
             fun amounts(key: String) = (root[key] as Map<String, Any?>).mapValues { (it.value as Number).toDouble() }
