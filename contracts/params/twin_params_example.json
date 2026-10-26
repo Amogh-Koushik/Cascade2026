@@ -116,6 +116,7 @@
   "cap_min": 45,
   "c_glance": 0.5,
   "resume_min": 8,
+  "dm_burst_to_deliver": 5,
   "open_window_min": 10,
   "idle_min": 2,
   "minutes_lost_cap_min": 60,

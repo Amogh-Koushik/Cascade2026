@@ -109,6 +109,7 @@
         "cap_min": {"$ref": "#/$defs/positive"},
         "c_glance": {"type": "number", "minimum": 0},
         "resume_min": {"type": "number", "minimum": 0},
+        "dm_burst_to_deliver": {"type": "integer", "minimum": 1},
         "open_window_min": {"$ref": "#/$defs/positive"},
         "idle_min": {"$ref": "#/$defs/positive"},
         "minutes_lost_cap_min": {"$ref": "#/$defs/positive"},

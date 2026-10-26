@@ -24,6 +24,7 @@ from typing import Any
 from contracts.contexts import CONTEXTS
 from contracts.lexicons import LEXICONS
 from contracts.params import PARAMS_DIR, ParamsError, load_draw_bank, load_params, validate_params
+from contracts.persona_rules import PERSONA_POLICY
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 FIT_DIR = REPO_ROOT / "fit"
@@ -171,8 +172,19 @@ def convert(
     converted["policy"]["repeat_ping"] = copy.deepcopy(contract_ping)
     # Contexts are the contract's too: the demo's placement scenarios depend on them.
     converted["contexts"] = copy.deepcopy(CONTEXTS)
+    # Rule settings chosen per persona (contracts/persona_rules.py), not fitted.
+    for key, value in PERSONA_POLICY.get(str(converted["persona"]), {}).items():
+        if converted["policy"].get(key) != value:
+            report.corrected.append(
+                f"policy.{key}: {converted['policy'].get(key)!r} -> {value!r} (persona rule)"
+            )
+        converted["policy"][key] = value
 
     provenance = {k: str(v) for k, v in open_maps["provenance"].items()}
+    if str(converted["persona"]) in PERSONA_POLICY:
+        provenance["persona_rules"] = (
+            "judgement from the persona profile: contracts/persona_rules.py"
+        )
     provenance["conversion"] = (
         f"converted from {source} by fit/convert_params.py: {len(report.filled)} keys filled "
         "from the example params, lexicons from contracts/lexicons.py, draw bank replaced "

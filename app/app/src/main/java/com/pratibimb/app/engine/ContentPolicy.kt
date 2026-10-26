@@ -12,7 +12,8 @@ import com.pratibimb.twin.NotificationFeatures
 //   delivered; snaps, streaks, promos and bots are held; a Placements match or a deadline within
 //   two hours is delivered; a genuine urgency keyword (not also a bait hit) bypasses the group
 //   hold and the Instagram/Snapchat throttle; a group is delivered once marked worth it 3+
-//   times; Instagram and Snapchat 1:1 texts wait until the same person sends 5 in 2 minutes;
+//   times; Instagram and Snapchat 1:1 texts wait until the same person sends the persona's
+//   number of texts in 2 minutes (policy.dm_burst_to_deliver: 5 student, 3 nurse);
 //   WhatsApp and other 1:1 messengers are delivered; anything else not from a person is held
 //   unless it has a genuine urgency keyword.
 // Free state, Observe mode and Suggest-mode recommendations are never changed. With focus rules
@@ -35,6 +36,8 @@ data class FocusSignals(
     val groupWorth: Boolean = false,
     // Text messages from this 1:1 sender in the last 2 minutes, this one included.
     val textBurst: Int = 0,
+    // How many of those get an Instagram/Snapchat chat through (params policy.dm_burst_to_deliver).
+    val burstToDeliver: Int = ContentPolicy.BURST_TO_DELIVER,
     val newSender: Boolean = false,
     val contextLabel: String? = null,
     val nowMillis: Long = 0L,
@@ -117,7 +120,7 @@ object ContentPolicy {
             }
         }
         if (instaOrSnap) {
-            if (content.kind == ContentKind.TEXT && signals.textBurst >= BURST_TO_DELIVER) {
+            if (content.kind == ContentKind.TEXT && signals.textBurst >= signals.burstToDeliver) {
                 val who = features.senderDisplayName ?: "This sender"
                 val reason = "Delivered: $who ×${signals.textBurst} in 2 minutes"
                 return RuledDecision(
@@ -127,7 +130,10 @@ object ContentPolicy {
                 )
             }
             if (genuineUrgency) return deliver(decision, "Delivered: urgent message", "urgent insta/snap")
-            return RuledDecision(hold(decision, "Held: single message (5 texts in 2 minutes get through)"), "instagram/snapchat 1:1")
+            return RuledDecision(
+                hold(decision, "Held: single message (${signals.burstToDeliver} texts in 2 minutes get through)"),
+                "instagram/snapchat 1:1",
+            )
         }
         if (oneToOne) return deliver(decision, "Delivered: message from a person", "1:1 message")
 

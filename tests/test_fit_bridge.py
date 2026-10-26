@@ -77,6 +77,15 @@ def test_converted_files_carry_the_contexts_and_caps_by_kind(
     assert converted["policy"]["cap_by_kind"] == example["policy"]["cap_by_kind"]
 
 
+def test_the_nurse_gets_through_with_fewer_texts_than_the_student(example: dict[str, Any]) -> None:
+    student, _ = convert(FITTED["twin_params_student_coder"], example, "fit")
+    nurse, _ = convert(FITTED["twin_params_night_shift_nurse"], example, "fit")
+
+    assert student["policy"]["dm_burst_to_deliver"] == 5
+    assert nurse["policy"]["dm_burst_to_deliver"] == 3
+    assert "persona_rules" in nurse["provenance"]
+
+
 def test_lists_keep_fitted_entries_and_add_the_examples(example: dict[str, Any]) -> None:
     fitted = FITTED["twin_params_student_coder"]
     converted, _ = convert(fitted, example, "fit")

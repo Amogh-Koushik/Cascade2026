@@ -101,6 +101,8 @@ def build_example_params() -> dict[str, Any]:
             # the problem statement's example ("task resumption delay of 8 min"), to be replaced
             # by a measured value.
             "resume_min": 8,
+            # Instagram/Snapchat 1:1: texts from one person within 2 minutes that get through.
+            "dm_burst_to_deliver": 5,
             "open_window_min": 10,
             "idle_min": 2,
             "minutes_lost_cap_min": 60,

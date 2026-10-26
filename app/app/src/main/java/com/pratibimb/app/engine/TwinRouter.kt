@@ -106,6 +106,10 @@ object TwinRouter {
     @Volatile
     private var minutesLostCapMin = 60.0
 
+    // policy.dm_burst_to_deliver: Instagram/Snapchat 1:1 texts in 2 minutes that get through.
+    @Volatile
+    private var dmBurstToDeliver = ContentPolicy.BURST_TO_DELIVER
+
     // policy.resume_min: minutes to get back into the task after an open, for the cards.
     @Volatile
     var resumeMinutes = 0.0
@@ -303,6 +307,7 @@ object TwinRouter {
             val openWindowMin = (policy["open_window_min"] as Number).toDouble()
             val lostCapMin = (policy["minutes_lost_cap_min"] as Number).toDouble()
             val resume = (policy["resume_min"] as Number).toDouble()
+            val dmBurst = (policy["dm_burst_to_deliver"] as Number?)?.toInt() ?: ContentPolicy.BURST_TO_DELIVER
             val caps = HoldCaps.fromParams(params)
             val topics = Contexts.fromParams(params)
             val payments = ((params["never_hold"] as Map<String, Any?>)["otp_source_packages"] as List<Any?>)
@@ -314,6 +319,7 @@ object TwinRouter {
             holdCapMin = capMin
             minutesLostCapMin = lostCapMin
             resumeMinutes = resume
+            dmBurstToDeliver = dmBurst
             holdCaps = caps
             contexts = topics
             paymentPackages = payments
@@ -504,6 +510,7 @@ object TwinRouter {
             mentionsYou = ContentRules.mentionsYou(text, TwinSettings.mentionNames.value),
             groupWorth = groupKey?.let { TwinSettings.isGroupWorth(it) } ?: false,
             textBurst = if (instaOrSnapText) textBursts.record(features.senderHash ?: rawTitle, sbn.postTime) else 0,
+            burstToDeliver = dmBurstToDeliver,
             newSender = newSender,
             contextLabel = topic?.label,
             nowMillis = System.currentTimeMillis(),

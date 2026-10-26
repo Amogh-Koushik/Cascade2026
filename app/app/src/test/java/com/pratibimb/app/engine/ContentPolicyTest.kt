@@ -76,6 +76,14 @@ class ContentPolicyTest {
     }
 
     @Test
+    fun theNurseGetsThroughAtThreeTexts() {
+        val nurse = FocusSignals(family = AppFamily.INSTAGRAM, textBurst = 3, burstToDeliver = 3)
+
+        assertEquals(Action.HOLD, decide(instaDm, nurse.copy(textBurst = 2)).decision.action)
+        assertEquals(Action.DELIVER, decide(instaDm, nurse).decision.action)
+    }
+
+    @Test
     fun reelsAndSnapsNeverCountTowardsTheFive() {
         assertEquals(Action.HOLD, decide(instaDm, insta(9), text.copy(kind = ContentKind.FORWARD)).decision.action)
     }
