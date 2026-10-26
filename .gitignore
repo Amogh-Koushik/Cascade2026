@@ -32,6 +32,9 @@ captures/
 .DS_Store
 Thumbs.db
 
+# Pitch and presentation notes stay on each laptop
+pitch/
+
 # Half-finished agent runs (resumed on the next run)
 *.progress.json
 *.progress.json.tmp

@@ -17,7 +17,6 @@ CASCADE '26 · Theme 3: Attention Economy · PS 3.3: The Attention Digital Twin
 | `data/`, `sim/`, `fit/`, `eval/`, `dashboard/` | Datasets, simulator, fitting, evaluation, proof dashboard | Safal |
 | `server/` | FastAPI edge server on the laptop | Satvik |
 | `app/` | Android app (Kotlin, Jetpack Compose) | Satvik, CSS |
-| `pitch/` | Slides and demo material | CSS |
 
 ## Laptop setup
 
