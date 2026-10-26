@@ -82,6 +82,14 @@ class PauseCardRulesTest {
     }
 
     @Test
+    fun theDemoBarLetsTheInstagramBurstThrough() {
+        val dm = features("com.instagram.android", Category.SOCIAL, conversation = true, sender = "Rohan")
+        val result = ruled(dm, FocusSignals(family = AppFamily.INSTAGRAM, textBurst = 5))
+
+        assertTrue(PauseCardRules.eligible(result.decision, result.rule, false, BuildMode.DEMO_PAUSE_CARD_MIN_LOSS_MIN))
+    }
+
+    @Test
     fun overridesAndContentRulesNeverGetACard() {
         val base = engine.decide(features("com.google.android.gm", Category.WORK_EMAIL, false, null), context)
         val bigLoss = base.copy(action = Action.DELIVER, card = base.card.copy(lP50 = 20.0))

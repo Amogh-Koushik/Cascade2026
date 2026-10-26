@@ -148,7 +148,8 @@
   ]
  },
  "features": {
-  "pause_card": false
+  "pause_card": false,
+  "pause_card_min_loss_min": 5
  },
  "contexts": [
   {

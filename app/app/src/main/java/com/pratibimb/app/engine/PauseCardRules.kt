@@ -19,12 +19,18 @@ object PauseCardRules {
     // Decided when the notification is delivered: delivered by the model (sure or unsure) or by
     // the Instagram/Snapchat burst rule; never by a safety override (calls, OTPs, rides,
     // always-deliver), a content rule (mention, bank or order status, a person's 1:1 chat,
-    // context, deadline) or a WhatsApp 1:1 chat; and the expected focus loss is worth a pause.
-    fun eligible(decision: Decision, contentRule: String?, whatsAppOneToOne: Boolean): Boolean {
+    // context, deadline) or a WhatsApp 1:1 chat; and the expected focus loss (L p50) is at least
+    // params features.pause_card_min_loss_min.
+    fun eligible(
+        decision: Decision,
+        contentRule: String?,
+        whatsAppOneToOne: Boolean,
+        minLossMin: Double = MIN_EXPECTED_LOSS_MIN,
+    ): Boolean {
         if (decision.action != Action.DELIVER || whatsAppOneToOne) return false
         val byModel = contentRule == null && decision.rule in MODEL_RULES
         val byBurst = contentRule == BURST_RULE
-        return (byModel || byBurst) && decision.card.lP50 >= MIN_EXPECTED_LOSS_MIN
+        return (byModel || byBurst) && decision.card.lP50 >= minLossMin
     }
 
     // Decided when the ping is tapped: at most three cards a session, twenty minutes apart,
